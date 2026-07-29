@@ -7,7 +7,12 @@
   transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease),
     box-shadow var(--dur) var(--ease);
 }
-
+.logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 50%;
+}
 .navbar.is-scrolled {
   background: var(--color-surface);
   border-bottom-color: var(--color-line);
