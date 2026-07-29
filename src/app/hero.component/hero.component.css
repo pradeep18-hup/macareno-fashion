@@ -355,7 +355,7 @@
 
 .card-actions {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -371,10 +371,10 @@
 .qty-btn {
   background: none;
   border: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 3px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -388,24 +388,26 @@
 }
 
 .qty-value {
-  min-width: 16px;
+  min-width: 18px;
   text-align: center;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 
+/* 🔥 LARGER ADD BUTTON */
 .buy-btn {
   background: var(--color-accent);
   color: white;
   border: none;
-  padding: 0.2rem 0.6rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.65rem;
+  font-weight: 600;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
   flex: 1;
   font-family: var(--font-body);
+  min-height: 30px;
 }
 
 .buy-btn:hover {
@@ -589,19 +591,21 @@
   }
   
   .qty-btn {
-    width: 18px;
-    height: 18px;
-    font-size: 0.7rem;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
   }
   
   .qty-value {
-    font-size: 0.65rem;
-    min-width: 14px;
+    font-size: 0.7rem;
+    min-width: 16px;
   }
   
+  /* 🔥 Larger Add button on mobile */
   .buy-btn {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+    min-height: 28px;
   }
   
   .footer-grid {
@@ -647,6 +651,9 @@
   
   .buy-btn {
     width: 100%;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+    min-height: 28px;
   }
   
   .filter-tab {
