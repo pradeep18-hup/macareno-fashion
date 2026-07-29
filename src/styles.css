@@ -1,19 +1,17 @@
 /* ==========================================================================
    MACARENA — Global Design Tokens
-   A Korean-fashion-house palette: warm ivory ground, near-black ink,
-   and a single "hanbok wine" accent instead of the default terracotta.
    ========================================================================== */
 
 :root {
   /* ---- Colour ---- */
-  --color-bg: #f6f1ea;          /* warm ivory ground */
-  --color-surface: #ffffff;      /* cards / navbar surface */
-  --color-ink: #17130f;          /* near-black text */
-  --color-ink-soft: #4a433c;     /* secondary text */
-  --color-accent: #6b1f2a;       /* hanbok wine — signature accent */
+  --color-bg: #f6f1ea;
+  --color-surface: #ffffff;
+  --color-ink: #17130f;
+  --color-ink-soft: #4a433c;
+  --color-accent: #6b1f2a;
   --color-accent-light: #8c3a44;
-  --color-accent-soft: #ead9d2;  /* blush tint for chips / hovers */
-  --color-line: #ddd2c2;         /* hairline dividers */
+  --color-accent-soft: #ead9d2;
+  --color-line: #ddd2c2;
   --color-white: #ffffff;
 
   /* ---- Type ---- */
@@ -30,8 +28,10 @@
   /* ---- Layout ---- */
   --nav-height: 84px;
   --container-max: 1360px;
+  --hero-max: 75%;
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --radius-sm: 2px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
 
   /* ---- Motion ---- */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -91,7 +91,6 @@ img {
   padding-inline: var(--gutter);
 }
 
-/* Respect reduced-motion preference across the whole app */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -102,7 +101,6 @@ img {
   }
 }
 
-/* Visible keyboard focus everywhere */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
