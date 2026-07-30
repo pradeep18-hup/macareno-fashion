@@ -1,13 +1,14 @@
 import { Component, HostListener, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface NavLink {
   label: string;
-  href: string;
+  routerLink: string;
 }
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
@@ -16,11 +17,11 @@ export class NavbarComponent {
   readonly isScrolled = signal(false);
 
   readonly links: NavLink[] = [
-    { label: 'New In', href: '#new-in' },
-    { label: 'Women', href: '#women' },
-    { label: 'Men', href: '#men' },
-    { label: 'Collections', href: 'contact' },
-    { label: 'Sale', href: '#sale' },
+    { label: 'New In', routerLink: '/contact' },
+    { label: 'Women', routerLink: '/contact' },
+    { label: 'Men', routerLink: '/contact' },
+    { label: 'Collections', routerLink: '/contact' },
+    { label: 'Sale', routerLink: '/contact' },
   ];
 
   toggleMenu(): void {
