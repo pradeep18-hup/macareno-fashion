@@ -19,7 +19,7 @@ export class NavbarComponent {
     { label: 'New In', href: '#new-in' },
     { label: 'Women', href: '#women' },
     { label: 'Men', href: '#men' },
-    { label: 'Collections', href: '#collections' },
+    { label: 'Collections', href: 'contact' },
     { label: 'Sale', href: '#sale' },
   ];
 
