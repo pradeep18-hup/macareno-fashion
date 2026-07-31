@@ -305,6 +305,18 @@
   }
 }
 
+/* ---------- Desktop (force mobile menu closed) ---------- */
+@media (min-width: 861px) {
+  .mobile-menu,
+  .mobile-menu.is-open,
+  .mobile-menu__scrim {
+    display: none !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 640px) {
   :root {
