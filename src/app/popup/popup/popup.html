@@ -1,0 +1,33 @@
+@if (isOpen()) {
+  <div class="popup-overlay" (click)="closePopup()">
+    <div class="popup-box" (click)="$event.stopPropagation()">
+      <button class="popup-close" (click)="closePopup()" aria-label="Close">&times;</button>
+      <h3 class="popup-title">Visit Our Store</h3>
+      <p class="popup-text">See the route from our store to your location.</p>
+
+      @if (locationError()) {
+        <p class="popup-error">{{ locationError() }}</p>
+      }
+
+      <button class="popup-btn" (click)="viewLocation()">
+        View Location
+      </button>
+
+      <div class="popup-socials">
+        <a href="https://www.instagram.com/macarena_korean_fashion?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.6" />
+            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.6" />
+            <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" />
+          </svg>
+        </a>
+
+        <a [href]="phoneHref" class="social-icon" aria-label="Call us">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M4 4.5c0-.6.5-1 1-1h3.2c.5 0 .9.3 1 .8l1 3.8c.1.4 0 .9-.3 1.2l-1.7 1.7a13.5 13.5 0 0 0 6 6l1.7-1.7c.3-.3.8-.4 1.2-.3l3.8 1c.5.1.8.5.8 1V21c0 .6-.4 1-1 1h-1.5C10.5 22 2 13.5 2 5.5V4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+}

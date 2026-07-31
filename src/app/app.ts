@@ -3,9 +3,10 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar.component/navbar.component';
 import { HeroComponent } from './hero.component/hero.component';
 import{Fotter} from './fotter/fotter';
+import { PopupComponent } from './popup/popup/popup';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, HeroComponent, Fotter],
+  imports: [RouterOutlet, NavbarComponent, HeroComponent, Fotter, PopupComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

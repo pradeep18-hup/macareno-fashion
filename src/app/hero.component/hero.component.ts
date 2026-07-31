@@ -47,16 +47,7 @@ export class HeroComponent {
       isFavorite: false,
       quantity: 1
     },
-    {
-      id: 3,
-      name: 'Hanbok Inspired Dress',
-      price: 249,
-      image: 'https://images.unsplash.com/photo-1495385794356-1530f4a5d191?auto=format&fit=crop&w=600&q=80',
-      category: 'Dresses',
-      rating: 4.7,
-      isFavorite: false,
-      quantity: 1
-    },
+   
     {
       id: 4,
       name: 'Cashmere Knit Top',

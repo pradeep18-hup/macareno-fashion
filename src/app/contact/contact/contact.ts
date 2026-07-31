@@ -22,15 +22,15 @@ export class ContactComponent {
   readonly lng = 77.324607;
 
   // Your WhatsApp number with country code, no + , no spaces
-  readonly whatsappNumber = '917094365478';
-  readonly phoneNumber = '+91 70943 65478';
-  readonly phoneHref = 'tel:+917094365478';
-  readonly email = 'hello@macarena.in';
-  readonly emailHref = 'mailto:hello@macarena.in';
-  readonly addressShort = 'Tamil Nadu, India';
+  readonly whatsappNumber = '919487987731';
+  readonly phoneNumber = '+91 94879 87731';
+  readonly phoneHref = 'tel:+91 94879 87731';
+  readonly email = 'fashionsmacarena@gmail.com';
+  readonly emailHref = 'mailto:fashionsmacarena@gmail.com';
+  readonly addressShort = 'Perumal kovil road thuckaly, Tamil Nadu';
 
   readonly businessHours = [
-    { day: 'Mon – Sat', time: '10:00 AM – 8:30 PM' },
+    { day: 'Mon – Sat', time: '9:00 AM – 6:00 PM' },
     { day: 'Sunday', time: '11:00 AM – 6:00 PM' }
   ];
 
