@@ -1,0 +1,94 @@
+<div class="dress-form-wrapper">
+  <form [formGroup]="dressForm" (ngSubmit)="onSubmit()" class="dress-card">
+    <h2 class="dress-card__title">Add Dress</h2>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label>Dress Name</label>
+        <input type="text" formControlName="dressName" placeholder="Enter dress name" />
+        <span class="error-text" *ngIf="dressForm.get('dressName')?.touched && dressForm.get('dressName')?.invalid">
+          Dress name தேவை
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Dress Type</label>
+        <select formControlName="dressType">
+          <option value="" disabled selected>Select dress type</option>
+          <option *ngFor="let type of dressTypes" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Price (₹)</label>
+        <input type="number" formControlName="price" placeholder="Enter price" />
+      </div>
+
+      <div class="form-group">
+        <label>Offer Price (₹)</label>
+        <input type="number" formControlName="offerPrice" placeholder="Enter offer price" />
+      </div>
+
+      <div class="form-group">
+        <label>Discount</label>
+        <div class="offer-badge" *ngIf="offerPercentage > 0">
+          {{ offerPercentage }}% OFF
+        </div>
+        <div class="offer-badge offer-badge--empty" *ngIf="offerPercentage === 0">
+          —
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Total Quantity</label>
+        <div class="offer-badge">{{ totalQty }}</div>
+      </div>
+
+      <div class="form-group full">
+        <label>Size Type</label>
+        <select formControlName="sizeType">
+          <option value="" disabled selected>Select size type</option>
+          <option *ngFor="let opt of sizeTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+
+      <div class="form-group full" *ngIf="availableSizes.length">
+        <label>Available Sizes (select pannina, qty box varum)</label>
+        <div class="size-chip-group">
+          <div class="size-chip-item" *ngFor="let size of availableSizes">
+            <button
+              type="button"
+              class="size-chip"
+              [class.size-chip--active]="isSizeSelected(size)"
+              (click)="toggleSize(size)">
+              {{ size }}
+            </button>
+
+            <input
+              *ngIf="isSizeSelected(size)"
+              type="number"
+              min="1"
+              class="size-qty-box"
+              placeholder="Qty"
+              [value]="getSizeQty(size)"
+              (input)="updateSizeQty(size, $any($event.target).value)" />
+          </div>
+        </div>
+
+        <span class="error-text" *ngIf="submitAttempted && selectedSizes.length === 0">
+          Kuraindhadhu oru size select pannunga
+        </span>
+        <span class="error-text" *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
+          Ella selected size-kum qty type pannunga (0 kku mela irukanum)
+        </span>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="resetForm()">Reset</button>
+      <button type="submit" class="btn btn--primary">Add Dress</button>
+    </div>
+  </form>
+</div>

@@ -21,7 +21,7 @@ export class NavbarComponent {
     { label: 'Women', routerLink: '/contact' },
     { label: 'Men', routerLink: '/contact' },
     { label: 'Collections', routerLink: '/contact' },
-    { label: 'Sale', routerLink: '/contact' },
+    { label: 'Map', routerLink: '/contact' },
   ];
 
   toggleMenu(): void {
