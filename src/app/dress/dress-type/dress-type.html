@@ -1,0 +1,24 @@
+<div class="dress-type-wrapper">
+  <div class="dress-type-card">
+    <h2 class="dress-type-card__title">Add Dress Type</h2>
+
+    <div class="type-input-row">
+      <input
+        type="text"
+        [formControl]="nameControl"
+        placeholder="Enter dress type name"
+        maxlength="30"
+        (keydown.enter)="add()" />
+      <button type="button" class="btn-add" (click)="add()">Add</button>
+    </div>
+
+    <span class="error-text" *ngIf="error">{{ error }}</span>
+
+    <div class="type-list">
+      <div class="type-tag" *ngFor="let type of dressTypes$ | async">
+        <span>{{ type }}</span>
+        <button type="button" class="type-tag__remove" aria-label="Remove" (click)="remove(type)">×</button>
+      </div>
+    </div>
+  </div>
+</div>
