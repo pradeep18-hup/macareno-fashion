@@ -6,11 +6,15 @@ import { DressTypeService } from './dress/dress-type/dress-type';
 import { Login } from './login/login';
 import { Register } from './register/register';
 import { MainLayout } from './layout/main-layout/main-layout';
-
+import { Admin } from './admin/admin';
+import { Customers } from './customer/customer';
+import { Orders } from './orders/orders/orders';
+import { AdminLayout } from './layout/admin-layout/admin-layout';
 export const routes: Routes = [
   // No header/footer
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+
 
   // Header/footer shown for all children
   {
@@ -19,10 +23,21 @@ export const routes: Routes = [
     children: [
       { path: '', component: HeroComponent },
       { path: 'contact', component: ContactComponent },
-      { path: 'dress-form', component: DressForm },
-      { path: 'dress-types', component: DressTypeService }
+      
+
     ]
   },
+ {
+  path: '',             
+  component: AdminLayout,
+  children: [
+    { path: 'dress-form', component: DressForm },
+    { path: 'dress-types', component: DressTypeService },
+    { path: 'admin', component: Admin },
+    { path: 'customer-list', component: Customers },
+    { path: 'orders', component: Orders }
+  ]
+},
 
   { path: '**', redirectTo: '' }
 ];

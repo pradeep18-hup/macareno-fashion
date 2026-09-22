@@ -1,0 +1,19 @@
+<aside class="admin-sidebar">
+
+  <div class="sidebar-brand">
+    <span class="brand-icon"><i class="bi bi-house-heart-fill"></i></span>
+    <span class="brand-text" routerLink="">Go To Home</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="nav-item">
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  </nav>
+
+</aside>

@@ -1,0 +1,16 @@
+
+.admin-layout {
+  display: flex;
+  flex-direction: row;   /* side-by-side */
+  min-height: 100vh;
+}
+
+app-sidebar {
+  flex-shrink: 0;
+  width: 260px;           /* sidebar width, adjust panunga */
+}
+
+.main-content {
+  flex: 1;
+  overflow-x: auto;
+}

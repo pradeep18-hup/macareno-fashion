@@ -17,11 +17,11 @@ export class NavbarComponent {
   readonly isScrolled = signal(false);
 
   readonly links: NavLink[] = [
-    { label: 'New In', routerLink: '/contact' },
-    { label: 'Women', routerLink: '/contact' },
-    { label: 'Men', routerLink: '/contact' },
-    { label: 'Collections', routerLink: '/contact' },
-    { label: 'Map', routerLink: '/contact' },
+    { label: 'Orders', routerLink: '/orders' },
+    { label: 'Admin', routerLink: '/admin' },
+    { label: 'Users', routerLink: '/customer-list' },
+    { label: 'Add product', routerLink: '/dress-form' },
+    { label: 'Contact', routerLink: '/contact' },
   ];
 
   toggleMenu(): void {

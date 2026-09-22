@@ -1,0 +1,91 @@
+<div class="customers-wrapper">
+  <div class="customers-card">
+
+    <div class="customers-header">
+      <h2 class="customers-title">
+        Customers <span class="count-pill">{{ customers.length }}</span>
+      </h2>
+
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Search name, email, phone or city"
+          [value]="searchTerm"
+          (input)="onSearch($any($event.target).value)" />
+        <button
+          type="button"
+          class="search-clear"
+          *ngIf="searchTerm"
+          aria-label="Clear search"
+          (click)="onSearch('')">×</button>
+      </div>
+    </div>
+
+    <div class="table-scroll" *ngIf="visibleCustomers.length; else emptyState">
+      <table class="customers-table">
+        <thead>
+          <tr>
+            <th class="col-index">#</th>
+            <th *ngFor="let col of columns" class="sortable" (click)="sortBy(col.key)">
+              {{ col.label }}
+              <span class="sort-icon" [class.sort-icon--active]="sortKey === col.key">
+                {{ sortIcon(col.key) }}
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of visibleCustomers; let i = index">
+            <td class="col-index">{{ startIndex + i + 1 }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.email }}</td>
+            <td>{{ c.phone }}</td>
+            <td>{{ c.city }}</td>
+            <td>{{ c.joinedAt | date: 'dd MMM yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <ng-container *ngIf="searchTerm; else noCustomers">
+          No customers match "{{ searchTerm }}".
+        </ng-container>
+        <ng-template #noCustomers>No customers yet.</ng-template>
+      </div>
+    </ng-template>
+
+    <div class="table-footer" *ngIf="filteredCount > 0">
+      <div class="footer-left">
+        <label>
+          Rows per page
+          <select (change)="onPageSizeChange($any($event.target).value)">
+            <option *ngFor="let n of pageSizeOptions" [value]="n" [selected]="n === pageSize">{{ n }}</option>
+          </select>
+        </label>
+        <span class="range-text">
+          {{ startIndex + 1 }}–{{ rangeEnd }} of {{ filteredCount }}
+        </span>
+      </div>
+
+      <div class="pagination">
+        <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          Previous
+        </button>
+        <button
+          type="button"
+          class="page-btn"
+          *ngFor="let p of pages"
+          [class.page-btn--active]="p === currentPage"
+          (click)="goToPage(p)">
+          {{ p }}
+        </button>
+        <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          Next
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

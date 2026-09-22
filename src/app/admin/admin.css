@@ -1,0 +1,227 @@
+.admin-wrapper {
+  padding: var(--gutter, 1.5rem);
+  display: flex;
+  justify-content: center;
+}
+
+.admin-card {
+  width: 100%;
+  max-width: 900px;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-line, #e5e5e5);
+  border-radius: 16px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-title {
+  margin: 0;
+  font-size: var(--fs-h2, 1.5rem);
+  color: var(--color-accent, #8b1e3f);
+}
+
+/* Table */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-line, #e5e5e5);
+}
+
+.admin-table th {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-soft, #666);
+  background: var(--color-bg, #fafafa);
+}
+
+.admin-table tbody tr:hover {
+  background: var(--color-accent-soft, #fbeaf0);
+}
+
+.col-action {
+  text-align: right;
+  width: 100px;
+}
+
+.btn-delete {
+  padding: 0.4rem 0.9rem;
+  border: 1.5px solid #d93025;
+  border-radius: 999px;
+  background: transparent;
+  color: #d93025;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: #d93025;
+  color: #fff;
+}
+
+.empty-state {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--color-ink-soft, #666);
+  border: 1.5px dashed var(--color-line, #e5e5e5);
+  border-radius: 12px;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn--primary {
+  background: var(--color-accent, #8b1e3f);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(139, 30, 63, 0.25);
+}
+
+.btn--primary:hover {
+  background: var(--color-accent-light, #c94f7c);
+  transform: translateY(-1px);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1.5px solid var(--color-line, #e5e5e5);
+  color: var(--color-ink-soft, #666);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-accent, #8b1e3f);
+  color: var(--color-accent, #8b1e3f);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.75rem;
+  background: var(--color-surface, #fff);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.modal-title {
+  margin: 0;
+  color: var(--color-accent, #8b1e3f);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-soft, #666);
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--color-line, #e5e5e5);
+  border-radius: 10px;
+  background: var(--color-bg, #fafafa);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--color-accent, #8b1e3f);
+  box-shadow: 0 0 0 4px rgba(139, 30, 63, 0.12);
+}
+
+.form-group input.ng-invalid.ng-touched {
+  border-color: #d93025;
+  background: #fff8f7;
+}
+
+.password-row {
+  position: relative;
+}
+
+.password-row input {
+  padding-right: 4.5rem;
+}
+
+.toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--color-accent, #8b1e3f);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.error-text {
+  font-size: 0.8rem;
+  color: #d93025;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
