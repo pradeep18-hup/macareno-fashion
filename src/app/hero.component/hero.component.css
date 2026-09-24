@@ -9,6 +9,7 @@
   --color-accent-soft: #ead9d2;
   --color-line: #ddd2c2;
   --color-white: #ffffff;
+  --color-discount: #388e3c;
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
   --fs-h1: clamp(2.6rem, 5vw + 1rem, 4.75rem);
@@ -263,6 +264,7 @@
   overflow: hidden;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
 }
 
 .product-card:hover {
@@ -332,87 +334,45 @@
 }
 
 .card-content {
-  padding: 0.6rem 0.7rem 0.7rem;
+  padding: 0.6rem 0.7rem 0.8rem;
 }
 
 .card-title {
   font-family: var(--font-display);
   font-size: 0.8rem;
   font-weight: 500;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.3rem;
   color: var(--color-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* ---- Flipkart-style price row ---- */
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
 .card-price {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  margin-bottom: 0.5rem;
-}
-
-.card-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.quantity-control {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  background: var(--color-bg);
-  border-radius: 4px;
-  padding: 0.05rem;
-}
-
-.qty-btn {
-  background: none;
-  border: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--color-ink);
 }
 
-.qty-btn:hover {
-  background: var(--color-line);
-}
-
-.qty-value {
-  min-width: 18px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.8rem;
-}
-
-/* 🔥 LARGER ADD BUTTON */
-.buy-btn {
-  background: var(--color-accent);
-  color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  font-weight: 600;
+.card-mrp {
   font-size: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
-  font-family: var(--font-body);
-  min-height: 30px;
+  color: var(--color-ink-soft);
+  text-decoration: line-through;
+  opacity: 0.7;
 }
 
-.buy-btn:hover {
-  background: var(--color-accent-light);
-  transform: scale(1.02);
+.card-discount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-discount);
 }
 
 /* ===== FOOTER ===== */
@@ -532,7 +492,7 @@
     max-height: 420px;
     aspect-ratio: auto;
   }
-  
+
   .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
@@ -567,52 +527,42 @@
   .hero__img--bottom-right {
     width: 30%;
   }
-  
+
   .filter-tab {
     padding: 0.4rem 1rem;
     font-size: 0.75rem;
   }
-  
+
   .cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.6rem;
   }
-  
+
   .card-image-wrapper {
     height: 140px;
   }
-  
+
   .card-title {
     font-size: 0.7rem;
   }
-  
+
   .card-price {
-    font-size: 0.75rem;
-  }
-  
-  .qty-btn {
-    width: 20px;
-    height: 20px;
     font-size: 0.8rem;
   }
-  
-  .qty-value {
-    font-size: 0.7rem;
-    min-width: 16px;
+
+  .card-mrp {
+    font-size: 0.65rem;
   }
-  
-  /* 🔥 Larger Add button on mobile */
-  .buy-btn {
-    font-size: 0.7rem;
-    padding: 0.35rem 0.7rem;
-    min-height: 28px;
+
+  .card-discount {
+    font-size: 0.65rem;
   }
-  
+
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .footer {
     padding: 2rem 0 1rem;
   }
@@ -630,32 +580,20 @@
     width: 46%;
     left: 28%;
   }
-  
+
   .cards-grid {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
-  
+
   .card-image-wrapper {
     height: 120px;
   }
-  
+
   .card-content {
-    padding: 0.4rem 0.5rem 0.5rem;
+    padding: 0.4rem 0.5rem 0.6rem;
   }
-  
-  .card-actions {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-  
-  .buy-btn {
-    width: 100%;
-    font-size: 0.7rem;
-    padding: 0.35rem 0.7rem;
-    min-height: 28px;
-  }
-  
+
   .filter-tab {
     padding: 0.3rem 0.8rem;
     font-size: 0.7rem;

@@ -1,0 +1,114 @@
+.charge-page {
+  padding: var(--gutter);
+  max-width: 800px;
+}
+
+h2 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  margin-bottom: 16px;
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  background: var(--color-accent-soft);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+input,
+select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-body);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+button[type="submit"] {
+  padding: 9px 18px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background var(--dur) var(--ease);
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background: var(--color-accent-light);
+}
+
+button[type="submit"]:disabled {
+  background: var(--color-line);
+  cursor: not-allowed;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-ink-soft);
+}
+
+.delete-btn {
+  background: none;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+
+.delete-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-ink-soft);
+  padding: 16px;
+}

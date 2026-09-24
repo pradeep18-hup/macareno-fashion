@@ -24,5 +24,7 @@ export class Sidebar {
     { label: 'Admin',      icon: 'bi bi-person-badge',  route: 'admin' },
     { label: 'Customer',   icon: 'bi bi-people',        route: 'customer-list' },
     { label: 'Orders',     icon: 'bi bi-bag-check',     route: 'orders' },
+      { label: 'Courier',     icon: 'bi bi-bag-check',     route: 'courier' },
+  { label: 'Order Amount set',     icon: 'bi bi-bag-check',     route: 'deliver-charge-settings' },
   ];
 }
