@@ -15,7 +15,6 @@ export interface AdminUser {
   createdAt: Date;
 }
 
-// Group-level validator: password and confirm password must match
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
@@ -73,7 +72,6 @@ export class Admin {
       return;
     }
 
-    // The password is not stored in the list, only the name
     this.admins = [
       ...this.admins,
       { id: this.nextId++, name, createdAt: new Date() }

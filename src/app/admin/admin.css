@@ -1,126 +1,238 @@
+/* ==========================================================================
+   MACARENA — Admins (Master Table)
+   Editorial layout, hairline rules, wine accent only.
+   ========================================================================== */
+
+:host { display: block; }
+
+/* ---------- Wrapper & card ---------- */
 .admin-wrapper {
-  padding: var(--gutter, 1.5rem);
-  display: flex;
-  justify-content: center;
+  padding: 0;
+  display: block;
+  background: var(--color-bg);
+  min-height: 100%;
 }
 
 .admin-card {
   width: 100%;
-  max-width: 900px;
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-line, #e5e5e5);
-  border-radius: 16px;
-  padding: clamp(1.25rem, 3vw, 2rem);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  background: var(--color-surface);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: clamp(1.75rem, 3vw, 2.75rem);
 }
 
+/* ---------- Header ---------- */
 .admin-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.admin-heading { min-width: 0; }
+
+.eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  opacity: 0.75;
+  margin-bottom: 0.5rem;
 }
 
 .admin-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  color: var(--color-ink);
   margin: 0;
-  font-size: var(--fs-h2, 1.5rem);
-  color: var(--color-accent, #8b1e3f);
 }
 
-/* Table */
-.table-scroll {
-  overflow-x: auto;
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: 0.85rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--color-line, #e5e5e5);
-}
-
-.admin-table th {
-  font-size: 0.78rem;
-  font-weight: 600;
+.count-note {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-ink-soft, #666);
-  background: var(--color-bg, #fafafa);
+  color: var(--color-ink-soft);
+  opacity: 0.75;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--color-line);
 }
 
-.admin-table tbody tr:hover {
-  background: var(--color-accent-soft, #fbeaf0);
+.admin-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 0.92rem;
+  color: var(--color-ink-soft);
 }
 
-.col-action {
-  text-align: right;
-  width: 100px;
-}
-
-.btn-delete {
-  padding: 0.4rem 0.9rem;
-  border: 1.5px solid #d93025;
-  border-radius: 999px;
-  background: transparent;
-  color: #d93025;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.btn-delete:hover {
-  background: #d93025;
-  color: #fff;
-}
-
-.empty-state {
-  padding: 2.5rem 1rem;
-  text-align: center;
-  color: var(--color-ink-soft, #666);
-  border: 1.5px dashed var(--color-line, #e5e5e5);
-  border-radius: 12px;
-}
-
-/* Buttons */
+/* ---------- Buttons ---------- */
 .btn {
-  padding: 0.75rem 1.6rem;
-  border-radius: 999px;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
   font-weight: 600;
-  border: none;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background var(--dur) var(--ease),
+              color var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
+}
+
+.btn-plus {
+  width: 12px;
+  height: 12px;
+  color: currentColor;
 }
 
 .btn--primary {
-  background: var(--color-accent, #8b1e3f);
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(139, 30, 63, 0.25);
+  background: var(--color-accent);
+  color: var(--color-white);
 }
-
-.btn--primary:hover {
-  background: var(--color-accent-light, #c94f7c);
-  transform: translateY(-1px);
-}
+.btn--primary:hover { background: var(--color-accent-light); }
 
 .btn--ghost {
   background: transparent;
-  border: 1.5px solid var(--color-line, #e5e5e5);
-  color: var(--color-ink-soft, #666);
+  border-color: var(--color-line);
+  color: var(--color-ink-soft);
 }
-
 .btn--ghost:hover {
-  border-color: var(--color-accent, #8b1e3f);
-  color: var(--color-accent, #8b1e3f);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
-/* Modal */
+/* ---------- Master table ---------- */
+.table-scroll { overflow-x: auto; }
+
+.master-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+}
+
+.master-table th,
+.master-table td {
+  padding: 1.05rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-line);
+  white-space: nowrap;
+}
+
+.master-table th {
+  padding-top: 0;
+  padding-bottom: 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-ink-soft);
+  background: transparent;
+  user-select: none;
+}
+
+.master-table tbody tr {
+  transition: background var(--dur) var(--ease);
+}
+.master-table tbody tr:hover {
+  background: rgba(234, 217, 210, 0.35);
+}
+
+.col-index {
+  width: 50px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  opacity: 0.7;
+}
+
+.col-action {
+  text-align: right !important;
+  width: 120px;
+}
+
+.cell-name {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.cell-muted {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+}
+
+/* ---------- Link buttons (Delete) ---------- */
+.link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease),
+              text-decoration-color var(--dur) var(--ease);
+}
+.link-btn:hover {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
+.link-btn--danger { color: var(--color-accent); }
+.link-btn--danger:hover { color: var(--color-ink); text-decoration-color: var(--color-ink); }
+
+/* ---------- Empty state ---------- */
+.empty-state {
+  padding: 4rem 1rem;
+  text-align: center;
+  color: var(--color-ink-soft);
+}
+.empty-flourish {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1rem;
+  color: var(--color-accent);
+}
+.empty-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--color-ink-soft);
+}
+.empty-sub {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  opacity: 0.8;
+}
+
+/* ---------- Modal ---------- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -129,99 +241,156 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(23, 19, 15, 0.55);
+  backdrop-filter: blur(2px);
 }
 
 .modal-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
-  padding: 1.75rem;
-  background: var(--color-surface, #fff);
-  border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  gap: 1.25rem;
+  padding: 2rem 2rem 1.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-line);
 }
 
 .modal-title {
-  margin: 0;
-  color: var(--color-accent, #8b1e3f);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  margin: 0.25rem 0 0;
 }
 
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-soft);
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: all var(--dur) var(--ease);
+}
+.modal-close:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ---------- Form ---------- */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.55rem;
 }
 
 .form-group label {
-  font-size: 0.78rem;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
   font-weight: 600;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-ink-soft, #666);
+  color: var(--color-ink-soft);
+  opacity: 0.85;
 }
 
 .form-group input {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.8rem 1rem;
-  border: 1.5px solid var(--color-line, #e5e5e5);
-  border-radius: 10px;
-  background: var(--color-bg, #fafafa);
-  font-size: 1rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: border-color var(--dur) var(--ease),
+              background var(--dur) var(--ease);
 }
-
+.form-group input::placeholder {
+  color: var(--color-ink-soft);
+  opacity: 0.55;
+}
+.form-group input:hover { border-color: var(--color-ink-soft); }
 .form-group input:focus {
   outline: none;
-  background: #fff;
-  border-color: var(--color-accent, #8b1e3f);
-  box-shadow: 0 0 0 4px rgba(139, 30, 63, 0.12);
+  border-color: var(--color-accent);
+  box-shadow: none;
 }
-
 .form-group input.ng-invalid.ng-touched {
-  border-color: #d93025;
-  background: #fff8f7;
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
 }
 
-.password-row {
-  position: relative;
-}
-
-.password-row input {
-  padding-right: 4.5rem;
-}
+.password-row { position: relative; }
+.password-row input { padding-right: 4.5rem; }
 
 .toggle-btn {
   position: absolute;
   top: 50%;
-  right: 0.75rem;
+  right: 0.9rem;
   transform: translateY(-50%);
   border: none;
   background: transparent;
-  color: var(--color-accent, #8b1e3f);
-  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
 }
+.toggle-btn:hover { color: var(--color-ink); }
 
 .error-text {
-  font-size: 0.8rem;
-  color: #d93025;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.error-text::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-line);
 }
 
-@media (max-width: 480px) {
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
   .admin-header {
     flex-direction: column;
     align-items: stretch;
   }
+  .admin-header .btn { width: 100%; justify-content: center; }
+  .modal-card { padding: 1.5rem; }
 }

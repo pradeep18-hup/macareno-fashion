@@ -1,12 +1,24 @@
 <div class="customers-wrapper">
   <div class="customers-card">
 
-    <div class="customers-header">
-      <h2 class="customers-title">
-        Customers <span class="count-pill">{{ customers.length }}</span>
-      </h2>
+    <!-- ============ HEADER ============ -->
+    <header class="customers-header">
+      <div class="customers-heading">
+        <span class="eyebrow">Atelier · Clientele</span>
+        <h2 class="customers-title">
+          Customers
+          <span class="count-note">{{ customers.length }} total</span>
+        </h2>
+        <p class="customers-subtitle">Every customer who has ordered from the atelier</p>
+      </div>
 
       <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="9" cy="9" r="6" fill="none"
+                  stroke="currentColor" stroke-width="1.5"/>
+          <path d="M13.5 13.5 L 17 17" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
         <input
           type="text"
           placeholder="Search name, email, phone or city"
@@ -19,17 +31,29 @@
           aria-label="Clear search"
           (click)="onSearch('')">×</button>
       </div>
-    </div>
+    </header>
 
+    <!-- ============ TABLE ============ -->
     <div class="table-scroll" *ngIf="visibleCustomers.length; else emptyState">
       <table class="customers-table">
         <thead>
           <tr>
             <th class="col-index">#</th>
-            <th *ngFor="let col of columns" class="sortable" (click)="sortBy(col.key)">
-              {{ col.label }}
-              <span class="sort-icon" [class.sort-icon--active]="sortKey === col.key">
-                {{ sortIcon(col.key) }}
+            <th *ngFor="let col of columns"
+                class="sortable"
+                [class.sortable--active]="sortKey === col.key"
+                (click)="sortBy(col.key)">
+              <span class="th-label">{{ col.label }}</span>
+              <span class="sort-mark" [class.sort-mark--active]="sortKey === col.key">
+                <svg viewBox="0 0 12 14" aria-hidden="true">
+                  <path *ngIf="sortKey !== col.key"
+                        d="M6 2 L 9 5 H 3 Z M6 12 L 9 9 H 3 Z"
+                        fill="currentColor" opacity="0.4"/>
+                  <path *ngIf="sortKey === col.key && sortDir === 'asc'"
+                        d="M6 2 L 10 8 H 2 Z" fill="currentColor"/>
+                  <path *ngIf="sortKey === col.key && sortDir === 'desc'"
+                        d="M6 12 L 10 6 H 2 Z" fill="currentColor"/>
+                </svg>
               </span>
             </th>
           </tr>
@@ -37,11 +61,11 @@
         <tbody>
           <tr *ngFor="let c of visibleCustomers; let i = index">
             <td class="col-index">{{ startIndex + i + 1 }}</td>
-            <td>{{ c.name }}</td>
-            <td>{{ c.email }}</td>
-            <td>{{ c.phone }}</td>
+            <td class="cell-name">{{ c.name }}</td>
+            <td class="cell-muted">{{ c.email }}</td>
+            <td class="cell-mono">{{ c.phone }}</td>
             <td>{{ c.city }}</td>
-            <td>{{ c.joinedAt | date: 'dd MMM yyyy' }}</td>
+            <td class="cell-muted">{{ c.joinedAt | date: 'dd MMM yyyy' }}</td>
           </tr>
         </tbody>
       </table>
@@ -49,19 +73,30 @@
 
     <ng-template #emptyState>
       <div class="empty-state">
-        <ng-container *ngIf="searchTerm; else noCustomers">
-          No customers match "{{ searchTerm }}".
-        </ng-container>
-        <ng-template #noCustomers>No customers yet.</ng-template>
+        <svg viewBox="0 0 60 60" aria-hidden="true" class="empty-flourish">
+          <circle cx="30" cy="30" r="22" fill="none"
+                  stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+          <path d="M20 30 h 20" stroke="currentColor"
+                stroke-width="0.8" opacity="0.45"/>
+        </svg>
+        <p class="empty-title" *ngIf="searchTerm; else noCustomers">
+          No customers match &ldquo;{{ searchTerm }}&rdquo;
+        </p>
+        <ng-template #noCustomers>
+          <p class="empty-title">No customers yet.</p>
+        </ng-template>
       </div>
     </ng-template>
 
-    <div class="table-footer" *ngIf="filteredCount > 0">
+    <!-- ============ FOOTER ============ -->
+    <footer class="table-footer" *ngIf="filteredCount > 0">
       <div class="footer-left">
-        <label>
-          Rows per page
+        <label class="rows-label">
+          <span>Rows per page</span>
           <select (change)="onPageSizeChange($any($event.target).value)">
-            <option *ngFor="let n of pageSizeOptions" [value]="n" [selected]="n === pageSize">{{ n }}</option>
+            <option *ngFor="let n of pageSizeOptions"
+                    [value]="n"
+                    [selected]="n === pageSize">{{ n }}</option>
           </select>
         </label>
         <span class="range-text">
@@ -70,22 +105,27 @@
       </div>
 
       <div class="pagination">
-        <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
-          Previous
+        <button type="button"
+                class="page-btn page-btn--nav"
+                [disabled]="currentPage === 1"
+                (click)="goToPage(currentPage - 1)">
+          Prev
         </button>
-        <button
-          type="button"
-          class="page-btn"
-          *ngFor="let p of pages"
-          [class.page-btn--active]="p === currentPage"
-          (click)="goToPage(p)">
+        <button type="button"
+                class="page-btn"
+                *ngFor="let p of pages"
+                [class.page-btn--active]="p === currentPage"
+                (click)="goToPage(p)">
           {{ p }}
         </button>
-        <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        <button type="button"
+                class="page-btn page-btn--nav"
+                [disabled]="currentPage === totalPages"
+                (click)="goToPage(currentPage + 1)">
           Next
         </button>
       </div>
-    </div>
+    </footer>
 
   </div>
 </div>

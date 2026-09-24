@@ -1,99 +1,117 @@
 <div class="dress-form-wrapper">
   <form [formGroup]="dressForm" (ngSubmit)="onSubmit()" class="dress-card">
-    <h2 class="dress-card__title">Add Dress</h2>
 
+    <!-- ============ HEADER ============ -->
+    <header class="dress-head">
+      <span class="eyebrow">Atelier · Catalogue</span>
+      <h2 class="dress-title">Add Dress</h2>
+      <p class="dress-subtitle">Create a new piece for the collection</p>
+    </header>
+
+    <!-- ============ FORM GRID ============ -->
     <div class="form-grid">
 
       <div class="form-group">
-        <label>Dress Name</label>
-        <input type="text" formControlName="dressName" placeholder="Enter dress name" />
-        <span class="error-text" *ngIf="dressForm.get('dressName')?.touched && dressForm.get('dressName')?.invalid">
+        <label for="dressName">Dress Name</label>
+        <input id="dressName" type="text" formControlName="dressName"
+               placeholder="Enter dress name" />
+        <span class="error-text"
+              *ngIf="dressForm.get('dressName')?.touched && dressForm.get('dressName')?.invalid">
           Dress name is required
         </span>
       </div>
 
       <div class="form-group">
-        <label>Dress Type</label>
-        <select formControlName="dressType">
+        <label for="dressType">Dress Type</label>
+        <select id="dressType" formControlName="dressType">
           <option value="" disabled selected>Select dress type</option>
           <option *ngFor="let type of dressTypes" [value]="type">{{ type }}</option>
         </select>
-        <span class="error-text" *ngIf="dressForm.get('dressType')?.touched && dressForm.get('dressType')?.invalid">
+        <span class="error-text"
+              *ngIf="dressForm.get('dressType')?.touched && dressForm.get('dressType')?.invalid">
           Please select a dress type
         </span>
       </div>
 
       <div class="form-group">
-        <label>Price (₹)</label>
-        <input type="number" min="1" formControlName="price" placeholder="Enter price" />
-        <span class="error-text" *ngIf="dressForm.get('price')?.touched && dressForm.get('price')?.invalid">
+        <label for="price">Price (₹)</label>
+        <input id="price" type="number" min="1" formControlName="price"
+               placeholder="Enter price" />
+        <span class="error-text"
+              *ngIf="dressForm.get('price')?.touched && dressForm.get('price')?.invalid">
           Enter a valid price
         </span>
       </div>
 
       <div class="form-group">
-        <label>Discount (%)</label>
-        <input type="number" min="0" max="100" formControlName="offerPercentage" placeholder="Enter discount %" />
-        <span class="error-text" *ngIf="dressForm.get('offerPercentage')?.invalid">
+        <label for="offerPercentage">Discount (%)</label>
+        <input id="offerPercentage" type="number" min="0" max="100"
+               formControlName="offerPercentage" placeholder="Enter discount %" />
+        <span class="error-text"
+              *ngIf="dressForm.get('offerPercentage')?.invalid">
           Discount must be between 0 and 100
         </span>
       </div>
 
       <div class="form-group">
-        <label>Offer Price (₹)</label>
-        <input type="number" min="0" formControlName="offerPrice" placeholder="Enter offer price" />
+        <label for="offerPrice">Offer Price (₹)</label>
+        <input id="offerPrice" type="number" min="0" formControlName="offerPrice"
+               placeholder="Enter offer price" />
         <span class="error-text" *ngIf="offerExceedsPrice">
           Offer price cannot be higher than the price
         </span>
-        <span class="error-text" *ngIf="dressForm.get('offerPrice')?.touched && dressForm.get('offerPrice')?.hasError('required')">
+        <span class="error-text"
+              *ngIf="dressForm.get('offerPrice')?.touched && dressForm.get('offerPrice')?.hasError('required')">
           Offer price is required
         </span>
       </div>
 
       <div class="form-group">
         <label>You Save</label>
-        <div class="offer-badge" *ngIf="savedAmount > 0">
-          ₹{{ savedAmount }} ({{ dressForm.get('offerPercentage')?.value }}% OFF)
-        </div>
-        <div class="offer-badge offer-badge--empty" *ngIf="savedAmount === 0">
-          —
+        <div class="readout">
+          <span class="readout-value" *ngIf="savedAmount > 0">
+            ₹{{ savedAmount }}
+          </span>
+          <span class="readout-note" *ngIf="savedAmount > 0">
+            {{ dressForm.get('offerPercentage')?.value }}% off
+          </span>
+          <span class="readout-empty" *ngIf="savedAmount === 0">—</span>
         </div>
       </div>
 
       <div class="form-group">
         <label>Total Quantity</label>
-        <div class="offer-badge">{{ totalQty }}</div>
+        <div class="readout">
+          <span class="readout-value">{{ totalQty }}</span>
+          <span class="readout-note">units</span>
+        </div>
       </div>
 
       <div class="form-group full">
-        <label>Size Type</label>
-        <select formControlName="sizeType">
+        <label for="sizeType">Size Type</label>
+        <select id="sizeType" formControlName="sizeType">
           <option value="" disabled selected>Select size type</option>
           <option *ngFor="let opt of sizeTypeOptions" [value]="opt.value">{{ opt.label }}</option>
         </select>
-        <span class="error-text" *ngIf="dressForm.get('sizeType')?.touched && dressForm.get('sizeType')?.invalid">
+        <span class="error-text"
+              *ngIf="dressForm.get('sizeType')?.touched && dressForm.get('sizeType')?.invalid">
           Please select a size type
         </span>
       </div>
 
       <div class="form-group full" *ngIf="availableSizes.length">
-        <label>Available Sizes (select a size to enter its quantity)</label>
+        <label>Available Sizes — select a size, then enter quantity</label>
+
         <div class="size-chip-group">
           <div class="size-chip-item" *ngFor="let size of availableSizes">
-            <button
-              type="button"
-              class="size-chip"
+            <button type="button" class="size-chip"
               [class.size-chip--active]="isSizeSelected(size)"
               (click)="toggleSize(size)">
               {{ size }}
             </button>
 
-            <input
-              *ngIf="isSizeSelected(size)"
-              type="number"
-              min="1"
-              class="size-qty-box"
-              placeholder="Qty"
+            <input *ngIf="isSizeSelected(size)" type="number" min="1"
+              class="size-qty-box" placeholder="Qty"
               [value]="getSizeQty(size)"
               (input)="updateSizeQty(size, $any($event.target).value)" />
           </div>
@@ -102,7 +120,8 @@
         <span class="error-text" *ngIf="submitAttempted && selectedSizes.length === 0">
           Please select at least one size
         </span>
-        <span class="error-text" *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
+        <span class="error-text"
+              *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
           Enter a quantity greater than 0 for every selected size
         </span>
       </div>
@@ -110,26 +129,23 @@
       <div class="form-group full">
         <label>Photos (up to {{ maxPhotos }}, max {{ maxPhotoSizeMb }} MB each)</label>
 
-        <input
-          #photoInput
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          (change)="onPhotosSelected($event)" />
+        <input #photoInput type="file" accept="image/*" multiple hidden
+               (change)="onPhotosSelected($event)" />
 
         <div class="photo-grid">
           <div class="photo-item" *ngFor="let photo of photos; let i = index">
             <img [src]="photo.url" [alt]="photo.file.name" />
-            <button type="button" class="photo-remove" aria-label="Remove photo" (click)="removePhoto(i)">×</button>
+            <button type="button" class="photo-remove"
+                    aria-label="Remove photo" (click)="removePhoto(i)">×</button>
           </div>
 
-          <button
-            type="button"
-            class="photo-add"
-            *ngIf="photos.length < maxPhotos"
-            (click)="photoInput.click()">
-            <span class="photo-add__icon">+</span>
+          <button type="button" class="photo-add"
+            *ngIf="photos.length < maxPhotos" (click)="photoInput.click()">
+            <svg class="photo-add__icon" viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M14 6 v 16 M 6 14 h 16"
+                    stroke="currentColor" stroke-width="1.3"
+                    stroke-linecap="round"/>
+            </svg>
             <span>Add photo</span>
           </button>
         </div>
@@ -142,9 +158,11 @@
 
     </div>
 
-    <div class="form-actions">
+    <!-- ============ ACTIONS ============ -->
+    <footer class="form-actions">
       <button type="button" class="btn btn--ghost" (click)="resetForm()">Reset</button>
       <button type="submit" class="btn btn--primary">Add Dress</button>
-    </div>
+    </footer>
+
   </form>
 </div>
