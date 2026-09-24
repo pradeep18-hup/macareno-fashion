@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Output, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 export interface RegisterDetails {
   fullName: string;
@@ -18,6 +19,9 @@ export interface RegisterDetails {
 export class Register {
   @Output() register = new EventEmitter<RegisterDetails>();
 
+  // Swap the default for your own asset path, e.g. 'assets/images/register-hero.jpg'
+  heroImage = input('assets/images/register-hero.jpg');
+
   fullName = signal('');
   email = signal('');
   password = signal('');
@@ -25,6 +29,8 @@ export class Register {
   showPassword = signal(false);
   loading = signal(false);
   errorMessage = signal<string | null>(null);
+
+  constructor(private router: Router) {}
 
   togglePasswordVisibility(): void {
     this.showPassword.update((v) => !v);
@@ -51,6 +57,10 @@ export class Register {
       password: this.password(),
     });
 
-    // Caller is responsible for clearing `loading` once the request settles.
+    // TODO: replace with your real auth call.
+    setTimeout(() => {
+      this.loading.set(false);
+      this.router.navigate(['/home']);
+    }, 400);
   }
 }

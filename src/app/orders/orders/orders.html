@@ -1,180 +1,210 @@
 <div class="orders-wrapper">
-  <div class="orders-card">
 
-    <div class="orders-header">
-      <div>
-        <h2 class="orders-title">Orders</h2>
-        <p class="orders-subtitle">Manage orders from placement to delivery</p>
-      </div>
+  <!-- ============ HEADER ============ -->
+  <header class="orders-header">
+    <div class="orders-heading">
+      <span class="eyebrow">Atelier · Operations</span>
+      <h2 class="orders-title">Orders</h2>
+      <p class="orders-subtitle">Manage orders from placement to delivery</p>
+    </div>
 
-      <div class="header-actions">
-        <div class="search-box">
-          <input
-            type="text"
-            placeholder="Search order ID, customer, phone, city or tracking ID"
-            [value]="searchTerm"
-            (input)="onSearch($any($event.target).value)" />
-          <button
-            type="button"
-            class="search-clear"
-            *ngIf="searchTerm"
-            aria-label="Clear search"
-            (click)="onSearch('')">×</button>
-        </div>
-
+    <div class="header-actions">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="9" cy="9" r="6" fill="none"
+                  stroke="currentColor" stroke-width="1.5"/>
+          <path d="M13.5 13.5 L 17 17" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search order, customer, phone, city, tracking"
+          [value]="searchTerm"
+          (input)="onSearch($any($event.target).value)" />
         <button
           type="button"
-          class="btn btn--outline"
-          [disabled]="!exportableCount"
-          title="Download New and Packed orders for courier bulk upload"
-          (click)="exportCsv()">
-          Export CSV ({{ exportableCount }})
-        </button>
+          class="search-clear"
+          *ngIf="searchTerm"
+          aria-label="Clear search"
+          (click)="onSearch('')">×</button>
       </div>
-    </div>
 
-    <!-- Summary cards -->
-    <div class="stats-grid">
-      <div class="stat-card stat-card--new">
-        <span class="stat-label">To Pack</span>
-        <span class="stat-value">{{ count('new') }}</span>
-      </div>
-      <div class="stat-card stat-card--packed">
-        <span class="stat-label">Ready to Dispatch</span>
-        <span class="stat-value">{{ count('packed') }}</span>
-      </div>
-      <div class="stat-card stat-card--dispatched">
-        <span class="stat-label">In Transit</span>
-        <span class="stat-value">{{ count('dispatched') }}</span>
-      </div>
-      <div class="stat-card stat-card--delivered">
-        <span class="stat-label">Delivered</span>
-        <span class="stat-value">{{ count('delivered') }}</span>
-      </div>
-      <div class="stat-card stat-card--overdue">
-        <span class="stat-label">Dispatch Overdue</span>
-        <span class="stat-value">{{ overdueCount }}</span>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs" role="tablist">
       <button
         type="button"
-        role="tab"
-        class="tab"
-        *ngFor="let tab of tabs"
-        [class.tab--active]="activeTab === tab.key"
-        [attr.aria-selected]="activeTab === tab.key"
-        (click)="setTab(tab.key)">
-        {{ tab.label }}
-        <span class="tab-count">{{ count(tab.key) }}</span>
+        class="btn btn--outline"
+        [disabled]="!exportableCount"
+        title="Download New and Packed orders for courier bulk upload"
+        (click)="exportCsv()">
+        Export CSV ({{ exportableCount }})
       </button>
     </div>
+  </header>
 
-    <!-- Orders table -->
-    <div class="table-scroll" *ngIf="visibleOrders.length; else emptyState">
-      <table class="orders-table">
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Payment</th>
-            <th class="num">Amount</th>
-            <th>Status</th>
-            <th>Last Update</th>
-            <th class="col-action">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of visibleOrders; trackBy: trackById">
-            <td>
-              <button type="button" class="order-id" (click)="openDetails(order)">{{ order.id }}</button>
-              <div class="sub-text" *ngIf="order.trackingId">
-                {{ order.courier }} · {{ order.trackingId }}
-              </div>
-            </td>
-            <td>
-              <div class="customer-name">{{ order.customer }}</div>
-              <div class="sub-text">{{ order.city }} · {{ order.phone }}</div>
-            </td>
-            <td>
-              <span class="pay-badge" [class.pay-badge--cod]="order.paymentMode === 'COD'">
-                {{ order.paymentMode }}
+  <!-- ============ SUMMARY ============ -->
+  <section class="stats-grid" aria-label="Order summary">
+    <article class="stat-card">
+      <span class="stat-label">To Pack</span>
+      <span class="stat-value">{{ count('new') }}</span>
+      <span class="stat-rule"></span>
+    </article>
+    <article class="stat-card">
+      <span class="stat-label">Ready to Dispatch</span>
+      <span class="stat-value">{{ count('packed') }}</span>
+      <span class="stat-rule"></span>
+    </article>
+    <article class="stat-card">
+      <span class="stat-label">In Transit</span>
+      <span class="stat-value">{{ count('dispatched') }}</span>
+      <span class="stat-rule"></span>
+    </article>
+    <article class="stat-card">
+      <span class="stat-label">Delivered</span>
+      <span class="stat-value">{{ count('delivered') }}</span>
+      <span class="stat-rule"></span>
+    </article>
+    <article class="stat-card stat-card--alert">
+      <span class="stat-label">Dispatch Overdue</span>
+      <span class="stat-value">{{ overdueCount }}</span>
+      <span class="stat-rule"></span>
+    </article>
+  </section>
+
+  <!-- ============ TABS ============ -->
+  <nav class="tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      class="tab"
+      *ngFor="let tab of tabs"
+      [class.tab--active]="activeTab === tab.key"
+      [attr.aria-selected]="activeTab === tab.key"
+      (click)="setTab(tab.key)">
+      <span>{{ tab.label }}</span>
+      <span class="tab-count">{{ count(tab.key) }}</span>
+    </button>
+  </nav>
+
+  <!-- ============ TABLE ============ -->
+  <div class="table-scroll" *ngIf="visibleOrders.length; else emptyState">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Payment</th>
+          <th class="num">Amount</th>
+          <th>Status</th>
+          <th>Last Update</th>
+          <th class="col-action">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of visibleOrders; trackBy: trackById">
+          <td>
+            <button type="button" class="order-id" (click)="openDetails(order)">
+              {{ order.id }}
+            </button>
+            <div class="sub-text" *ngIf="order.trackingId">
+              {{ order.courier }} · {{ order.trackingId }}
+            </div>
+          </td>
+
+          <td>
+            <div class="customer-name">{{ order.customer }}</div>
+            <div class="sub-text">{{ order.city }} · {{ order.phone }}</div>
+          </td>
+
+          <td>
+            <span class="pay-badge" [class.pay-badge--cod]="order.paymentMode === 'COD'">
+              {{ order.paymentMode }}
+            </span>
+          </td>
+
+          <td class="num amount-cell">
+            {{ order.amount | currency: 'INR' : 'symbol' : '1.0-0' }}
+          </td>
+
+          <td>
+            <span class="status-badge" [ngClass]="'status-badge--' + order.status">
+              {{ statusLabel(order.status) }}
+            </span>
+            <div class="sla-text" [class.sla-text--overdue]="isOverdue(order)" *ngIf="slaText(order)">
+              {{ slaText(order) }}
+            </div>
+            <div class="sub-text" *ngIf="lastNote(order) && (order.status === 'cancelled' || order.status === 'returned')">
+              {{ lastNote(order) }}
+            </div>
+          </td>
+
+          <td class="date-cell">
+            <div>{{ lastUpdate(order) | date: 'dd MMM yyyy' }}</div>
+            <div class="sub-text">{{ lastUpdate(order) | date: 'hh:mm a' }}</div>
+          </td>
+
+          <td class="col-action">
+            <div class="action-group">
+              <button type="button" class="action-btn action-btn--pack"
+                *ngIf="order.status === 'new'" (click)="pack(order)">Mark Packed</button>
+
+              <button type="button" class="action-btn action-btn--dispatch"
+                *ngIf="order.status === 'packed'" (click)="openDispatch(order)">Dispatch</button>
+
+              <button type="button" class="action-btn action-btn--deliver"
+                *ngIf="order.status === 'dispatched'" (click)="markDelivered(order)">Mark Delivered</button>
+
+              <ng-container *ngIf="order.trackingId && (order.status === 'dispatched' || order.status === 'delivered')">
+                <button type="button" class="link-btn" (click)="openTracking(order)">Track</button>
+                <button type="button" class="link-btn" (click)="shareWhatsApp(order)">WhatsApp</button>
+              </ng-container>
+
+              <button type="button" class="link-btn link-btn--danger"
+                *ngIf="order.status === 'new' || order.status === 'packed'"
+                (click)="openReason(order, 'cancel')">Cancel</button>
+
+              <button type="button" class="link-btn link-btn--danger"
+                *ngIf="order.status === 'dispatched'"
+                (click)="openReason(order, 'rto')">Delivery Failed</button>
+
+              <button type="button" class="link-btn link-btn--danger"
+                *ngIf="canReturn(order)"
+                (click)="openReason(order, 'return')">Return</button>
+
+              <span class="done-text"
+                *ngIf="(order.status === 'delivered' && !canReturn(order)) || order.status === 'cancelled' || order.status === 'returned'">
+                Closed
               </span>
-            </td>
-            <td class="num">{{ order.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-badge--' + order.status">
-                {{ statusLabel(order.status) }}
-              </span>
-              <div class="sla-text" [class.sla-text--overdue]="isOverdue(order)" *ngIf="slaText(order)">
-                {{ slaText(order) }}
-              </div>
-              <div class="sub-text" *ngIf="lastNote(order) && (order.status === 'cancelled' || order.status === 'returned')">
-                {{ lastNote(order) }}
-              </div>
-            </td>
-            <td class="date-cell">
-              <div>{{ lastUpdate(order) | date: 'dd MMM yyyy' }}</div>
-              <div class="sub-text">{{ lastUpdate(order) | date: 'hh:mm a' }}</div>
-            </td>
-            <td class="col-action">
-              <div class="action-group">
-                <button type="button" class="action-btn action-btn--pack"
-                  *ngIf="order.status === 'new'" (click)="pack(order)">Mark Packed</button>
-
-                <button type="button" class="action-btn action-btn--dispatch"
-                  *ngIf="order.status === 'packed'" (click)="openDispatch(order)">Dispatch</button>
-
-                <button type="button" class="action-btn action-btn--deliver"
-                  *ngIf="order.status === 'dispatched'" (click)="markDelivered(order)">Mark Delivered</button>
-
-                <ng-container *ngIf="order.trackingId && (order.status === 'dispatched' || order.status === 'delivered')">
-                  <button type="button" class="link-btn" (click)="openTracking(order)">Track</button>
-                  <button type="button" class="link-btn" (click)="shareWhatsApp(order)">WhatsApp</button>
-                </ng-container>
-
-                <button type="button" class="link-btn link-btn--danger"
-                  *ngIf="order.status === 'new' || order.status === 'packed'"
-                  (click)="openReason(order, 'cancel')">Cancel</button>
-
-                <button type="button" class="link-btn link-btn--danger"
-                  *ngIf="order.status === 'dispatched'"
-                  (click)="openReason(order, 'rto')">Delivery Failed</button>
-
-                <button type="button" class="link-btn link-btn--danger"
-                  *ngIf="canReturn(order)"
-                  (click)="openReason(order, 'return')">Return</button>
-
-                <span class="done-text"
-                  *ngIf="(order.status === 'delivered' && !canReturn(order)) || order.status === 'cancelled' || order.status === 'returned'">
-                  Closed
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ng-template #emptyState>
-      <div class="empty-state">
-        <ng-container *ngIf="searchTerm; else noOrders">
-          No orders match "{{ searchTerm }}".
-        </ng-container>
-        <ng-template #noOrders>No orders in this section.</ng-template>
-      </div>
-    </ng-template>
-
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <svg viewBox="0 0 60 60" aria-hidden="true" class="empty-flourish">
+        <circle cx="30" cy="30" r="22" fill="none"
+                stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+        <path d="M20 30 h 20 M 30 20 v 20" stroke="currentColor"
+              stroke-width="0.8" opacity="0.4"/>
+      </svg>
+      <p class="empty-title" *ngIf="searchTerm; else noOrders">
+        No orders match &ldquo;{{ searchTerm }}&rdquo;
+      </p>
+      <ng-template #noOrders>
+        <p class="empty-title">No orders in this section.</p>
+      </ng-template>
+    </div>
+  </ng-template>
+
 </div>
 
-<!-- Order details popup -->
+<!-- ============ ORDER DETAILS ============ -->
 <div class="modal-overlay" *ngIf="detailOrder as o" (click)="closeDetails()">
   <div class="modal-card modal-card--wide" (click)="$event.stopPropagation()">
     <div class="modal-head">
       <div>
+        <span class="eyebrow">Order Detail</span>
         <h3 class="modal-title">{{ o.id }}</h3>
         <span class="status-badge" [ngClass]="'status-badge--' + o.status">{{ statusLabel(o.status) }}</span>
       </div>
@@ -193,10 +223,13 @@
       </div>
       <div>
         <div class="detail-label">Payment</div>
-        <div>{{ o.paymentMode }}<span *ngIf="o.paymentMode === 'COD'"> (collect {{ o.amount | currency: 'INR' : 'symbol' : '1.0-0' }})</span></div>
+        <div>
+          {{ o.paymentMode }}
+          <span *ngIf="o.paymentMode === 'COD'"> — collect {{ o.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</span>
+        </div>
       </div>
       <div>
-        <div class="detail-label">Courier &amp; Tracking ID</div>
+        <div class="detail-label">Courier &amp; Tracking</div>
         <div>
           <ng-container *ngIf="o.trackingId; else noTracking">
             {{ o.courier }} · {{ o.trackingId }}
@@ -246,16 +279,19 @@
   </div>
 </div>
 
-<!-- Dispatch popup (courier and tracking ID) -->
+<!-- ============ DISPATCH ============ -->
 <div class="modal-overlay" *ngIf="dispatchOrder as o" (click)="closeDispatch()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-head">
-      <h3 class="modal-title">Dispatch · {{ o.id }}</h3>
+      <div>
+        <span class="eyebrow">Dispatch</span>
+        <h3 class="modal-title">{{ o.id }}</h3>
+      </div>
       <button type="button" class="modal-close" aria-label="Close" (click)="closeDispatch()">×</button>
     </div>
 
     <p class="modal-help">
-      Enter the courier and the tracking ID you received from the courier.
+      Enter the courier and the tracking ID received from the courier.
     </p>
 
     <label class="detail-label" for="courierSelect">Courier</label>
@@ -286,11 +322,14 @@
   </div>
 </div>
 
-<!-- Reason popup (cancel, delivery failed, return) -->
+<!-- ============ REASON ============ -->
 <div class="modal-overlay" *ngIf="reasonOrder as o" (click)="closeReason()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-head">
-      <h3 class="modal-title">{{ reasonTitle }} · {{ o.id }}</h3>
+      <div>
+        <span class="eyebrow">{{ reasonTitle }}</span>
+        <h3 class="modal-title">{{ o.id }}</h3>
+      </div>
       <button type="button" class="modal-close" aria-label="Close" (click)="closeReason()">×</button>
     </div>
 
@@ -312,5 +351,5 @@
   </div>
 </div>
 
-<!-- Confirmation toast -->
+<!-- ============ TOAST ============ -->
 <div class="toast" *ngIf="toastMessage" role="status">{{ toastMessage }}</div>

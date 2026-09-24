@@ -1,5 +1,7 @@
 <div class="login-page">
-  <aside class="login-brand">
+  <aside class="login-brand" [style.background-image]="'url(' + heroImage() + ')'">
+    <div class="login-brand__overlay"></div>
+
     <div class="login-brand__inner">
       <span class="login-brand__mark">Macarena</span>
 
@@ -18,7 +20,7 @@
         <h1>Create an account</h1>
         <p class="login-subtext">
           Already a member?
-          <a href="/login">Sign in</a>
+          <a href="/">Sign in</a>
         </p>
       </header>
 

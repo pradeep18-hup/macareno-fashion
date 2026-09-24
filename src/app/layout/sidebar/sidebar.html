@@ -1,19 +1,94 @@
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" [class.is-collapsed]="isCollapsed">
 
-  <div class="sidebar-brand">
-    <span class="brand-icon"><i class="bi bi-house-heart-fill"></i></span>
-    <span class="brand-text" routerLink="">Go To Home</span>
+  <!-- Decorative corner flourish -->
+  <svg class="corner-flourish" viewBox="0 0 120 120" aria-hidden="true">
+    <path d="M2 118 C 2 60, 60 2, 118 2"
+          fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+    <circle cx="2" cy="118" r="2.5" fill="currentColor" opacity="0.4"/>
+  </svg>
+
+  <!-- ============ BRAND ============ -->
+  <div class="sidebar-brand" routerLink="/">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 44 44">
+        <rect x="1" y="1" width="42" height="42" rx="12" fill="none"
+              stroke="currentColor" stroke-width="1.2"/>
+        <path d="M22 10 C 14 16, 12 22, 12 27 a 10 10 0 0 0 20 0 c 0 -5 -2 -11 -10 -17 z"
+              fill="currentColor" opacity="0.9"/>
+        <path d="M22 15 v 18 M 17 22 h 10" stroke="#f6f1ea"
+              stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+
+    <div class="brand-copy">
+      <span class="brand-name">Macarena</span>
+      <span class="brand-sub">Atelier Admin</span>
+    </div>
+
+    <button class="collapse-toggle" type="button"
+            (click)="toggle()"
+            [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <svg viewBox="0 0 20 20" class="toggle-icon" [class.flip]="isCollapsed">
+        <path d="M12 4 L 6 10 L 12 16" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 
+  <!-- ============ NAV ============ -->
   <nav class="sidebar-nav">
-    <a
-      *ngFor="let item of navItems"
-      [routerLink]="item.route"
-      routerLinkActive="active"
-      class="nav-item">
-      <i [class]="item.icon"></i>
-      <span>{{ item.label }}</span>
+    <span class="nav-eyebrow">Menu</span>
+
+    <a *ngFor="let item of navItems; let i = index"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       class="nav-item"
+       [style.--i]="i">
+
+      <span class="nav-icon" aria-hidden="true">
+        <i [class]="item.icon"></i>
+      </span>
+      <span class="nav-text">{{ item.label }}</span>
+      <span class="nav-arrow" aria-hidden="true">
+        <svg viewBox="0 0 16 16">
+          <path d="M5 4 L 10 8 L 5 12" fill="none"
+                stroke="currentColor" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
     </a>
   </nav>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="sidebar-footer">
+    <div class="footer-card">
+      <div class="footer-avatar" aria-hidden="true">
+        <svg viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="19" fill="none"
+                  stroke="currentColor" stroke-width="1" opacity="0.35"/>
+          <text x="20" y="26" text-anchor="middle"
+                font-family="Fraunces, Georgia, serif"
+                font-size="16" font-weight="500" fill="currentColor">M</text>
+        </svg>
+      </div>
+      <div class="footer-meta">
+        <span class="footer-name">Maison Keeper</span>
+        <span class="footer-status">
+          <span class="dot"></span> Signed in
+        </span>
+      </div>
+      <button class="footer-action" type="button" aria-label="Sign out">
+        <svg viewBox="0 0 20 20">
+          <path d="M12 4 H 5 a 1 1 0 0 0 -1 1 v 10 a 1 1 0 0 0 1 1 h 7"
+                fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 7 l 3 3 l -3 3 M 17 10 H 9"
+                fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 
 </aside>

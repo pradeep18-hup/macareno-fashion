@@ -21,7 +21,6 @@ type SortDir = 'asc' | 'desc';
   styleUrl: './customer.css'
 })
 export class Customers {
-  // Sample data. Replace with real data later.
   customers: Customer[] = [
     { id: 1,  name: 'Priya Sharma',   email: 'priya@example.com',   phone: '9876543210', city: 'Coimbatore', joinedAt: new Date('2026-01-12') },
     { id: 2,  name: 'Arun Kumar',     email: 'arun@example.com',    phone: '9876501234', city: 'Chennai',    joinedAt: new Date('2026-02-03') },
@@ -45,7 +44,6 @@ export class Customers {
     { key: 'joinedAt', label: 'Joined' }
   ];
 
-  // Table state
   searchTerm = '';
   sortKey: SortKey = 'joinedAt';
   sortDir: SortDir = 'desc';
@@ -53,7 +51,6 @@ export class Customers {
   pageSizeOptions = [5, 10, 25];
   currentPage = 1;
 
-  // Derived data used by the template
   visibleCustomers: Customer[] = [];
   filteredCount = 0;
   totalPages = 1;
@@ -64,7 +61,6 @@ export class Customers {
     this.updateView();
   }
 
-  // Recalculates filtered, sorted and paged rows. Call after any change.
   private updateView(): void {
     const term = this.searchTerm.trim().toLowerCase();
 
@@ -109,11 +105,6 @@ export class Customers {
     }
     this.currentPage = 1;
     this.updateView();
-  }
-
-  sortIcon(key: SortKey): string {
-    if (this.sortKey !== key) return '⇅';
-    return this.sortDir === 'asc' ? '▲' : '▼';
   }
 
   onPageSizeChange(value: string): void {

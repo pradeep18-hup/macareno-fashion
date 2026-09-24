@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 export interface LoginCredentials {
   email: string;
@@ -12,7 +12,7 @@ export interface LoginCredentials {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -48,8 +48,7 @@ export class Login {
       rememberMe: this.rememberMe(),
     });
 
-    // TODO: replace with your real auth call. This simulates success
-    // so the redirect works today — swap it for your service's response.
+    // TODO: replace with your real auth call.
     setTimeout(() => {
       this.loading.set(false);
       this.router.navigate(['/home']);
