@@ -10,6 +10,9 @@ import { Admin } from './admin/admin';
 import { Customers } from './customer/customer';
 import { Orders } from './orders/orders/orders';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
+import { CourierForm } from './courier/courier/courier';
+import { DeliveryChargeForm } from './delivery-charge-form/delivery-charge-form';
+import { ProductDetailComponent } from './product-dettail/product-dettail';
 export const routes: Routes = [
   // No header/footer
   { path: 'login', component: Login },
@@ -23,7 +26,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: HeroComponent },
       { path: 'contact', component: ContactComponent },
-      
+      {path:'product-detail',component:ProductDetailComponent},
 
     ]
   },
@@ -32,10 +35,12 @@ export const routes: Routes = [
   component: AdminLayout,
   children: [
     { path: 'dress-form', component: DressForm },
-    { path: 'dress-types', component: DressTypeService },
+    { path: 'dress-type', component: DressTypeService },
     { path: 'admin', component: Admin },
     { path: 'customer-list', component: Customers },
-    { path: 'orders', component: Orders }
+    { path: 'orders', component: Orders },
+    {path:'courier',component:CourierForm},
+    {path:'deliver-charge-settings',component:DeliveryChargeForm}
   ]
 },
 

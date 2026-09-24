@@ -44,17 +44,24 @@
   </div>
 </section>
 
-<!-- ===== CARDS SECTION ===== -->
+<!-- ===== CARDS SECTION (click card -> product detail page) ===== -->
 <section class="cards-section">
   <div class="cards-container">
     <div class="cards-grid">
-      <div class="product-card" *ngFor="let product of filteredProducts()">
+      <div
+        class="product-card"
+        *ngFor="let product of filteredProducts()"
+        (click)="openProduct(product)"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="openProduct(product)"
+      >
         <div class="card-image-wrapper">
           <img [src]="product.image" [alt]="product.name" loading="lazy" />
-          <button class="favorite-btn" (click)="toggleFavorite(product)">
+          <button class="favorite-btn" (click)="toggleFavorite(product, $event)">
             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" 
-                    [attr.fill]="product.isFavorite ? 'currentColor' : 'none'" 
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    [attr.fill]="product.isFavorite ? 'currentColor' : 'none'"
                     [style.color]="product.isFavorite ? '#6b1f2a' : 'currentColor'"/>
             </svg>
           </button>
@@ -63,15 +70,11 @@
 
         <div class="card-content">
           <h3 class="card-title">{{ product.name }}</h3>
-          <p class="card-price">{{ formatPrice(product.price) }}</p>
 
-          <div class="card-actions">
-            <div class="quantity-control">
-              <button class="qty-btn" (click)="decreaseQuantity(product)">−</button>
-              <span class="qty-value">{{ product.quantity }}</span>
-              <button class="qty-btn" (click)="increaseQuantity(product)">+</button>
-            </div>
-            <button class="buy-btn" (click)="buyNow(product)">Add</button>
+          <div class="price-row">
+            <span class="card-price">{{ formatPrice(product.price) }}</span>
+            <span class="card-mrp" *ngIf="product.mrp > product.price">{{ formatPrice(product.mrp) }}</span>
+            <span class="card-discount" *ngIf="getDiscount(product) > 0">{{ getDiscount(product) }}% off</span>
           </div>
         </div>
       </div>
@@ -80,3 +83,57 @@
 </section>
 
 <!-- ===== FOOTER SECTION ===== -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <p class="footer-logo">Macarena</p>
+        <p class="footer-desc">
+          Korean-inspired everyday fashion — oversized fits, quiet-luxury
+          fabrics, and street-style layering, curated for you.
+        </p>
+        <div class="footer-social">
+          <a class="social-link" href="#" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a class="social-link" href="#" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul class="footer-links">
+          <li><a href="#">Dresses</a></li>
+          <li><a href="#">Tops</a></li>
+          <li><a href="#">Outerwear</a></li>
+          <li><a href="#">Sets</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul class="footer-links">
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul class="footer-links">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2026 Macarena. All rights reserved.
+    </div>
+  </div>
+</footer>

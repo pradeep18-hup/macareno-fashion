@@ -1,0 +1,37 @@
+<div class="courier-page">
+  <h2>Courier Companies</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label>Courier Company Name</label>
+      <input type="text" formControlName="companyName" placeholder="e.g. DTDC, BlueDart" />
+    </div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="text" formControlName="phoneNumber" placeholder="10 digit number" />
+    </div>
+
+    <button type="submit" [disabled]="form.invalid">Add Courier</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Company Name</th>
+        <th>Phone Number</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of couriers">
+        <td>{{ c.companyName }}</td>
+        <td>{{ c.phoneNumber }}</td>
+        <td><button class="delete-btn" (click)="remove(c.id)">Delete</button></td>
+      </tr>
+      <tr *ngIf="couriers.length === 0">
+        <td colspan="3" class="empty">No couriers added yet</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
