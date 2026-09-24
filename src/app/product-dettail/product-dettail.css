@@ -271,7 +271,6 @@
 }
 
 .pd-btn {
-  flex: 1;
   min-width: 160px;
   padding: 0.85rem 1.4rem;
   border-radius: var(--radius-sm);
@@ -280,6 +279,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
+}
+
+/* Only the side-by-side Buy Now / Add to Cart buttons should grow */
+.pd-cta-row .pd-btn {
+  flex: 1;
 }
 
 .pd-btn--primary {
