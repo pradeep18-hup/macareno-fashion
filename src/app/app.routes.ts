@@ -19,7 +19,7 @@ import { UserProfile } from './profile/user-profile/user-profile';
 
 export const routes: Routes = [
   // ---------- No header/footer ----------
-  { path: 'login', component: Login },
+  { path: '', component: Login },
   { path: 'register', component: Register },
 
   // ---------- Public site (MainLayout) ----------
@@ -27,7 +27,7 @@ export const routes: Routes = [
     path: '',
     component: MainLayout,
     children: [
-      { path: '', component: HeroComponent },
+      { path: 'home', component: HeroComponent },
       { path: 'contact', component: ContactComponent },
       {path:'product-detail',component:ProductDetailComponent},
       {path:'cart',component:ShopCartComponent},

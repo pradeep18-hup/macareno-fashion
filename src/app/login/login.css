@@ -27,18 +27,6 @@
   overflow: hidden;
 }
 
-/* thin brand-color bar across the very top, like the reference logo lockup */
-.auth-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: var(--color-accent);
-  z-index: 5;
-}
-
 /* ==========================================================================
    LEFT COLUMN
    ========================================================================== */
@@ -50,12 +38,14 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 /* ---- Brand (site-heading treatment: staggered entrance + animated underline) ---- */
 .auth-page__brand {
+  margin-top: clamp(0.75rem, 2.5vh, 1.5rem);
   margin-bottom: clamp(1rem, 3vh, 2rem);
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -63,9 +53,9 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   font-family: var(--font-display);
-  font-size: clamp(1.15rem, 3vh, 1.6rem);
+  font-size: clamp(1.6rem, 4.2vh, 2.3rem);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -81,7 +71,7 @@
   right: 100%;
   bottom: -0.15em;
   height: 2px;
-  background: var(--color-accent);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-ink));
   transition: right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -96,13 +86,31 @@
   transform: translateY(0.5em);
   animation: brand-letter-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: calc(var(--i) * 55ms);
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition: color 0.25s ease, transform 0.25s ease, text-shadow 0.25s ease;
+  text-shadow:
+    1px 1px 0 rgba(23, 19, 15, 0.18),
+    2px 2px 0 rgba(23, 19, 15, 0.16),
+    3px 3px 0 rgba(23, 19, 15, 0.12),
+    4px 4px 6px rgba(23, 19, 15, 0.22);
 }
 
 .auth-page__brand-link:hover .brand-letter {
-  color: var(--color-accent);
   transform: translateY(-0.08em);
   transition-delay: calc(var(--i) * 25ms);
+  text-shadow:
+    1px 1px 0 rgba(107, 31, 42, 0.3),
+    2px 2px 0 rgba(107, 31, 42, 0.22),
+    3px 3px 0 rgba(107, 31, 42, 0.16),
+    5px 5px 8px rgba(23, 19, 15, 0.28);
+}
+
+/* ---- two-tone brand mark: first half accent, second half ink ---- */
+.brand-letter:nth-child(-n + 4) {
+  color: var(--color-accent);
+}
+
+.brand-letter:nth-child(n + 5) {
+  color: var(--color-ink);
 }
 
 @keyframes brand-letter-in {
@@ -124,12 +132,63 @@
 .brand-wordmark {
   display: inline-flex;
   line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-wordmark-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-squiggle {
+  position: absolute;
+  left: -14%;
+  top: 50%;
+  width: 128%;
+  height: 180%;
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.brand-squiggle__line {
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 480;
+  stroke-dashoffset: 480;
+  animation: squiggle-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  opacity: 0.85;
+}
+
+.brand-squiggle__line--accent {
+  stroke: var(--color-accent);
+}
+
+.brand-squiggle__line--gold {
+  stroke: var(--color-gold, #b8862c);
+  animation-delay: 0.5s;
+}
+
+@keyframes squiggle-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-squiggle__line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }
 
 .logo {
   display: block;
-  height: clamp(2.4rem, 5.5vh, 3.1rem);
-  width: clamp(2.4rem, 5.5vh, 3.1rem);
+  height: clamp(3.2rem, 7.5vh, 4.4rem);
+  width: clamp(3.2rem, 7.5vh, 4.4rem);
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3px var(--color-line);
@@ -180,13 +239,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: safe center;
+  justify-content: safe flex-start;
   max-width: 440px;
   width: 100%;
   margin: 0 auto;
   min-width: 0;
   min-height: 0;
-  padding-top: clamp(0.5rem, 4vh, 2.5rem);
+  padding-top: clamp(0.25rem, 1.5vh, 0.75rem);
   padding-bottom: clamp(0.5rem, 4vh, 2.5rem);
 }
 
@@ -222,11 +281,11 @@
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
-  padding: clamp(0.85rem, 2.5vh, 1.5rem);
+  padding: clamp(1rem, 2.8vh, 1.75rem);
   display: flex;
   flex-direction: column;
   gap: clamp(0.5rem, 1.4vh, 0.75rem);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   width: 100%;
   min-width: 0;
   flex-shrink: 0;
