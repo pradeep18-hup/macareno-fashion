@@ -1,6 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 export interface Product {
   id: number;
@@ -19,6 +20,17 @@ export interface Product {
   deliveryDays: number;
   codAvailable: boolean;
   returnPolicyDays: number;
+}
+
+export interface DeliveryAddress {
+  fullName: string;
+  phone: string;
+  houseNo: string;
+  street: string;
+  landmark: string;
+  city: string;
+  state: string;
+  pincode: string;
 }
 
 // ===== FAKE PRODUCT (no route, no API) =====
@@ -52,10 +64,21 @@ const FAKE_PRODUCT: Product = {
   returnPolicyDays: 14
 };
 
+const EMPTY_ADDRESS: DeliveryAddress = {
+  fullName: '',
+  phone: '',
+  houseNo: '',
+  street: '',
+  landmark: '',
+  city: '',
+  state: '',
+  pincode: ''
+};
+
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './product-dettail.html',
   styleUrl: './product-dettail.css'
 })
@@ -116,5 +139,59 @@ export class ProductDetailComponent {
 
   buyNow() {
     this.addToCart();
+  }
+
+  // ===================== DELIVERY ADDRESS MODULE =====================
+
+  /** The address the customer has saved, or null if none saved yet */
+  savedAddress = signal<DeliveryAddress | null>(null);
+
+  /** Whether the "enter address" form is currently open */
+  showAddressForm = signal(false);
+
+  /** Draft values while the form is open (only committed on save) */
+  addressDraft = signal<DeliveryAddress>({ ...EMPTY_ADDRESS });
+
+  /** Validation message for the address form, empty when valid */
+  addressError = signal('');
+
+  addressField<K extends keyof DeliveryAddress>(key: K, value: string) {
+    this.addressDraft.update(a => ({ ...a, [key]: value }));
+  }
+
+  openAddressForm() {
+    // Pre-fill the form with the saved address if the user is editing
+    this.addressDraft.set(this.savedAddress() ? { ...this.savedAddress()! } : { ...EMPTY_ADDRESS });
+    this.addressError.set('');
+    this.showAddressForm.set(true);
+  }
+
+  cancelAddressForm() {
+    this.showAddressForm.set(false);
+    this.addressError.set('');
+  }
+
+  saveAddress() {
+    const a = this.addressDraft();
+
+    if (!a.houseNo.trim() || !a.street.trim() || !a.city.trim() || !a.pincode.trim()) {
+      this.addressError.set('House no, street, city and pincode are required.');
+      return;
+    }
+    if (!/^\d{6}$/.test(a.pincode.trim())) {
+      this.addressError.set('Enter a valid 6-digit pincode.');
+      return;
+    }
+
+    this.savedAddress.set({ ...a });
+    this.pincode.set(a.pincode.trim());
+    this.deliveryChecked.set(true);
+    this.showAddressForm.set(false);
+    this.addressError.set('');
+  }
+
+  removeAddress() {
+    this.savedAddress.set(null);
+    this.deliveryChecked.set(false);
   }
 }

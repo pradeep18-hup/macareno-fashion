@@ -454,3 +454,152 @@
     min-width: 100%;
   }
 }
+/* ==========================================================================
+   Delivery Address Module — append to product-dettail.css
+   ========================================================================== */
+
+.pd-address-block {
+  border-top: 1px solid var(--color-line, #ddd2c2);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+/* ---- Add-address trigger ---- */
+
+.pd-add-address-btn {
+  background: none;
+  border: 1px dashed var(--color-accent, #6b1f2a);
+  color: var(--color-accent, #6b1f2a);
+  border-radius: var(--radius-sm, 12px);
+  padding: 0.75rem 1rem;
+  width: 100%;
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.pd-add-address-btn:hover {
+  background: var(--color-accent-soft, #ead9d2);
+}
+
+/* ---- Saved address summary card ---- */
+
+.pd-address-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-line, #ddd2c2);
+  border-radius: var(--radius-sm, 12px);
+  padding: 0.9rem 1rem;
+}
+
+.pd-address-name {
+  font-weight: 600;
+  color: var(--color-ink, #17130f);
+  margin: 0 0 0.3rem;
+  font-size: 0.92rem;
+}
+
+.pd-address-line {
+  color: var(--color-ink-soft, #4a433c);
+  margin: 0.1rem 0;
+  font-size: 0.85rem;
+}
+
+.pd-address-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.pd-address-edit,
+.pd-address-remove {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: right;
+}
+
+.pd-address-edit {
+  color: var(--color-accent, #6b1f2a);
+  font-weight: 600;
+}
+
+.pd-address-remove {
+  color: var(--color-ink-soft, #4a433c);
+}
+
+.pd-address-remove:hover {
+  color: #b3261e;
+}
+
+/* ---- Address entry form ---- */
+
+.pd-address-form {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-line, #ddd2c2);
+  border-radius: var(--radius-sm, 12px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.pd-address-form__row {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.pd-address-input {
+  flex: 1 1 140px;
+  min-width: 0;
+  border: 1px solid var(--color-line, #ddd2c2);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: var(--color-ink, #17130f);
+  background: var(--color-bg, #f6f1ea);
+}
+
+.pd-address-input:focus {
+  outline: 2px solid var(--color-accent, #6b1f2a);
+  outline-offset: 1px;
+  background: var(--color-surface, #fff);
+}
+
+.pd-address-error {
+  color: #b3261e;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.pd-address-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.pd-address-form__actions .pd-btn {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .pd-address-form__row {
+    flex-direction: column;
+  }
+  .pd-address-card {
+    flex-direction: column;
+  }
+  .pd-address-card__actions {
+    flex-direction: row;
+  }
+}
