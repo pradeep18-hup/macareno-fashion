@@ -1,101 +1,112 @@
-<div class="tag-page">
-  <div class="tag-card">
-    <span class="tag-card__eyelet"></span>
-
-    <div class="tag-card__header">
-      <span class="tag-card__mark">Macarena</span>
-      <span class="tag-card__collection">Autumn 26</span>
+<!-- login.component.html -->
+<div class="auth-page">
+  <!-- LEFT: cream panel — headline, account link, about-us teaser -->
+  <div class="auth-page__left">
+    <div class="auth-page__intro">
+      <h1 class="auth-page__heading">
+        Offers powered<br />
+        by <span class="auth-page__heading-accent">designers</span><br />
+        around the world.
+      </h1>
+      <p class="auth-page__account-line">
+        Don't have account?
+        <a routerLink="/register" class="auth-page__account-link">Create account <span>&rarr;</span></a>
+      </p>
     </div>
 
-    <hr class="tag-card__stitch" />
-
-    <h1>Welcome back</h1>
-    <p class="tag-card__subtext">
-      New here?
-      <a routerLink="/register">Create an account</a>
-    </p>
-
-    <form (ngSubmit)="onSubmit()" novalidate>
-      <div class="field">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          autocomplete="email"
-          [ngModel]="email()"
-          (ngModelChange)="email.set($event)"
-          required
+    <div class="about-block">
+      <div class="about-image">
+        <img
+          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&auto=format&fit=crop&q=80"
+          alt="About Macarena"
         />
+        <span class="about-image__label">About us</span>
       </div>
+      <p class="about-text">
+        Shop new women's clothing at the best brands and reach new heights with your fashion style
+      </p>
+    </div>
+  </div>
 
-      <div class="field">
-        <div class="field__label-row">
-          <label for="password">Password</label>
-          <a href="/forgot-password" class="field__aux-link">Forgot?</a>
-        </div>
-        <div class="field__password-wrap">
+  <!-- RIGHT: full-height editorial image with floating login card -->
+  <div class="auth-page__right">
+    <img
+      class="auth-page__bg"
+      src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1400&auto=format&fit=crop&q=80"
+      alt="Macarena Autumn / Winter 26 collection"
+    />
+
+    <div class="auth-card">
+      <h2 class="auth-card__title">Login to your account</h2>
+
+      <form (ngSubmit)="onSubmit()" novalidate>
+        <div class="field">
+          <label for="email">Username</label>
           <input
-            id="password"
-            [type]="showPassword() ? 'text' : 'password'"
-            name="password"
-            autocomplete="current-password"
-            [ngModel]="password()"
-            (ngModelChange)="password.set($event)"
+            id="email"
+            type="text"
+            name="email"
+            autocomplete="username"
+            placeholder="Enter your username"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
             required
           />
-          <button
-            type="button"
-            class="field__toggle"
-            (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
-          >
-            <ng-container *ngIf="!showPassword(); else hideIcon">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                />
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
-              </svg>
-            </ng-container>
-            <ng-template #hideIcon>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M6.6 6.7C3.9 8.4 2 12 2 12s4 7 11 7c2 0 3.7-.5 5.1-1.3M17.5 17.4C20 15.7 22 12 22 12s-1.6-2.8-4.4-4.8"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </ng-template>
-          </button>
         </div>
-      </div>
 
-      <label class="checkbox-row">
-        <input
-          type="checkbox"
-          name="rememberMe"
-          [ngModel]="rememberMe()"
-          (ngModelChange)="rememberMe.set($event)"
-        />
-        <span>Keep me signed in</span>
-      </label>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="field__password-wrap">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              name="password"
+              autocomplete="current-password"
+              placeholder="Enter your password"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+              required
+            />
+            <button
+              type="button"
+              class="field__toggle"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              <ng-container *ngIf="!showPassword(); else hideIcon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
+                </svg>
+              </ng-container>
+              <ng-template #hideIcon>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M6.6 6.7C3.9 8.4 2 12 2 12s4 7 11 7c2 0 3.7-.5 5.1-1.3M17.5 17.4C20 15.7 22 12 22 12s-1.6-2.8-4.4-4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </ng-template>
+            </button>
+          </div>
+        </div>
 
-      <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+        <div class="field-row">
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="rememberMe"
+              [ngModel]="rememberMe()"
+              (ngModelChange)="rememberMe.set($event)"
+            />
+            <span>Remember me</span>
+          </label>
+          <a href="/forgot-password" class="field__aux-link">Forget your password?</a>
+        </div>
 
-      <button type="submit" class="submit-btn" [disabled]="loading()">
-        {{ loading() ? 'Signing in…' : 'Sign in' }}
-      </button>
-    </form>
+        <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
-    <div class="tag-card__swatches">
-      <span class="swatch swatch--accent"></span>
-      <span class="swatch swatch--accent-light"></span>
-      <span class="swatch swatch--ink"></span>
-      <span class="tag-card__swatches-label">This season's palette</span>
+        <button type="submit" class="submit-btn" [disabled]="loading()">
+          {{ loading() ? 'Signing in…' : 'Login' }}
+        </button>
+      </form>
     </div>
   </div>
 </div>

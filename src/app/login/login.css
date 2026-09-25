@@ -1,153 +1,194 @@
+/* login.component.css */
+
 /* ==========================================================================
-   Login — Macarena (garment tag concept)
+   Login page — cream left panel + full-height image with floating card
    ========================================================================== */
 
-.tag-page {
-  position: relative;
+:host {
+  display: block;
+}
+
+.auth-page {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ==========================================================================
+   LEFT — cream panel
+   ========================================================================== */
+.auth-page__left {
+  background: #efebe4;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  background: var(--color-bg);
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(23, 19, 15, 0.015) 0px,
-    rgba(23, 19, 15, 0.015) 1px,
-    transparent 1px,
-    transparent 6px
-  );
+  gap: clamp(2rem, 6vh, 4rem);
+  padding: clamp(2rem, 6vw, 5rem);
 }
 
-/* ---- The tag ---- */
-
-.tag-card {
-  position: relative;
-  width: 100%;
-  max-width: 380px;
-  background: var(--color-surface);
-  padding: clamp(2.25rem, 4vw, 2.75rem) clamp(1.9rem, 4vw, 2.4rem) 2.25rem;
-  clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 0 100%);
-  box-shadow: 0 26px 50px -30px rgba(23, 19, 15, 0.35);
-  transform: rotate(-0.6deg);
-  animation: tag-rise var(--dur) var(--ease) both;
+.auth-page__intro {
+  max-width: 480px;
 }
 
-@keyframes tag-rise {
-  from {
-    opacity: 0;
-    transform: rotate(-0.6deg) translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(-0.6deg) translateY(0);
-  }
-}
-
-.tag-card__eyelet {
-  position: absolute;
-  top: 14px;
-  right: 44px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--color-line);
-  background: var(--color-bg);
-}
-
-/* ---- Header ---- */
-
-.tag-card__header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 1.1rem;
-}
-
-.tag-card__mark {
+.auth-page__heading {
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  color: var(--color-ink);
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #1c1a17;
+  margin: 0;
 }
 
-.tag-card__collection {
-  font-size: 0.72rem;
-  letter-spacing: var(--tracking-wide);
-  color: var(--color-accent);
+.auth-page__heading-accent {
+  color: #c1793a;
 }
 
-.tag-card__stitch {
-  border: none;
-  border-top: 1.5px dashed var(--color-line);
-  margin: 0 0 1.5rem;
+.auth-page__account-line {
+  margin-top: 1.75rem;
+  font-size: 0.95rem;
+  color: #4a453e;
 }
 
-h1 {
-  font-size: 1.7rem;
-  margin-bottom: 0.4rem;
+.auth-page__account-link {
+  margin-left: 0.4rem;
+  font-weight: 600;
+  color: #1c1a17;
+  border-bottom: 1px solid #1c1a17;
+  padding-bottom: 1px;
 }
 
-.tag-card__subtext {
-  font-size: 0.88rem;
-  color: var(--color-ink-soft);
-  margin-bottom: 1.9rem;
+.auth-page__account-link:hover {
+  color: #c1793a;
+  border-color: #c1793a;
 }
 
-.tag-card__subtext a {
-  color: var(--color-accent);
-  border-bottom: 1px solid var(--color-accent-soft);
+/* ---- About-us teaser block ---- */
+.about-block {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  max-width: 560px;
 }
 
-.tag-card__subtext a:hover {
-  border-bottom-color: var(--color-accent);
+.about-image {
+  position: relative;
+  width: 46%;
+  aspect-ratio: 3 / 4;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-/* ---- Form ---- */
+.about-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 55%);
+}
+
+.about-image__label {
+  position: absolute;
+  left: 1.1rem;
+  bottom: 1rem;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.about-text {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #4a453e;
+}
+
+/* ==========================================================================
+   RIGHT — editorial image + floating card
+   ========================================================================== */
+.auth-page__right {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-page__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.auth-card {
+  position: absolute;
+  top: 18%;
+  right: 8%;
+  width: min(360px, 86%);
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.auth-card__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  color: #111;
+  margin: 0;
+}
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 1.15rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .field label {
-  font-size: 0.83rem;
-  color: var(--color-ink-soft);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6b655c;
 }
 
-.field__label-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.field__aux-link {
-  font-size: 0.78rem;
-  color: var(--color-accent);
-}
-
+.field input[type='text'],
 .field input[type='email'],
-.field input[type='password'],
-.field input[type='text'] {
+.field input[type='password'] {
   border: none;
-  border-bottom: 1.5px solid var(--color-line);
+  border-bottom: 1px solid #ddd7cc;
+  border-radius: 0;
   background: transparent;
-  padding: 0.55rem 0.1rem;
-  font-size: 0.98rem;
-  font-family: var(--font-body);
-  color: var(--color-ink);
-  transition: border-color var(--dur) var(--ease);
+  padding: 0.3rem 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.field input::placeholder {
+  font-weight: 400;
+  color: #b5afa4;
 }
 
 .field input:focus-visible {
   outline: none;
-  border-bottom-color: var(--color-accent);
+  border-color: #111;
 }
 
 .field__password-wrap {
@@ -157,8 +198,8 @@ form {
 }
 
 .field__password-wrap input {
-  flex: 1;
-  padding-right: 2rem;
+  width: 100%;
+  padding-right: 1.6rem;
 }
 
 .field__toggle {
@@ -166,109 +207,129 @@ form {
   right: 0;
   background: none;
   border: none;
-  padding: 0.25rem;
+  padding: 0.2rem;
   display: flex;
-  color: var(--color-ink-soft);
+  color: #6b655c;
 }
 
 .field__toggle:hover {
-  color: var(--color-accent);
+  color: #111;
+}
+
+/* ---- Remember me / forgot password row ---- */
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .checkbox-row {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.87rem;
-  color: var(--color-ink-soft);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+  user-select: none;
 }
 
 .checkbox-row input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--color-accent);
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #111;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
+.field__aux-link {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #6b655c;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.field__aux-link:hover {
+  color: #111;
+}
+
+/* ---- Error ---- */
 .form-error {
-  font-size: 0.85rem;
-  color: var(--color-accent);
+  font-size: 0.82rem;
+  color: #b3413c;
+  margin: 0;
 }
 
+/* ---- Submit ---- */
 .submit-btn {
-  margin-top: 0.15rem;
   padding: 0.85rem 1.5rem;
   border: none;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent);
-  color: var(--color-white);
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+  border-radius: 999px;
+  background: #17130f;
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: var(--color-accent-light);
+  background: #2c2620;
 }
 
 .submit-btn:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .submit-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
-/* ---- Palette swatches ---- */
-
-.tag-card__swatches {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 2rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--color-line);
-}
-
-.swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-}
-
-.swatch--accent {
-  background: var(--color-accent);
-}
-
-.swatch--accent-light {
-  background: var(--color-accent-light);
-}
-
-.swatch--ink {
-  background: var(--color-ink-soft);
-}
-
-.tag-card__swatches-label {
-  margin-left: 0.3rem;
-  font-size: 0.75rem;
-  color: var(--color-ink-soft);
-}
-
-/* ---- Responsive ---- */
-
-@media (max-width: 420px) {
-  .tag-card {
-    transform: none;
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 960px) {
+  .auth-page {
+    grid-template-columns: 1fr;
   }
 
-  @keyframes tag-rise {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .auth-page__left {
+    padding: 2rem 1.5rem;
+    gap: 2rem;
+  }
+
+  .auth-page__right {
+    min-height: 480px;
+  }
+
+  .auth-card {
+    position: static;
+    width: 100%;
+    max-width: 380px;
+    margin: 2rem auto;
+  }
+
+  .about-block {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 540px) {
+  .auth-page__heading {
+    font-size: 1.5rem;
+  }
+
+  .about-block {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .about-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
   }
 }
