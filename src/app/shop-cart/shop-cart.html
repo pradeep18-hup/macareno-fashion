@@ -1,0 +1,67 @@
+<header class="cart-header">
+  <h2 class="cart-header__title">Your Cart</h2>
+  <span class="cart-header__count">{{ totalCount }} items</span>
+</header>
+
+<section class="cart-page" *ngIf="cartItems.length; else emptyCart">
+
+  <div class="cart-list">
+    <div class="cart-row" *ngFor="let item of cartItems">
+      <img class="cart-row__img" [src]="item.image" [alt]="item.name" />
+
+      <div class="cart-row__info">
+        <p class="cart-row__name">{{ item.name }}</p>
+        <div class="cart-row__price">
+          <span class="price-offer">₹{{ unitPrice(item) | number }}</span>
+          <span class="price-original" *ngIf="hasOffer(item)">₹{{ item.price | number }}</span>
+          <span class="price-off-tag" *ngIf="hasOffer(item)">
+            {{ ((item.price - unitPrice(item)) / item.price) * 100 | number: '1.0-0' }}% off
+          </span>
+        </div>
+      </div>
+
+      <div class="cart-row__qty">
+        <button class="qty-btn" (click)="decrease(item)" aria-label="Decrease quantity">–</button>
+        <span class="qty-value">{{ item.qty }}</span>
+        <button class="qty-btn" (click)="increase(item)" aria-label="Increase quantity">+</button>
+      </div>
+
+      <p class="cart-row__total">₹{{ lineTotal(item) | number }}</p>
+
+      <button class="cart-row__remove" (click)="remove(item)" aria-label="Remove item">✕</button>
+    </div>
+  </div>
+
+  <aside class="cart-summary">
+    <h3 class="cart-summary__title">Order Summary</h3>
+
+    <div class="cart-summary__line">
+      <span>Item total</span>
+      <span>₹{{ originalTotal | number }}</span>
+    </div>
+
+    <div class="cart-summary__line cart-summary__line--savings" *ngIf="savings > 0">
+      <span>Offer discount</span>
+      <span>− ₹{{ savings | number }}</span>
+    </div>
+
+    <div class="cart-summary__line">
+      <span>Delivery</span>
+      <span class="free-tag">FREE</span>
+    </div>
+
+    <div class="cart-summary__line cart-summary__line--total">
+      <span>To pay</span>
+      <span>₹{{ payableTotal | number }}</span>
+    </div>
+
+    <button class="cart-btn cart-btn--primary">Proceed to Checkout</button>
+  </aside>
+
+</section>
+
+<ng-template #emptyCart>
+  <div class="cart-empty">
+    <p>Your cart is empty.</p>
+  </div>
+</ng-template>
