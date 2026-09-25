@@ -11,6 +11,7 @@
 
       <div class="cart-row__info">
         <p class="cart-row__name">{{ item.name }}</p>
+
         <div class="cart-row__price">
           <span class="price-offer">₹{{ unitPrice(item) | number }}</span>
           <span class="price-original" *ngIf="hasOffer(item)">₹{{ item.price | number }}</span>
@@ -18,44 +19,52 @@
             {{ ((item.price - unitPrice(item)) / item.price) * 100 | number: '1.0-0' }}% off
           </span>
         </div>
-      </div>
 
-      <div class="cart-row__qty">
-        <button class="qty-btn" (click)="decrease(item)" aria-label="Decrease quantity">–</button>
-        <span class="qty-value">{{ item.qty }}</span>
-        <button class="qty-btn" (click)="increase(item)" aria-label="Increase quantity">+</button>
+        <div class="cart-row__qty">
+          <button class="qty-btn" (click)="decrease(item)" aria-label="Decrease quantity">–</button>
+          <span class="qty-value">{{ item.qty }}</span>
+          <button class="qty-btn" (click)="increase(item)" aria-label="Increase quantity">+</button>
+        </div>
+
+        <div class="cart-row__actions">
+          <button class="action-link action-link--remove" (click)="remove(item)">REMOVE</button>
+        </div>
       </div>
 
       <p class="cart-row__total">₹{{ lineTotal(item) | number }}</p>
-
-      <button class="cart-row__remove" (click)="remove(item)" aria-label="Remove item">✕</button>
     </div>
   </div>
 
   <aside class="cart-summary">
-    <h3 class="cart-summary__title">Order Summary</h3>
+    <h3 class="cart-summary__title">PRICE DETAILS</h3>
 
     <div class="cart-summary__line">
-      <span>Item total</span>
+      <span>Price ({{ totalCount }} items)</span>
       <span>₹{{ originalTotal | number }}</span>
     </div>
 
     <div class="cart-summary__line cart-summary__line--savings" *ngIf="savings > 0">
-      <span>Offer discount</span>
-      <span>− ₹{{ savings | number }}</span>
+      <span>Discount</span>
+      <span class="savings-value">− ₹{{ savings | number }}</span>
     </div>
 
     <div class="cart-summary__line">
-      <span>Delivery</span>
+      <span>Delivery Charges</span>
       <span class="free-tag">FREE</span>
     </div>
 
+    <div class="cart-summary__divider"></div>
+
     <div class="cart-summary__line cart-summary__line--total">
-      <span>To pay</span>
+      <span>Total Amount</span>
       <span>₹{{ payableTotal | number }}</span>
     </div>
 
-    <button class="cart-btn cart-btn--primary">Proceed to Checkout</button>
+    <p class="cart-summary__savings-msg" *ngIf="savings > 0">
+      You will save ₹{{ savings | number }} on this order
+    </p>
+
+    <button class="cart-btn cart-btn--primary">Buy Now</button>
   </aside>
 
 </section>

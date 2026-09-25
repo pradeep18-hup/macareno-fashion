@@ -1,5 +1,5 @@
 import { Component, HostListener, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface NavLink {
   label: string;
@@ -8,7 +8,7 @@ interface NavLink {
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
@@ -20,7 +20,7 @@ export class NavbarComponent {
     { label: 'Orders', routerLink: '/orders' },
     { label: 'Admin', routerLink: '/admin' },
     { label: 'Users', routerLink: '/customer-list' },
-    { label: 'Add product', routerLink: '/dress-form' },
+    { label: 'Add product', routerLink: 'admin/dress-form' },
     { label: 'Contact', routerLink: '/contact' },
   ];
 

@@ -1,0 +1,155 @@
+<section class="profile-page">
+
+  <!-- ---- Sidebar ---- -->
+  <aside class="profile-sidebar">
+    <div class="profile-sidebar__user">
+      <div class="profile-sidebar__avatar">{{ initials }}</div>
+      <div>
+        <p class="profile-sidebar__name">{{ personalInfo.name }}</p>
+        <p class="profile-sidebar__email">{{ personalInfo.email }}</p>
+      </div>
+    </div>
+
+    <nav class="profile-sidebar__nav">
+      <button
+        class="sidebar-link"
+        [class.sidebar-link--active]="activeTab === 'profile'"
+        (click)="setTab('profile')"
+      >
+        Personal Info
+      </button>
+
+      <button
+        class="sidebar-link"
+        [class.sidebar-link--active]="activeTab === 'address'"
+        (click)="setTab('address')"
+      >
+        Manage Address
+      </button>
+
+      <button
+        class="sidebar-link"
+        [class.sidebar-link--active]="activeTab === 'password'"
+        (click)="setTab('password')"
+      >
+        Password
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ---- Content ---- -->
+  <div class="profile-content">
+
+    <!-- ===== Personal Info ===== -->
+    <div class="profile-card" *ngIf="activeTab === 'profile'">
+      <div class="profile-card__header">
+        <h3>Personal Information</h3>
+        <button class="edit-btn" *ngIf="!editingProfile" (click)="editingProfile = true">Edit</button>
+      </div>
+
+      <div class="profile-field">
+        <label>Full Name</label>
+        <input type="text" [(ngModel)]="personalInfo.name" [disabled]="!editingProfile" />
+      </div>
+
+      <div class="profile-field">
+        <label>Email Address</label>
+        <input type="email" [(ngModel)]="personalInfo.email" [disabled]="!editingProfile" />
+      </div>
+
+      <div class="profile-field">
+        <label>Mobile Number</label>
+        <input type="tel" [(ngModel)]="personalInfo.mobile" [disabled]="!editingProfile" />
+      </div>
+
+      <div class="profile-card__actions" *ngIf="editingProfile">
+        <button class="btn btn--ghost" (click)="editingProfile = false">Cancel</button>
+        <button class="btn btn--primary" (click)="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- ===== Manage Address ===== -->
+    <div class="profile-card" *ngIf="activeTab === 'address'">
+      <div class="profile-card__header">
+        <h3>Delivery Address</h3>
+        <button class="edit-btn" *ngIf="!editingAddress" (click)="editingAddress = true">Edit</button>
+      </div>
+
+      <span class="address-type-tag">{{ address.type }}</span>
+
+      <div class="profile-field">
+        <label>Address Line</label>
+        <input type="text" [(ngModel)]="address.line" [disabled]="!editingAddress" />
+      </div>
+
+      <div class="profile-field">
+        <label>Landmark</label>
+        <input type="text" [(ngModel)]="address.landmark" [disabled]="!editingAddress" />
+      </div>
+
+      <div class="profile-field-row">
+        <div class="profile-field">
+          <label>City</label>
+          <input type="text" [(ngModel)]="address.city" [disabled]="!editingAddress" />
+        </div>
+
+        <div class="profile-field">
+          <label>State</label>
+          <input type="text" [(ngModel)]="address.state" [disabled]="!editingAddress" />
+        </div>
+      </div>
+
+      <div class="profile-field-row">
+        <div class="profile-field">
+          <label>Pincode</label>
+          <input type="text" [(ngModel)]="address.pincode" [disabled]="!editingAddress" />
+        </div>
+
+        <div class="profile-field">
+          <label>Address Type</label>
+          <select [(ngModel)]="address.type" [disabled]="!editingAddress">
+            <option value="Home">Home</option>
+            <option value="Work">Work</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="profile-card__actions" *ngIf="editingAddress">
+        <button class="btn btn--ghost" (click)="editingAddress = false">Cancel</button>
+        <button class="btn btn--primary" (click)="saveAddress()">Save Address</button>
+      </div>
+    </div>
+
+    <!-- ===== Password ===== -->
+    <div class="profile-card" *ngIf="activeTab === 'password'">
+      <div class="profile-card__header">
+        <h3>Change Password</h3>
+      </div>
+
+      <div class="profile-field">
+        <label>Current Password</label>
+        <input type="password" [(ngModel)]="passwordForm.current" placeholder="Enter current password" />
+      </div>
+
+      <div class="profile-field">
+        <label>New Password</label>
+        <input type="password" [(ngModel)]="passwordForm.new" placeholder="Enter new password" />
+      </div>
+
+      <div class="profile-field">
+        <label>Confirm New Password</label>
+        <input type="password" [(ngModel)]="passwordForm.confirm" placeholder="Re-enter new password" />
+      </div>
+
+      <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
+      <p class="field-success" *ngIf="passwordSuccess">Password updated successfully.</p>
+
+      <div class="profile-card__actions">
+        <button class="btn btn--primary" (click)="changePassword()">Update Password</button>
+      </div>
+    </div>
+
+  </div>
+
+</section>

@@ -15,6 +15,7 @@ import { CourierForm } from './courier/courier/courier';
 import { DeliveryChargeForm } from './delivery-charge-form/delivery-charge-form';
 import { ProductDetailComponent } from './product-dettail/product-dettail';
 import { ShopCartComponent } from './shop-cart/shop-cart';
+import { UserProfile } from './profile/user-profile/user-profile';
 export const routes: Routes = [
   // ---------- No header/footer ----------
   { path: 'login', component: Login },
@@ -29,6 +30,7 @@ export const routes: Routes = [
       { path: 'contact', component: ContactComponent },
       {path:'product-detail',component:ProductDetailComponent},
       {path:'cart',component:ShopCartComponent},
+      {path:'user-profile',component:UserProfile},
 
     ]
   },

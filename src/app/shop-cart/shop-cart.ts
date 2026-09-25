@@ -18,44 +18,15 @@ interface CartItem {
   styleUrl: './shop-cart.css'
 })
 export class ShopCartComponent {
-  /* ---- fake cart, already filled with 5 items ---- */
+  /* ---- fake cart, already filled with 6 items ---- */
   cartItems: CartItem[] = [
+   
     {
-      id: 'p001',
-      name: 'Handwoven Silk Runner',
-      image: 'https://picsum.photos/seed/p001/200/200',
-      price: 2400,
-      offerPrice: 1899,
-      qty: 1
-    },
-    {
-      id: 'p002',
-      name: 'Terracotta Table Lamp',
-      image: 'https://picsum.photos/seed/p002/200/200',
-      price: 1450,
-      qty: 2
-    },
-    {
-      id: 'p003',
-      name: 'Brass Wall Mirror',
-      image: 'https://picsum.photos/seed/p003/200/200',
-      price: 3200,
-      offerPrice: 2650,
-      qty: 1
-    },
-    {
-      id: 'p004',
-      name: 'Hand-block Print Cushion Cover',
-      image: 'https://picsum.photos/seed/p004/200/200',
-      price: 850,
-      offerPrice: 699,
-      qty: 3
-    },
-    {
-      id: 'p005',
-      name: 'Rattan Storage Basket',
-      image: 'https://picsum.photos/seed/p005/200/200',
-      price: 1200,
+      id: 'p006',
+      name: 'Woven Jute Area Rug',
+      image: 'https://images.unsplash.com/photo-1612336307429-8a898d10e223?auto=format&fit=crop&w=1000&q=90',
+      price: 300,
+      offerPrice: 199,
       qty: 1
     }
   ];

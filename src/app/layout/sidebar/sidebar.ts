@@ -25,12 +25,12 @@ export class Sidebar {
   navItems: SidebarItem[] = [
   
     
-    { label: 'Add Dress',  icon: 'bi bi-plus-circle',   route: 'dress-form' },
-    { label: 'Dress Type', icon: 'bi bi-tags',          route: 'dress-type' },
+    { label: 'Add Product',  icon: 'bi bi-plus-circle',   route: 'dress-form' },
+    { label: 'Product Type', icon: 'bi bi-tags',          route: 'dress-type' },
     { label: 'Admin',      icon: 'bi bi-person-badge',  route: 'admin' },
     { label: 'Customer',   icon: 'bi bi-people',        route: 'customer-list' },
     { label: 'Orders',     icon: 'bi bi-bag-check',     route: 'orders' },
       { label: 'Courier',     icon: 'bi bi-bag-check',     route: 'courier' },
-  { label: 'Order Amount set',     icon: 'bi bi-bag-check',     route: 'deliver-charge-settings' },
+  { label: 'Order Amount',     icon: 'bi bi-bag-check',     route: 'deliver-charge-settings' },
   ];
 }
