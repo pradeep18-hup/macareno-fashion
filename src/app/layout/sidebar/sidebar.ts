@@ -26,7 +26,7 @@ export class Sidebar {
   
     
     { label: 'Add Dress',  icon: 'bi bi-plus-circle',   route: 'dress-form' },
-    { label: 'Dress Type', icon: 'bi bi-tags',          route: 'dress-types' },
+    { label: 'Dress Type', icon: 'bi bi-tags',          route: 'dress-type' },
     { label: 'Admin',      icon: 'bi bi-person-badge',  route: 'admin' },
     { label: 'Customer',   icon: 'bi bi-people',        route: 'customer-list' },
     { label: 'Orders',     icon: 'bi bi-bag-check',     route: 'orders' },
