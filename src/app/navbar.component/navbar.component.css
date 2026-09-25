@@ -6,7 +6,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: var(--color-bg);
+  background: white;
   border-bottom: 1px solid transparent;
   transition: background var(--dur) var(--ease), 
               border-color var(--dur) var(--ease),

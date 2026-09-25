@@ -4,15 +4,21 @@
 
 :root {
   /* ---- Colour ---- */
-  --color-bg: #f6f1ea;
+  --color-bg: #ffffff;
+  --color-bg-muted: #faf8f5;     /* subtle off-white for alternating sections */
   --color-surface: #ffffff;
   --color-ink: #17130f;
   --color-ink-soft: #4a433c;
   --color-accent: #6b1f2a;
   --color-accent-light: #8c3a44;
   --color-accent-soft: #ead9d2;
-  --color-line: #ddd2c2;
+  --color-line: #e5ddd0;         /* slightly softer so borders still read on white */
   --color-white: #ffffff;
+
+  /* ---- Elevation (white-on-white needs shadow, not just borders, for depth) ---- */
+  --shadow-sm: 0 1px 3px rgba(23, 19, 15, 0.06), 0 1px 2px rgba(23, 19, 15, 0.04);
+  --shadow-md: 0 8px 24px rgba(23, 19, 15, 0.08);
+  --shadow-lg: 0 16px 40px rgba(23, 19, 15, 0.10);
 
   /* ---- Type ---- */
   --font-display: 'Fraunces', Georgia, serif;
