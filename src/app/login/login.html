@@ -3,7 +3,19 @@
   <!-- LEFT: Brand + Auth form -->
   <div class="auth-page__left">
     <header class="auth-page__brand">
-      <a href="/" class="auth-page__brand-link">Macarena</a>
+      <a href="/" class="auth-page__brand-link auth-page__brand-link--logo" aria-label="Macarena">
+        <img src="assets/logo2.png" class="logo" alt="Logo">
+        <span class="brand-wordmark">
+          <span class="brand-letter" style="--i:0">M</span>
+          <span class="brand-letter" style="--i:1">a</span>
+          <span class="brand-letter" style="--i:2">c</span>
+          <span class="brand-letter" style="--i:3">a</span>
+          <span class="brand-letter" style="--i:4">r</span>
+          <span class="brand-letter" style="--i:5">e</span>
+          <span class="brand-letter" style="--i:6">n</span>
+          <span class="brand-letter" style="--i:7">a</span>
+        </span>
+      </a>
     </header>
 
     <div class="auth-page__content">
@@ -98,7 +110,7 @@
 
           <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
-          <button type="submit" class="submit-btn" routerLink="/" >
+          <button type="submit" class="submit-btn" [disabled]="loading()">
             {{ loading() ? 'Signing in…' : 'Sign in' }}
           </button>
         </form>

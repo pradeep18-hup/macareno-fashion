@@ -18,12 +18,25 @@
 
 /* ---- Page shell ---- */
 .auth-page {
+  position: relative;
   height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 0;
   background: var(--color-bg);
   overflow: hidden;
+}
+
+/* thin brand-color bar across the very top, like the reference logo lockup */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--color-accent);
+  z-index: 5;
 }
 
 /* ==========================================================================
@@ -40,36 +53,141 @@
   overflow-y: auto;
 }
 
-/* ---- Brand ---- */
+/* ---- Brand (site-heading treatment: staggered entrance + animated underline) ---- */
 .auth-page__brand {
   margin-bottom: clamp(1rem, 3vh, 2rem);
   flex-shrink: 0;
 }
 
 .auth-page__brand-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-size: clamp(1.15rem, 3vh, 1.6rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--color-ink);
-  transition: color var(--dur) var(--ease);
+  text-decoration: none;
 }
 
-.auth-page__brand-link:hover {
+/* animated underline that draws in on hover */
+.auth-page__brand-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -0.15em;
+  height: 2px;
+  background: var(--color-accent);
+  transition: right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-page__brand-link:hover::after {
+  right: 0;
+}
+
+/* per-letter entrance animation on page load (used if the brand is plain text) */
+.brand-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.5em);
+  animation: brand-letter-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--i) * 55ms);
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.auth-page__brand-link:hover .brand-letter {
   color: var(--color-accent);
+  transform: translateY(-0.08em);
+  transition-delay: calc(var(--i) * 25ms);
 }
 
-/* ---- Content block (centered vertically, shrinks before it overflows) ---- */
+@keyframes brand-letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Image logo variant (paired with the wordmark) ---- */
+.auth-page__brand-link--logo {
+  line-height: 0;
+}
+
+.brand-wordmark {
+  display: inline-flex;
+  line-height: 1;
+}
+
+.logo {
+  display: block;
+  height: clamp(2.4rem, 5.5vh, 3.1rem);
+  width: clamp(2.4rem, 5.5vh, 3.1rem);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3px var(--color-line);
+  opacity: 0;
+  transform: translateY(0.4em) scale(0.94);
+  animation: logo-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.35s ease;
+  will-change: transform;
+}
+
+@keyframes logo-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.auth-page__brand-link--logo:hover .logo {
+  transform: translateY(-3px) scale(1.05) rotate(-1deg);
+  filter: drop-shadow(0 10px 16px rgba(23, 19, 15, 0.18));
+}
+
+.auth-page__brand-link--logo:active .logo {
+  transform: translateY(-1px) scale(1.01);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-letter,
+  .logo {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .auth-page__brand-link:hover .brand-letter,
+  .auth-page__brand-link--logo:hover .logo {
+    transform: none;
+  }
+  .auth-page__brand-link::after {
+    transition: none;
+  }
+}
+
+/* ---- Content block: anchored near the top so it doesn't leave a dead
+   gap under the logo on tall/wide screens; still centers itself if the
+   left column is short enough that top-anchoring would look cramped ---- */
 .auth-page__content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: safe center;
   max-width: 440px;
   width: 100%;
   margin: 0 auto;
   min-width: 0;
   min-height: 0;
+  padding-top: clamp(0.5rem, 4vh, 2.5rem);
+  padding-bottom: clamp(0.5rem, 4vh, 2.5rem);
 }
 
 /* ---- Intro ---- */
