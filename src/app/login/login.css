@@ -4,19 +4,26 @@
    Login page — built on Macarena global design tokens
    ========================================================================== */
 
+* {
+  box-sizing: border-box;
+}
+
 :host {
   display: block;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   background: var(--color-bg);
+  overflow: hidden;
 }
 
 /* ---- Page shell ---- */
 .auth-page {
-  min-height: 100vh;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 0;
   background: var(--color-bg);
+  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -25,18 +32,23 @@
 .auth-page__left {
   display: flex;
   flex-direction: column;
-  padding: clamp(1.5rem, 4vw, 3rem) var(--gutter);
+  padding: clamp(1rem, 3vh, 2rem) clamp(1.25rem, 5vw, var(--gutter, 3rem));
   position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* ---- Brand ---- */
 .auth-page__brand {
-  margin-bottom: clamp(2.5rem, 6vw, 5rem);
+  margin-bottom: clamp(1rem, 3vh, 2rem);
+  flex-shrink: 0;
 }
 
 .auth-page__brand-link {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--color-ink);
@@ -47,7 +59,7 @@
   color: var(--color-accent);
 }
 
-/* ---- Content block (centered vertically) ---- */
+/* ---- Content block (centered vertically, shrinks before it overflows) ---- */
 .auth-page__content {
   flex: 1;
   display: flex;
@@ -56,28 +68,31 @@
   max-width: 440px;
   width: 100%;
   margin: 0 auto;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* ---- Intro ---- */
 .auth-page__intro {
-  margin-bottom: 2.25rem;
+  margin-bottom: clamp(0.85rem, 2.5vh, 1.5rem);
+  flex-shrink: 0;
 }
 
 .auth-page__heading {
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 4vw, 3rem);
+  font-size: clamp(1.6rem, 4vh, 2.5rem);
   font-weight: 500;
-  line-height: 1.08;
+  line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--color-ink);
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.5rem;
 }
 
 .auth-page__subheading {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 400;
-  font-size: 1.05rem;
+  font-size: clamp(0.85rem, 1.8vh, 1.05rem);
   color: var(--color-ink-soft);
   margin: 0;
 }
@@ -89,11 +104,14 @@
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
-  padding: clamp(1.5rem, 3vw, 2rem);
+  padding: clamp(0.85rem, 2.5vh, 1.5rem);
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: clamp(0.5rem, 1.4vh, 0.75rem);
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 /* ---- OAuth buttons ---- */
@@ -101,16 +119,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: clamp(0.5rem, 1.6vh, 0.75rem) 1rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-line);
   background: var(--color-bg);
   color: var(--color-ink);
-  font-size: 0.9rem;
+  font-size: clamp(0.82rem, 2vw, 0.9rem);
   font-weight: 500;
   letter-spacing: 0.01em;
+  white-space: nowrap;
   transition:
     background var(--dur) var(--ease),
     border-color var(--dur) var(--ease),
@@ -135,11 +154,12 @@
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  margin: 0.35rem 0;
+  margin: 0.15rem 0;
   color: var(--color-ink-soft);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .auth-card__divider::before,
@@ -156,17 +176,19 @@
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.05rem;
+  gap: clamp(0.55rem, 1.6vh, 0.85rem);
+  min-width: 0;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.3rem;
+  min-width: 0;
 }
 
 .field label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -177,6 +199,8 @@ form {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .field__aux-link {
@@ -196,11 +220,12 @@ form {
 .field input[type='email'],
 .field input[type='password'],
 .field input[type='text'] {
+  width: 100%;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
   background: var(--color-bg);
-  padding: 0.75rem 0.9rem;
-  font-size: 0.95rem;
+  padding: clamp(0.5rem, 1.4vh, 0.7rem) 0.85rem;
+  font-size: max(0.9rem, 16px); /* 16px+ prevents iOS auto-zoom on focus */
   font-family: var(--font-body);
   color: var(--color-ink);
   transition:
@@ -224,16 +249,17 @@ form {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .field__password-wrap input {
   width: 100%;
-  padding-right: 2.6rem;
+  padding-right: 2.5rem;
 }
 
 .field__toggle {
   position: absolute;
-  right: 0.75rem;
+  right: 0.7rem;
   background: none;
   border: none;
   padding: 0.25rem;
@@ -260,6 +286,7 @@ form {
 .checkbox-row input {
   width: 1rem;
   height: 1rem;
+  flex-shrink: 0;
   accent-color: var(--color-accent);
   cursor: pointer;
 }
@@ -269,12 +296,13 @@ form {
   font-size: 0.82rem;
   color: var(--color-accent);
   margin: 0;
+  word-break: break-word;
 }
 
 /* ---- Submit ---- */
 .submit-btn {
-  margin-top: 0.25rem;
-  padding: 0.9rem 1.5rem;
+  margin-top: 0.15rem;
+  padding: clamp(0.6rem, 1.8vh, 0.85rem) 1.5rem;
   border: none;
   border-radius: var(--radius-pill);
   background: var(--color-ink);
@@ -282,6 +310,7 @@ form {
   font-size: 0.92rem;
   font-weight: 500;
   letter-spacing: 0.02em;
+  width: 100%;
   transition:
     background var(--dur) var(--ease),
     transform var(--dur) var(--ease);
@@ -302,10 +331,11 @@ form {
 
 /* ---- Footer ---- */
 .auth-page__footer {
-  margin-top: 1.75rem;
+  margin-top: clamp(0.75rem, 2.5vh, 1.25rem);
   text-align: center;
   font-size: 0.86rem;
   color: var(--color-ink-soft);
+  flex-shrink: 0;
 }
 
 .auth-page__footer a {
@@ -329,9 +359,11 @@ form {
   position: relative;
   overflow: hidden;
   background: var(--color-bg-muted);
-  margin: clamp(0.75rem, 1.5vw, 1.25rem);
+  margin: clamp(0.5rem, 1.2vw, 1.25rem);
   margin-left: 0;
   border-radius: var(--radius-sm);
+  min-width: 0;
+  height: calc(100% - clamp(1rem, 2.4vw, 2.5rem));
 }
 
 .auth-page__image {
@@ -351,7 +383,7 @@ form {
   height: 100%;
   display: flex;
   align-items: flex-end;
-  padding: clamp(1.75rem, 3vw, 3rem);
+  padding: clamp(1rem, 3vh, 3rem);
   background: linear-gradient(
     to top,
     rgba(23, 19, 15, 0.65) 0%,
@@ -369,7 +401,7 @@ form {
 }
 
 .auth-page__overlay-tag {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -378,14 +410,14 @@ form {
 
 .auth-page__overlay-title {
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 2.5vw, 2.4rem);
+  font-size: clamp(1.4rem, 3.5vh, 2.4rem);
   font-weight: 500;
   line-height: 1.1;
   color: var(--color-white);
 }
 
 .auth-page__overlay-sub {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.85);
 }
@@ -393,41 +425,102 @@ form {
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
-@media (max-width: 960px) {
+
+/* Tablets: still side-by-side, but tighten spacing */
+@media (max-width: 1100px) {
   .auth-page {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  }
+}
+
+/* Below this, stack into one column — page can scroll again here,
+   since two full-height panels can't both fit stacked */
+@media (max-width: 860px) {
+  :host {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .auth-page {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .auth-page__left {
+    height: auto;
+    overflow-y: visible;
+    padding-top: 1.25rem;
   }
 
   .auth-page__right {
     order: -1;
-    min-height: 260px;
-    margin: clamp(0.75rem, 2vw, 1rem);
+    min-height: 220px;
+    height: 220px;
+    margin: clamp(0.6rem, 2vw, 1rem);
     margin-bottom: 0;
   }
 
   .auth-page__overlay {
-    padding: 1.5rem;
-  }
-
-  .auth-page__overlay-title {
-    font-size: 1.6rem;
-  }
-
-  .auth-page__left {
-    padding-top: 1.5rem;
-  }
-
-  .auth-page__brand {
-    margin-bottom: 2rem;
-  }
-}
-
-@media (max-width: 540px) {
-  .auth-page__right {
-    min-height: 200px;
+    padding: 1.25rem;
   }
 
   .auth-page__overlay-sub {
     display: none;
+  }
+
+  .auth-page__brand {
+    margin-bottom: 1.25rem;
+  }
+
+  .auth-page__content {
+    max-width: 480px;
+    justify-content: flex-start;
+  }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  .auth-page__right {
+    min-height: 160px;
+    height: 160px;
+  }
+
+  .auth-page__overlay-title {
+    font-size: 1.35rem;
+  }
+
+  .auth-page__overlay-tag {
+    display: none;
+  }
+
+  .auth-card {
+    padding: 1rem;
+    gap: 0.6rem;
+    border-radius: var(--radius-sm, 0.5rem);
+  }
+
+  form {
+    gap: 0.75rem;
+  }
+
+  .oauth-btn span {
+    font-size: 0.82rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .auth-page__left {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .auth-page__heading {
+    font-size: 1.4rem;
   }
 }
