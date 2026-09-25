@@ -1,24 +1,64 @@
-<div class="dress-type-wrapper">
-  <div class="dress-type-card">
-    <h2 class="dress-type-card__title">Add Dress Type</h2>
+<div class="dt-page">
+  <header class="dt-header">
+    <svg viewBox="0 0 24 24" class="dt-header__icon" aria-hidden="true">
+      <path d="M6 3l6 6-9 9v-6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M12 3h6l3 3v6l-9 9-9-9z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      <circle cx="15.5" cy="7.5" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    <div>
+      <h1 class="dt-header__title">Dress Types</h1>
+      <p class="dt-header__subtitle">Categories available when adding a new product.</p>
+    </div>
+  </header>
 
-    <div class="type-input-row">
+  <main class="dt-main">
+    <section class="dt-add">
       <input
         type="text"
         [formControl]="nameControl"
-        placeholder="Enter dress type name"
+        placeholder="Ladies Dress, T-Shirt, Shorts…"
         maxlength="30"
         (keydown.enter)="add()" />
-      <button type="button" class="btn-add" (click)="add()">Add</button>
-    </div>
-
+      <button type="button" class="btn btn--primary" (click)="add()">
+        <svg viewBox="0 0 12 12" class="icon-plus" aria-hidden="true">
+          <path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Add type</span>
+      </button>
+    </section>
     <span class="error-text" *ngIf="error">{{ error }}</span>
 
-    <div class="type-list">
-      <div class="type-tag" *ngFor="let type of dressTypes$ | async">
-        <span>{{ type }}</span>
-        <button type="button" class="type-tag__remove" aria-label="Remove" (click)="remove(type)">×</button>
+    <section class="dt-list">
+      <div class="dt-list__grid" *ngIf="(dressTypes$ | async) as types">
+        <ng-container *ngIf="types.length; else emptyState">
+          <div class="type-card" *ngFor="let type of types">
+            <svg viewBox="0 0 16 16" class="icon-tag" aria-hidden="true">
+              <path d="M2 2l5-0.5L14 9l-5 5L2 7z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              <circle cx="5" cy="5" r="0.9" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="type-card__label">{{ type }}</span>
+            <button
+              type="button"
+              class="type-card__remove"
+              aria-label="Remove {{ type }}"
+              (click)="remove(type)">
+              <svg viewBox="0 0 12 12" class="icon-x" aria-hidden="true">
+                <path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </ng-container>
+        <ng-template #emptyState>
+          <div class="dt-empty">
+            <svg viewBox="0 0 40 40" class="dt-empty__icon" aria-hidden="true">
+              <path d="M10 5l8-1 12 12-9 9-12-12z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+              <circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none"/>
+            </svg>
+            <p>No dress types yet</p>
+            <span>Add your first one above.</span>
+          </div>
+        </ng-template>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </div>

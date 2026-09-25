@@ -1,109 +1,219 @@
-.dress-type-wrapper {
-  padding: var(--gutter, 1.5rem);
-  display: flex;
-  justify-content: center;
-}
+/* ==========================================================================
+   MACARENA — Dress Types (full-width, single column)
+   ========================================================================== */
 
-.dress-type-card {
+:host { display: block; height: 100%; }
+
+.dt-page {
+  min-height: 100vh;
   width: 100%;
-  max-width: 600px;
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-line, #e5e5e5);
-  border-radius: 16px;
-  padding: clamp(1.5rem, 3vw, 2rem);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
 }
 
-.dress-type-card__title {
-  margin: 0 0 1.25rem;
-  font-size: var(--fs-h2, 1.5rem);
-  color: var(--color-accent, #8b1e3f);
+/* ---------- Header ---------- */
+.dt-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.5rem clamp(1.5rem, 4vw, 3rem);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
 }
 
-.type-input-row {
+.dt-header__icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+.dt-header__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.dt-header__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+/* ---------- Main: single full-width column ---------- */
+.dt-main {
+  flex: 1;
+  padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.5rem, 4vw, 3rem);
+}
+
+/* ---------- Add row ---------- */
+.dt-add {
   display: flex;
   gap: 0.75rem;
+  max-width: 640px;
 }
 
-.type-input-row input {
+.dt-add input {
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   padding: 0.8rem 1rem;
-  border: 1.5px solid var(--color-line, #e5e5e5);
-  border-radius: 10px;
-  background: var(--color-bg, #fafafa);
-  font-size: 1rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  transition: border-color var(--dur) var(--ease);
 }
 
-.type-input-row input:focus {
+.dt-add input::placeholder {
+  color: var(--color-ink-soft);
+  opacity: 0.55;
+}
+
+.dt-add input:hover {
+  border-color: var(--color-ink-soft);
+}
+
+.dt-add input:focus {
   outline: none;
-  background: #fff;
-  border-color: var(--color-accent, #8b1e3f);
-  box-shadow: 0 0 0 4px rgba(139, 30, 63, 0.12);
-}
-
-.btn-add {
-  padding: 0.8rem 1.6rem;
-  border: none;
-  border-radius: 999px;
-  background: var(--color-accent, #8b1e3f);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.btn-add:hover {
-  background: var(--color-accent-light, #c94f7c);
-  transform: translateY(-1px);
+  border-color: var(--color-accent);
 }
 
 .error-text {
   display: block;
   margin-top: 0.5rem;
-  font-size: 0.8rem;
-  color: #d93025;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--color-accent);
 }
 
-.type-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
-}
-
-.type-tag {
+.btn {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.5rem 0.4rem 1rem;
-  border-radius: 999px;
-  background: var(--color-accent-soft, #fbeaf0);
-  color: var(--color-accent, #8b1e3f);
-  font-size: 0.9rem;
-  font-weight: 500;
+  gap: 0.4rem;
+  padding: 0.8rem 1.3rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
 }
 
-.type-tag__remove {
-  width: 22px;
-  height: 22px;
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+.btn--primary:hover { background: var(--color-accent-light); }
+
+.icon-plus { width: 11px; height: 11px; }
+
+/* ---------- List: fills the rest of the width ---------- */
+.dt-list {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.dt-list__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.type-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.5rem 0.75rem 0.9rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  transition: border-color var(--dur) var(--ease);
+}
+
+.type-card:hover {
+  border-color: var(--color-accent);
+}
+
+.icon-tag {
+  width: 14px;
+  height: 14px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.type-card__label {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-card__remove {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: inherit;
-  font-size: 1rem;
-  line-height: 1;
+  color: var(--color-ink-soft);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
-.type-tag__remove:hover {
-  background: #d93025;
-  color: #fff;
+.type-card__remove:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
-@media (max-width: 480px) {
-  .type-input-row {
+.icon-x { width: 9px; height: 9px; }
+
+/* ---------- Empty state ---------- */
+.dt-empty {
+  grid-column: 1 / -1;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-ink-soft);
+}
+
+.dt-empty__icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.75rem;
+}
+
+.dt-empty p {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.dt-empty span {
+  font-size: 0.82rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 560px) {
+  .dt-add {
     flex-direction: column;
+    max-width: none;
   }
+  .btn { justify-content: center; }
 }

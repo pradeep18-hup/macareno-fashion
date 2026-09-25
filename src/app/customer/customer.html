@@ -1,41 +1,44 @@
-<div class="customers-wrapper">
-  <div class="customers-card">
-
-    <!-- ============ HEADER ============ -->
-    <header class="customers-header">
-      <div class="customers-heading">
+<div class="cst-page">
+  <header class="cst-header">
+    <div class="cst-header__title-group">
+      <svg viewBox="0 0 24 24" class="cst-header__icon" aria-hidden="true">
+        <circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="17" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M14.5 19c0-2.3 1.5-4 3.5-4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <div>
         <span class="eyebrow">Atelier · Clientele</span>
-        <h2 class="customers-title">
+        <h1 class="cst-title">
           Customers
           <span class="count-note">{{ customers.length }} total</span>
-        </h2>
-        <p class="customers-subtitle">Every customer who has ordered from the atelier</p>
+        </h1>
+        <p class="cst-subtitle">Every customer who has ordered from the atelier</p>
       </div>
+    </div>
 
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
-          <circle cx="9" cy="9" r="6" fill="none"
-                  stroke="currentColor" stroke-width="1.5"/>
-          <path d="M13.5 13.5 L 17 17" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <input
-          type="text"
-          placeholder="Search name, email, phone or city"
-          [value]="searchTerm"
-          (input)="onSearch($any($event.target).value)" />
-        <button
-          type="button"
-          class="search-clear"
-          *ngIf="searchTerm"
-          aria-label="Clear search"
-          (click)="onSearch('')">×</button>
-      </div>
-    </header>
+    <div class="search-box">
+      <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
+        <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M13.5 13.5 L 17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search name, email, phone or city"
+        [value]="searchTerm"
+        (input)="onSearch($any($event.target).value)" />
+      <button
+        type="button"
+        class="search-clear"
+        *ngIf="searchTerm"
+        aria-label="Clear search"
+        (click)="onSearch('')">×</button>
+    </div>
+  </header>
 
-    <!-- ============ TABLE ============ -->
+  <main class="cst-main">
     <div class="table-scroll" *ngIf="visibleCustomers.length; else emptyState">
-      <table class="customers-table">
+      <table class="cst-table">
         <thead>
           <tr>
             <th class="col-index">#</th>
@@ -60,12 +63,15 @@
         </thead>
         <tbody>
           <tr *ngFor="let c of visibleCustomers; let i = index">
-            <td class="col-index">{{ startIndex + i + 1 }}</td>
-            <td class="cell-name">{{ c.name }}</td>
-            <td class="cell-muted">{{ c.email }}</td>
-            <td class="cell-mono">{{ c.phone }}</td>
-            <td>{{ c.city }}</td>
-            <td class="cell-muted">{{ c.joinedAt | date: 'dd MMM yyyy' }}</td>
+            <td class="col-index" data-label="#">{{ startIndex + i + 1 }}</td>
+            <td class="cell-name" data-label="Name">
+              <span class="avatar">{{ c.name.charAt(0).toUpperCase() }}</span>
+              <span>{{ c.name }}</span>
+            </td>
+            <td class="cell-muted" data-label="Email">{{ c.email }}</td>
+            <td class="cell-mono" data-label="Phone">{{ c.phone }}</td>
+            <td data-label="City">{{ c.city }}</td>
+            <td class="cell-muted" data-label="Joined">{{ c.joinedAt | date: 'dd MMM yyyy' }}</td>
           </tr>
         </tbody>
       </table>
@@ -74,10 +80,8 @@
     <ng-template #emptyState>
       <div class="empty-state">
         <svg viewBox="0 0 60 60" aria-hidden="true" class="empty-flourish">
-          <circle cx="30" cy="30" r="22" fill="none"
-                  stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
-          <path d="M20 30 h 20" stroke="currentColor"
-                stroke-width="0.8" opacity="0.45"/>
+          <circle cx="24" cy="22" r="8" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path d="M10 46c0-8 6-13 14-13s14 5 14 13" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
         </svg>
         <p class="empty-title" *ngIf="searchTerm; else noCustomers">
           No customers match &ldquo;{{ searchTerm }}&rdquo;
@@ -88,7 +92,6 @@
       </div>
     </ng-template>
 
-    <!-- ============ FOOTER ============ -->
     <footer class="table-footer" *ngIf="filteredCount > 0">
       <div class="footer-left">
         <label class="rows-label">
@@ -126,6 +129,5 @@
         </button>
       </div>
     </footer>
-
-  </div>
+  </main>
 </div>

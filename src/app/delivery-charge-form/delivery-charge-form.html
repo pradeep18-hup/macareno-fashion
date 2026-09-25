@@ -1,49 +1,94 @@
-<div class="charge-page">
-  <h2>Delivery Charges</h2>
+<div class="dc-page">
+  <header class="dc-header">
+    <div class="dc-header__title-group">
+      <svg viewBox="0 0 24 24" class="dc-header__icon" aria-hidden="true">
+        <rect x="4" y="8" width="16" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M4 12h16M12 8v12" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M8 8V6a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      </svg>
+      <div>
+        <span class="eyebrow">Atelier · Fulfillment</span>
+        <h1 class="dc-title">
+          Delivery Charges
+          <span class="count-note">{{ charges.length }} rates</span>
+        </h1>
+        <p class="dc-subtitle">Shipping rates by courier and package weight</p>
+      </div>
+    </div>
+  </header>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="field">
-      <label>Courier Name</label>
-      <select formControlName="courierId">
-        <option [ngValue]="null" disabled selected>Select Courier</option>
-        <option *ngFor="let c of couriers" [ngValue]="c.id">
-          {{ c.companyName }} ({{ c.phoneNumber }})
-        </option>
-      </select>
+  <main class="dc-main">
+    <form class="dc-form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="courierId">Courier</label>
+        <select id="courierId" formControlName="courierId">
+          <option [ngValue]="null" disabled selected>Select courier</option>
+          <option *ngFor="let c of couriers" [ngValue]="c.id">
+            {{ c.companyName }} ({{ c.phoneNumber }})
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="weightKg">Weight (kg)</label>
+        <input id="weightKg" type="number" step="0.1" formControlName="weightKg" placeholder="e.g. 1.5" />
+      </div>
+
+      <div class="field">
+        <label for="amount">Amount (₹)</label>
+        <input id="amount" type="number" formControlName="amount" placeholder="e.g. 60" />
+      </div>
+
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        <svg viewBox="0 0 12 12" class="icon-plus" aria-hidden="true">
+          <path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Add charge</span>
+      </button>
+    </form>
+
+    <div class="table-scroll" *ngIf="charges.length; else emptyState">
+      <table class="dc-table">
+        <thead>
+          <tr>
+            <th>Courier</th>
+            <th>Weight tier</th>
+            <th class="col-amount">Amount</th>
+            <th class="col-action">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of charges">
+            <td class="cell-name" data-label="Courier">
+              <span class="avatar">{{ c.courierName.charAt(0).toUpperCase() }}</span>
+              <span>{{ c.courierName }}</span>
+            </td>
+            <td data-label="Weight tier">
+              <span class="weight-badge">{{ c.weightKg }} kg</span>
+            </td>
+            <td class="cell-amount" data-label="Amount">₹{{ c.amount }}</td>
+            <td class="col-action" data-label="Action">
+              <button type="button" class="delete-btn" (click)="remove(c.id)">
+                <svg viewBox="0 0 14 14" class="icon-trash" aria-hidden="true">
+                  <path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4l.6 8h5.8l.6-8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+                <span>Delete</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="field">
-      <label>Weight (kg)</label>
-      <input type="number" step="0.1" formControlName="weightKg" placeholder="e.g. 1.5" />
-    </div>
-
-    <div class="field">
-      <label>Amount (₹)</label>
-      <input type="number" formControlName="amount" placeholder="e.g. 60" />
-    </div>
-
-    <button type="submit" [disabled]="form.invalid">Add Charge</button>
-  </form>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Courier</th>
-        <th>Weight (kg)</th>
-        <th>Amount</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let c of charges">
-        <td>{{ c.courierName }}</td>
-        <td>{{ c.weightKg }}</td>
-        <td>₹{{ c.amount }}</td>
-        <td><button class="delete-btn" (click)="remove(c.id)">Delete</button></td>
-      </tr>
-      <tr *ngIf="charges.length === 0">
-        <td colspan="4" class="empty">No delivery charges added yet</td>
-      </tr>
-    </tbody>
-  </table>
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <svg viewBox="0 0 60 60" aria-hidden="true" class="empty-flourish">
+          <rect x="16" y="24" width="28" height="20" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path d="M16 32h28M30 24v20" stroke="currentColor" stroke-width="0.9"/>
+        </svg>
+        <p class="empty-title">No delivery charges added yet</p>
+        <span class="empty-note">Add a courier's rate by weight above.</span>
+      </div>
+    </ng-template>
+  </main>
 </div>

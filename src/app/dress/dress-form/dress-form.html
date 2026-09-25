@@ -1,35 +1,38 @@
-<div class="dress-form-wrapper">
-  <form [formGroup]="dressForm" (ngSubmit)="onSubmit()" class="dress-card">
-
-    <!-- ============ HEADER ============ -->
-    <header class="dress-head">
+<div class="pr-page">
+  <header class="pr-header">
+    <svg viewBox="0 0 24 24" class="pr-header__icon" aria-hidden="true">
+      <path d="M2 2l5-0.5L14 9l-5 5L2 7z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      <circle cx="5" cy="5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+    <div>
       <span class="eyebrow">Atelier · Catalogue</span>
-      <h2 class="dress-title">Add Dress</h2>
-      <p class="dress-subtitle">Create a new piece for the collection</p>
-    </header>
+      <h1 class="pr-title">Add Product</h1>
+      <p class="pr-subtitle">Create a new product for the catalog</p>
+    </div>
+  </header>
 
-    <!-- ============ FORM GRID ============ -->
-    <div class="form-grid">
+  <main class="pr-main">
+    <form [formGroup]="dressForm" (ngSubmit)="onSubmit()" class="form-grid">
 
       <div class="form-group">
-        <label for="dressName">Dress Name</label>
+        <label for="dressName">Product Name</label>
         <input id="dressName" type="text" formControlName="dressName"
-               placeholder="Enter dress name" />
+               placeholder="Enter product name" />
         <span class="error-text"
               *ngIf="dressForm.get('dressName')?.touched && dressForm.get('dressName')?.invalid">
-          Dress name is required
+          Product name is required
         </span>
       </div>
 
       <div class="form-group">
-        <label for="dressType">Dress Type</label>
+        <label for="dressType">Product Type</label>
         <select id="dressType" formControlName="dressType">
-          <option value="" disabled selected>Select dress type</option>
+          <option value="" disabled selected>Select product type</option>
           <option *ngFor="let type of dressTypes" [value]="type">{{ type }}</option>
         </select>
         <span class="error-text"
               *ngIf="dressForm.get('dressType')?.touched && dressForm.get('dressType')?.invalid">
-          Please select a dress type
+          Please select a product type
         </span>
       </div>
 
@@ -156,13 +159,11 @@
         </span>
       </div>
 
-    </div>
+      <div class="form-actions full">
+        <button type="button" class="btn btn--ghost" (click)="resetForm()">Reset</button>
+        <button type="submit" class="btn btn--primary">Add Product</button>
+      </div>
 
-    <!-- ============ ACTIONS ============ -->
-    <footer class="form-actions">
-      <button type="button" class="btn btn--ghost" (click)="resetForm()">Reset</button>
-      <button type="submit" class="btn btn--primary">Add Dress</button>
-    </footer>
-
-  </form>
+    </form>
+  </main>
 </div>

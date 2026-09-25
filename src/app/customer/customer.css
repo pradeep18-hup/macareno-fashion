@@ -1,41 +1,43 @@
 /* ==========================================================================
-   MACARENA — Customers
-   Editorial directory, hairline rules, wine accent only.
+   MACARENA — Customers (full page, white background)
    ========================================================================== */
 
-:host { display: block; }
+:host { display: block; height: 100%; }
 
-/* ---------- Wrapper & card ---------- */
-.customers-wrapper {
-  padding: 0;
-  display: block;
-  background: var(--color-bg);
-  min-height: 100%;
-}
-
-.customers-card {
+.cst-page {
+  min-height: 100vh;
   width: 100%;
-  max-width: none;
-  background: var(--color-surface);
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  padding: clamp(1.75rem, 3vw, 2.75rem);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
 }
 
 /* ---------- Header ---------- */
-.customers-header {
+.cst-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1.5rem;
-  padding-bottom: 1.5rem;
-  margin-bottom: 2rem;
+  padding: 1.75rem clamp(1.5rem, 4vw, 3rem);
+  background: #ffffff;
   border-bottom: 1px solid var(--color-line);
 }
 
-.customers-heading { min-width: 0; }
+.cst-header__title-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.cst-header__icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  color: var(--color-accent);
+}
 
 .eyebrow {
   display: block;
@@ -49,7 +51,7 @@
   margin-bottom: 0.5rem;
 }
 
-.customers-title {
+.cst-title {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
@@ -75,7 +77,7 @@
   border-left: 1px solid var(--color-line);
 }
 
-.customers-subtitle {
+.cst-subtitle {
   margin: 0.5rem 0 0;
   font-size: 0.92rem;
   color: var(--color-ink-soft);
@@ -110,8 +112,7 @@
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 0.9rem;
-  transition: border-color var(--dur) var(--ease),
-              background var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
 .search-box input::placeholder {
@@ -121,9 +122,8 @@
 
 .search-box input:focus {
   outline: none;
-  background: var(--color-surface);
+  background: #ffffff;
   border-color: var(--color-accent);
-  box-shadow: none;
 }
 
 .search-clear {
@@ -146,46 +146,56 @@
   color: var(--color-accent);
 }
 
+/* ---------- Main ---------- */
+.cst-main {
+  flex: 1;
+  padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.5rem, 4vw, 3rem);
+}
+
 /* ---------- Table ---------- */
 .table-scroll { overflow-x: auto; }
 
-.customers-table {
+.cst-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 780px;
   font-family: var(--font-body);
 }
 
-.customers-table th,
-.customers-table td {
+.cst-table th,
+.cst-table td {
   padding: 1.05rem 1rem;
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
   border-bottom: 1px solid var(--color-line);
   white-space: nowrap;
 }
 
-.customers-table th {
-  padding-top: 0;
+/* Sticky, blurred header — innovation for long lists */
+.cst-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-top: 0.9rem;
   padding-bottom: 0.9rem;
   font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   color: var(--color-ink-soft);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
   user-select: none;
 }
 
 .th-label { vertical-align: middle; }
 
-/* Sortable header */
-.customers-table th.sortable {
+.cst-table th.sortable {
   cursor: pointer;
   transition: color var(--dur) var(--ease);
 }
-.customers-table th.sortable:hover { color: var(--color-ink); }
-.customers-table th.sortable--active { color: var(--color-accent); }
+.cst-table th.sortable:hover { color: var(--color-ink); }
+.cst-table th.sortable--active { color: var(--color-accent); }
 
 .sort-mark {
   display: inline-flex;
@@ -200,12 +210,11 @@
 }
 .sort-mark--active svg { color: var(--color-accent); }
 
-/* Rows */
-.customers-table tbody tr {
+.cst-table tbody tr {
   transition: background var(--dur) var(--ease);
 }
-.customers-table tbody tr:hover {
-  background: rgba(234, 217, 210, 0.35);
+.cst-table tbody tr:hover {
+  background: var(--color-accent-soft);
 }
 
 .col-index {
@@ -217,9 +226,27 @@
   opacity: 0.7;
 }
 
+/* Avatar initial — small innovation, no new bindings needed */
 .cell-name {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   font-weight: 600;
   color: var(--color-ink);
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .cell-muted {
@@ -240,8 +267,8 @@
   color: var(--color-ink-soft);
 }
 .empty-flourish {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   margin: 0 auto 1rem;
   color: var(--color-accent);
 }
@@ -288,7 +315,7 @@
   padding: 0.35rem 1.6rem 0.35rem 0.6rem;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background: #ffffff;
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 0.85rem;
@@ -326,9 +353,7 @@
   font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color var(--dur) var(--ease),
-              color var(--dur) var(--ease),
-              background var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
 .page-btn:hover:not(:disabled):not(.page-btn--active) {
@@ -354,13 +379,58 @@
   cursor: not-allowed;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 640px) {
-  .customers-header {
+/* ---------- Responsive: rows become cards, not a scroll bar ---------- */
+@media (max-width: 720px) {
+  .cst-header {
     flex-direction: column;
     align-items: stretch;
   }
   .search-box { max-width: none; }
+
+  .table-scroll { overflow-x: visible; }
+
+  .cst-table, .cst-table thead, .cst-table tbody, .cst-table tr {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cst-table thead {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .cst-table tbody tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0;
+  }
+
+  .cst-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: none;
+    padding: 0.6rem 1rem;
+    white-space: normal;
+    text-align: right;
+  }
+
+  .cst-table td::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-ink-soft);
+    margin-right: 1rem;
+  }
+
+  .cell-name { justify-content: flex-start; }
+  .cell-name::before { display: none; }
 
   .table-footer {
     flex-direction: column;
