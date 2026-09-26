@@ -1,8 +1,8 @@
-// login.component.ts
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,38 +12,59 @@ import { RouterLink } from '@angular/router';
   styleUrl: './login.css',
 })
 export class Login {
-  email = signal('');
-  password = signal('');
-  rememberMe = signal(false);
+
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  email        = signal('');
+  password     = signal('');
+  rememberMe   = signal(false);
   showPassword = signal(false);
-  loading = signal(false);
-  errorMessage = signal('');
+  loading      = signal(false);
+  errorMessage = signal<string | null>(null);
 
   togglePasswordVisibility(): void {
     this.showPassword.set(!this.showPassword());
   }
 
   onSubmit(): void {
-    this.errorMessage.set('');
+    this.errorMessage.set(null);
 
-    if (!this.email() || !this.password()) {
+    const email = this.email().trim();
+    const password = this.password();
+
+    if (!email || !password) {
       this.errorMessage.set('Please enter your email and password.');
       return;
     }
 
     this.loading.set(true);
 
-    // TODO: replace with real auth call
-    setTimeout(() => {
-      this.loading.set(false);
-    }, 1200);
+    this.authService.login({ email, password }).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+
+        // Redirect based on detected role
+        if (res.userType === 'admin') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/']);
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.errorMessage.set(
+          err?.error?.error || 'Login failed. Please try again.'
+        );
+      }
+    });
   }
 
   continueWithGoogle(): void {
-    // TODO: wire up Google OAuth
+    // TODO: Google OAuth
   }
 
   continueWithApple(): void {
-    // TODO: wire up Apple OAuth
+    // TODO: Apple OAuth
   }
 }

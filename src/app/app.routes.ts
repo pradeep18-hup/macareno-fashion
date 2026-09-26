@@ -4,7 +4,7 @@ import { ContactComponent } from './contact/contact/contact';
 import { HeroComponent } from './hero.component/hero.component';
 import { DressForm } from './dress/dress-form/dress-form';
 import { DressType } from './dress/dress-type/dress-type';
-import { SizeForm } from './size-form/size-form';                             // ✅ path fixed
+import { SizeForm } from './size-form/size-form';
 import { Login } from './login/login';
 import { Register } from './register/register';
 import { MainLayout } from './layout/main-layout/main-layout';
@@ -18,10 +18,15 @@ import { ProductDetailComponent } from './product-dettail/product-dettail';
 import { ShopCartComponent } from './shop-cart/shop-cart';
 import { UserProfile } from './profile/user-profile/user-profile';
 
+import { adminGuard } from './guards/admin.guard';
+import { customerGuard } from './guards/customer.guard';
+
 export const routes: Routes = [
+  // ---------- Auth (no layout) ----------
   { path: 'login', component: Login },
   { path: 'register', component: Register },
 
+  // ---------- Public site (MainLayout) ----------
   {
     path: '',
     component: MainLayout,
@@ -29,25 +34,30 @@ export const routes: Routes = [
       { path: '', component: HeroComponent },
       { path: 'contact', component: ContactComponent },
       { path: 'product-detail', component: ProductDetailComponent },
-      { path: 'cart', component: ShopCartComponent },
-      { path: 'user-profile', component: UserProfile },
+
+      // Customer-only pages
+      { path: 'cart',         component: ShopCartComponent, canActivate: [customerGuard] },
+      { path: 'user-profile', component: UserProfile,       canActivate: [customerGuard] },
     ]
   },
 
+  // ---------- Admin section (protected) ----------
   {
     path: 'admin',
     component: AdminLayout,
+    canActivate: [adminGuard],
     children: [
-      { path: '', component: Admin },
-      { path: 'dress-form', component: DressForm },
-      { path: 'dress-type', component: DressType },
-      { path: 'size', component: SizeForm },                        // ✅ new route
-      { path: 'customer-list', component: Customers },
-      { path: 'orders', component: Orders },
-      { path: 'courier', component: CourierForm },
+      { path: '',                        component: Admin },
+      { path: 'dress-form',              component: DressForm },
+      { path: 'dress-type',              component: DressType },
+      { path: 'size',                    component: SizeForm },
+      { path: 'customer-list',           component: Customers },
+      { path: 'orders',                  component: Orders },
+      { path: 'courier',                 component: CourierForm },
       { path: 'deliver-charge-settings', component: DeliveryChargeForm },
     ]
   },
 
+  // ---------- Fallback ----------
   { path: '**', redirectTo: '' }
 ];

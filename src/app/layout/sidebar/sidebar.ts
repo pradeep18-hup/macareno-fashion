@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 interface SidebarItem {
   label: string;
@@ -16,10 +17,21 @@ interface SidebarItem {
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
+
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   isCollapsed = false;
 
-  toggle() {
+  toggle(): void {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  logout(): void {
+    if (!confirm('Sign out of the admin panel?')) return;
+
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   navItems: SidebarItem[] = [

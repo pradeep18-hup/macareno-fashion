@@ -59,13 +59,13 @@
 
         <form (ngSubmit)="onSubmit()" novalidate>
           <div class="field">
-            <label for="email">Email</label>
+            <label for="email">Email or Admin name</label>
             <input
               id="email"
-              type="email"
+              type="text"
               name="email"
-              autocomplete="email"
-              placeholder="Enter your email"
+              autocomplete="username"
+              placeholder="Enter your email or admin name"
               [ngModel]="email()"
               (ngModelChange)="email.set($event)"
               required
@@ -121,7 +121,7 @@
 
           <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
-          <button type="submit" class="submit-btn" routerLink="/home" >
+          <button type="submit" class="submit-btn" [disabled]="loading()">
             {{ loading() ? 'Signing in…' : 'Sign in' }}
           </button>
         </form>
