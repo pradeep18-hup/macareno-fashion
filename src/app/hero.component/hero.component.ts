@@ -288,6 +288,6 @@ export class HeroComponent {
   }
 
   openProduct(product: Product) {
-    this.router.navigate(['/product', product.id]);
+    this.router.navigate(['/product-detail', product.id]);
   }
 }

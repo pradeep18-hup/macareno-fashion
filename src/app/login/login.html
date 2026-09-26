@@ -33,6 +33,8 @@
     </header>
 
     <div class="auth-page__content">
+      <p class="auth-page__theme-line">Timeless Dresses, Made for the Modern Woman</p>
+
       <div class="auth-card">
         <button type="button" class="oauth-btn" (click)="continueWithGoogle()">
           <svg class="oauth-btn__icon" width="18" height="18" viewBox="0 0 24 24">
@@ -119,7 +121,7 @@
 
           <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
-          <button type="submit" class="submit-btn" [disabled]="loading()">
+          <button type="submit" class="submit-btn" routerLink="/home" >
             {{ loading() ? 'Signing in…' : 'Sign in' }}
           </button>
         </form>
