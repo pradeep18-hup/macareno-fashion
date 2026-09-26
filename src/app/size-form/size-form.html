@@ -1,0 +1,126 @@
+<div class="sz-page">
+  <header class="sz-header">
+    <svg viewBox="0 0 24 24" class="sz-header__icon" aria-hidden="true">
+      <path d="M3 6h18M6 6l1 14h10l1-14M9 6V4h6v2"
+            fill="none" stroke="currentColor" stroke-width="1.4"
+            stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <span class="eyebrow">Atelier · Catalogue</span>
+      <h1 class="sz-title">
+        Sizes
+        <span class="count-note">{{ sizes.length }} {{ activeTab }}</span>
+      </h1>
+      <p class="sz-subtitle">Manage available sizes for products</p>
+    </div>
+  </header>
+
+  <main class="sz-main">
+    <!-- Tabs -->
+    <div class="sz-tabs">
+      <button type="button" class="sz-tab"
+        [class.sz-tab--active]="activeTab === 'alphabet'"
+        (click)="switchTab('alphabet')">
+        Alphabet (S, M, L…)
+      </button>
+      <button type="button" class="sz-tab"
+        [class.sz-tab--active]="activeTab === 'number'"
+        (click)="switchTab('number')">
+        Number (28, 30, 32…)
+      </button>
+    </div>
+
+    <!-- Add form -->
+    <form class="sz-form" [formGroup]="sizeForm" (ngSubmit)="add()">
+      <div class="field">
+        <label for="label">Size label</label>
+        <input id="label" type="text" formControlName="label"
+               placeholder="S, M, 28, 30…" maxlength="10" />
+        <span class="error-text"
+              *ngIf="sizeForm.get('label')?.touched && sizeForm.get('label')?.invalid">
+          Size label is required
+        </span>
+      </div>
+
+      <div class="field field--small">
+        <label for="displayOrder">Order</label>
+        <input id="displayOrder" type="number" min="0"
+               formControlName="displayOrder" placeholder="0" />
+      </div>
+
+      <button type="submit" class="btn btn--primary"
+              [disabled]="sizeForm.invalid || submitting">
+        <svg viewBox="0 0 12 12" class="icon-plus" aria-hidden="true">
+          <path d="M6 1v10M1 6h10" fill="none" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>{{ submitting ? 'Adding…' : 'Add size' }}</span>
+      </button>
+    </form>
+
+    <!-- List -->
+    <section class="sz-list">
+      <div class="sz-grid" *ngIf="sizes.length; else emptyState">
+        <div class="size-card" *ngFor="let size of sizes">
+          <svg viewBox="0 0 16 16" class="icon-tag" aria-hidden="true">
+            <path d="M2 2l5-0.5L14 9l-5 5L2 7z" fill="none"
+                  stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="5" cy="5" r="0.9" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="size-card__label">{{ size.label }}</span>
+          <span class="size-card__order">#{{ size.displayOrder }}</span>
+          <button type="button" class="size-card__remove"
+                  aria-label="Remove {{ size.label }}"
+                  (click)="askDelete(size)">
+            <svg viewBox="0 0 12 12" class="icon-x" aria-hidden="true">
+              <path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor"
+                    stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="sz-empty">
+          <p>No {{ activeTab }} sizes yet</p>
+          <span>Add your first one above.</span>
+        </div>
+      </ng-template>
+    </section>
+  </main>
+
+  <!-- Delete confirm modal -->
+  <div class="sz-modal" *ngIf="pendingDelete">
+    <div class="sz-modal__backdrop" (click)="cancelDelete()"></div>
+    <div class="sz-modal__card">
+      <h3 class="sz-modal__title">Delete size?</h3>
+      <p class="sz-modal__text">
+        Delete <strong>{{ pendingDelete.label }}</strong>
+        ({{ pendingDelete.sizeType }})? This cannot be undone.
+      </p>
+      <div class="sz-modal__actions">
+        <button type="button" class="btn btn--ghost" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn btn--danger" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div class="sz-toasts">
+    <div class="sz-toast"
+      *ngFor="let t of toasts"
+      [class.sz-toast--success]="t.type === 'success'"
+      [class.sz-toast--error]="t.type === 'error'"
+      (click)="dismissToast(t)">
+      <svg *ngIf="t.type === 'success'" viewBox="0 0 12 12" class="sz-toast__icon">
+        <path d="M1.5 6.5l3 3 6-7" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg *ngIf="t.type === 'error'" viewBox="0 0 12 12" class="sz-toast__icon">
+        <path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span>{{ t.message }}</span>
+    </div>
+  </div>
+</div>

@@ -25,13 +25,13 @@
       </div>
 
       <div class="form-group">
-        <label for="dressType">Product Type</label>
-        <select id="dressType" formControlName="dressType">
-          <option value="" disabled selected>Select product type</option>
-          <option *ngFor="let type of dressTypes" [value]="type">{{ type }}</option>
+        <label for="dressTypeId">Product Type</label>
+        <select id="dressTypeId" formControlName="dressTypeId">
+          <option [ngValue]="null" disabled>Select product type</option>
+          <option *ngFor="let t of dressTypes" [ngValue]="t.id">{{ t.name }}</option>
         </select>
         <span class="error-text"
-              *ngIf="dressForm.get('dressType')?.touched && dressForm.get('dressType')?.invalid">
+              *ngIf="dressForm.get('dressTypeId')?.touched && dressForm.get('dressTypeId')?.invalid">
           Please select a product type
         </span>
       </div>
@@ -72,9 +72,7 @@
       <div class="form-group">
         <label>You Save</label>
         <div class="readout">
-          <span class="readout-value" *ngIf="savedAmount > 0">
-            ₹{{ savedAmount }}
-          </span>
+          <span class="readout-value" *ngIf="savedAmount > 0">₹{{ savedAmount }}</span>
           <span class="readout-note" *ngIf="savedAmount > 0">
             {{ dressForm.get('offerPercentage')?.value }}% off
           </span>
@@ -93,8 +91,10 @@
       <div class="form-group full">
         <label for="sizeType">Size Type</label>
         <select id="sizeType" formControlName="sizeType">
-          <option value="" disabled selected>Select size type</option>
-          <option *ngFor="let opt of sizeTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+          <option value="" disabled>Select size type</option>
+          <option *ngFor="let opt of sizeTypeOptions" [value]="opt.value">
+            {{ opt.label }}
+          </option>
         </select>
         <span class="error-text"
               *ngIf="dressForm.get('sizeType')?.touched && dressForm.get('sizeType')?.invalid">
@@ -160,10 +160,33 @@
       </div>
 
       <div class="form-actions full">
-        <button type="button" class="btn btn--ghost" (click)="resetForm()">Reset</button>
-        <button type="submit" class="btn btn--primary">Add Product</button>
+        <button type="button" class="btn btn--ghost"
+                (click)="resetForm()" [disabled]="submitting">Reset</button>
+        <button type="submit" class="btn btn--primary"
+                [disabled]="submitting">
+          {{ submitting ? 'Saving…' : 'Add Product' }}
+        </button>
       </div>
 
     </form>
   </main>
+
+  <!-- ============ Toasts ============ -->
+  <div class="pr-toasts">
+    <div class="pr-toast"
+      *ngFor="let t of toasts"
+      [class.pr-toast--success]="t.type === 'success'"
+      [class.pr-toast--error]="t.type === 'error'"
+      (click)="dismissToast(t)">
+      <svg *ngIf="t.type === 'success'" viewBox="0 0 12 12" class="pr-toast__icon">
+        <path d="M1.5 6.5l3 3 6-7" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg *ngIf="t.type === 'error'" viewBox="0 0 12 12" class="pr-toast__icon">
+        <path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span>{{ t.message }}</span>
+    </div>
+  </div>
 </div>

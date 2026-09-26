@@ -13,7 +13,7 @@
           Customers
           <span class="count-note">{{ customers.length }} total</span>
         </h1>
-        <p class="cst-subtitle">Every customer who has ordered from the atelier</p>
+        <p class="cst-subtitle">Every customer registered at the atelier</p>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
       </svg>
       <input
         type="text"
-        placeholder="Search name, email, phone or city"
+        placeholder="Search name, email or phone"
         [value]="searchTerm"
         (input)="onSearch($any($event.target).value)" />
       <button
@@ -37,7 +37,19 @@
   </header>
 
   <main class="cst-main">
-    <div class="table-scroll" *ngIf="visibleCustomers.length; else emptyState">
+
+    <!-- Loading -->
+    <div class="state-msg" *ngIf="loading">Loading customers…</div>
+
+    <!-- Error -->
+    <div class="state-msg state-msg--error" *ngIf="!loading && loadError">
+      ⚠️ {{ loadError }}
+      <button type="button" class="retry-btn" (click)="reload()">Retry</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-scroll"
+         *ngIf="!loading && !loadError && visibleCustomers.length; else emptyState">
       <table class="cst-table">
         <thead>
           <tr>
@@ -65,23 +77,23 @@
           <tr *ngFor="let c of visibleCustomers; let i = index">
             <td class="col-index" data-label="#">{{ startIndex + i + 1 }}</td>
             <td class="cell-name" data-label="Name">
-              <span class="avatar">{{ c.name.charAt(0).toUpperCase() }}</span>
-              <span>{{ c.name }}</span>
+              <span class="avatar">{{ c.fullName.charAt(0).toUpperCase() }}</span>
+              <span>{{ c.fullName }}</span>
             </td>
             <td class="cell-muted" data-label="Email">{{ c.email }}</td>
-            <td class="cell-mono" data-label="Phone">{{ c.phone }}</td>
-            <td data-label="City">{{ c.city }}</td>
-            <td class="cell-muted" data-label="Joined">{{ c.joinedAt | date: 'dd MMM yyyy' }}</td>
+            <td class="cell-mono" data-label="Phone">{{ c.phoneNumber }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
+    <!-- Empty -->
     <ng-template #emptyState>
-      <div class="empty-state">
+      <div class="empty-state" *ngIf="!loading && !loadError">
         <svg viewBox="0 0 60 60" aria-hidden="true" class="empty-flourish">
           <circle cx="24" cy="22" r="8" fill="none" stroke="currentColor" stroke-width="1"/>
-          <path d="M10 46c0-8 6-13 14-13s14 5 14 13" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          <path d="M10 46c0-8 6-13 14-13s14 5 14 13"
+                fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
         </svg>
         <p class="empty-title" *ngIf="searchTerm; else noCustomers">
           No customers match &ldquo;{{ searchTerm }}&rdquo;
@@ -92,7 +104,9 @@
       </div>
     </ng-template>
 
-    <footer class="table-footer" *ngIf="filteredCount > 0">
+    <!-- Footer -->
+    <footer class="table-footer"
+            *ngIf="!loading && !loadError && filteredCount > 0">
       <div class="footer-left">
         <label class="rows-label">
           <span>Rows per page</span>
@@ -129,5 +143,6 @@
         </button>
       </div>
     </footer>
+
   </main>
 </div>

@@ -1,16 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CustomerService } from '../services/customer.service';
 
 export interface Customer {
   id: number;
-  name: string;
+  fullName: string;
   email: string;
-  phone: string;
-  city: string;
-  joinedAt: Date;
+  phoneNumber: string;
+  message?: string | null;
 }
 
-type SortKey = keyof Customer;
+type SortKey = 'fullName' | 'email' | 'phoneNumber' | 'id';
 type SortDir = 'asc' | 'desc';
 
 @Component({
@@ -20,32 +20,23 @@ type SortDir = 'asc' | 'desc';
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
-export class Customers {
-  customers: Customer[] = [
-    { id: 1,  name: 'Priya Sharma',   email: 'priya@example.com',   phone: '9876543210', city: 'Coimbatore', joinedAt: new Date('2026-01-12') },
-    { id: 2,  name: 'Arun Kumar',     email: 'arun@example.com',    phone: '9876501234', city: 'Chennai',    joinedAt: new Date('2026-02-03') },
-    { id: 3,  name: 'Divya Lakshmi',  email: 'divya@example.com',   phone: '9345612780', city: 'Madurai',    joinedAt: new Date('2026-02-18') },
-    { id: 4,  name: 'Karthik Raj',    email: 'karthik@example.com', phone: '9445098765', city: 'Salem',      joinedAt: new Date('2026-03-07') },
-    { id: 5,  name: 'Meena Devi',     email: 'meena@example.com',   phone: '9123456780', city: 'Trichy',     joinedAt: new Date('2026-03-25') },
-    { id: 6,  name: 'Suresh Babu',    email: 'suresh@example.com',  phone: '9988776655', city: 'Erode',      joinedAt: new Date('2026-04-09') },
-    { id: 7,  name: 'Anitha Selvam',  email: 'anitha@example.com',  phone: '9871234560', city: 'Tiruppur',   joinedAt: new Date('2026-04-30') },
-    { id: 8,  name: 'Vignesh M',      email: 'vignesh@example.com', phone: '9600123456', city: 'Coimbatore', joinedAt: new Date('2026-05-14') },
-    { id: 9,  name: 'Lavanya R',      email: 'lavanya@example.com', phone: '9791234567', city: 'Chennai',    joinedAt: new Date('2026-06-02') },
-    { id: 10, name: 'Ramesh Pandian', email: 'ramesh@example.com',  phone: '9840012345', city: 'Madurai',    joinedAt: new Date('2026-06-21') },
-    { id: 11, name: 'Nisha Fathima',  email: 'nisha@example.com',   phone: '9003456712', city: 'Vellore',    joinedAt: new Date('2026-07-15') },
-    { id: 12, name: 'Gokul Krishnan', email: 'gokul@example.com',   phone: '9500987654', city: 'Salem',      joinedAt: new Date('2026-08-05') }
-  ];
+export class Customers implements OnInit {
+
+  private customerService = inject(CustomerService);
+  private cdr = inject(ChangeDetectorRef);     // ✅ ADDED
+
+  customers: Customer[] = [];
+  loading = true;
+  loadError = '';
 
   columns: { key: SortKey; label: string }[] = [
-    { key: 'name',     label: 'Name' },
-    { key: 'email',    label: 'Email' },
-    { key: 'phone',    label: 'Phone' },
-    { key: 'city',     label: 'City' },
-    { key: 'joinedAt', label: 'Joined' }
+    { key: 'fullName',    label: 'Name' },
+    { key: 'email',       label: 'Email' },
+    { key: 'phoneNumber', label: 'Phone' }
   ];
 
   searchTerm = '';
-  sortKey: SortKey = 'joinedAt';
+  sortKey: SortKey = 'id';
   sortDir: SortDir = 'desc';
   pageSize = 10;
   pageSizeOptions = [5, 10, 25];
@@ -57,8 +48,36 @@ export class Customers {
   pages: number[] = [];
   startIndex = 0;
 
-  constructor() {
-    this.updateView();
+  ngOnInit(): void {
+    this.loadCustomers();
+  }
+
+  private loadCustomers(): void {
+    this.loading = true;
+    this.loadError = '';
+    this.cdr.detectChanges();
+
+    this.customerService.getAll().subscribe({
+      next: (list) => {
+        this.customers = Array.isArray(list) ? [...list] : [];
+        this.loading = false;
+        this.updateView();
+        this.cdr.detectChanges();              // ✅ force table to render
+      },
+      error: (err) => {
+        this.loading = false;
+        this.loadError = err?.error?.error
+          || err?.message
+          || 'Failed to load customers.';
+        this.customers = [];
+        this.updateView();
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  reload(): void {
+    this.loadCustomers();
   }
 
   private updateView(): void {
@@ -66,19 +85,15 @@ export class Customers {
 
     const rows = term
       ? this.customers.filter(c =>
-          c.name.toLowerCase().includes(term) ||
-          c.email.toLowerCase().includes(term) ||
-          c.phone.includes(term) ||
-          c.city.toLowerCase().includes(term))
+          c.fullName?.toLowerCase().includes(term) ||
+          c.email?.toLowerCase().includes(term) ||
+          c.phoneNumber?.includes(term))
       : [...this.customers];
 
     const dir = this.sortDir === 'asc' ? 1 : -1;
     rows.sort((a, b) => {
-      const x = a[this.sortKey];
-      const y = b[this.sortKey];
-      if (x instanceof Date && y instanceof Date) {
-        return (x.getTime() - y.getTime()) * dir;
-      }
+      const x = (a as any)[this.sortKey];
+      const y = (b as any)[this.sortKey];
       return String(x).localeCompare(String(y), undefined, { numeric: true }) * dir;
     });
 
@@ -94,6 +109,7 @@ export class Customers {
     this.searchTerm = value;
     this.currentPage = 1;
     this.updateView();
+    this.cdr.detectChanges();
   }
 
   sortBy(key: SortKey): void {
@@ -105,18 +121,21 @@ export class Customers {
     }
     this.currentPage = 1;
     this.updateView();
+    this.cdr.detectChanges();
   }
 
   onPageSizeChange(value: string): void {
     this.pageSize = Number(value);
     this.currentPage = 1;
     this.updateView();
+    this.cdr.detectChanges();
   }
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.updateView();
+    this.cdr.detectChanges();
   }
 
   get rangeEnd(): number {

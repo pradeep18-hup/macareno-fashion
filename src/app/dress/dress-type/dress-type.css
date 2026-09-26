@@ -44,7 +44,7 @@
   color: var(--color-ink-soft);
 }
 
-/* ---------- Main: single full-width column ---------- */
+/* ---------- Main ---------- */
 .dt-main {
   flex: 1;
   padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.5rem, 4vw, 3rem);
@@ -85,14 +85,7 @@
   border-color: var(--color-accent);
 }
 
-.error-text {
-  display: block;
-  margin-top: 0.5rem;
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  color: var(--color-accent);
-}
-
+/* ---------- Buttons ---------- */
 .btn {
   flex-shrink: 0;
   display: inline-flex;
@@ -105,7 +98,9 @@
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease),
+              border-color var(--dur) var(--ease),
+              color var(--dur) var(--ease);
 }
 
 .btn--primary {
@@ -114,9 +109,22 @@
 }
 .btn--primary:hover { background: var(--color-accent-light); }
 
+.btn--ghost {
+  background: transparent;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.btn--ghost:hover { background: var(--color-accent-soft); }
+
+.btn--danger {
+  background: #dc2626;
+  color: #fff;
+}
+.btn--danger:hover { background: #b91c1c; }
+
 .icon-plus { width: 11px; height: 11px; }
 
-/* ---------- List: fills the rest of the width ---------- */
+/* ---------- List ---------- */
 .dt-list {
   margin-top: 2rem;
   padding-top: 1.5rem;
@@ -129,6 +137,7 @@
   gap: 0.85rem;
 }
 
+/* ---------- Card ---------- */
 .type-card {
   display: flex;
   align-items: center;
@@ -137,11 +146,15 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
-  transition: border-color var(--dur) var(--ease);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
-.type-card:hover {
+.type-card:hover { border-color: var(--color-accent); }
+
+.type-card--editing {
   border-color: var(--color-accent);
+  background: var(--color-accent-soft);
 }
 
 .icon-tag {
@@ -162,6 +175,8 @@
   white-space: nowrap;
 }
 
+/* ---------- Edit / remove buttons ---------- */
+.type-card__edit,
 .type-card__remove {
   flex-shrink: 0;
   width: 20px;
@@ -176,12 +191,14 @@
   transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
+.type-card__edit:hover,
 .type-card__remove:hover {
   background: var(--color-accent-soft);
   color: var(--color-accent);
 }
 
-.icon-x { width: 9px; height: 9px; }
+.icon-x    { width: 9px;  height: 9px; }
+.icon-edit { width: 10px; height: 10px; }
 
 /* ---------- Empty state ---------- */
 .dt-empty {
@@ -190,13 +207,7 @@
   text-align: center;
   color: var(--color-ink-soft);
 }
-
-.dt-empty__icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 0.75rem;
-}
-
+.dt-empty__icon { width: 32px; height: 32px; margin-bottom: 0.75rem; }
 .dt-empty p {
   margin: 0 0 0.25rem;
   font-family: var(--font-display);
@@ -204,16 +215,137 @@
   font-weight: 500;
   color: var(--color-ink);
 }
+.dt-empty span { font-size: 0.82rem; }
 
-.dt-empty span {
-  font-size: 0.82rem;
+/* ============================================================
+   Delete confirm modal
+   ============================================================ */
+.dt-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+}
+
+.dt-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  animation: dt-fade-in 0.15s ease;
+}
+
+.dt-modal__card {
+  position: relative;
+  width: min(400px, 90vw);
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: dt-pop-in 0.18s ease;
+  font-family: var(--font-body);
+}
+
+.dt-modal__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.dt-modal__text {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+}
+
+.dt-modal__text strong {
+  color: var(--color-ink);
+}
+
+.dt-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+/* ============================================================
+   Toast notifications
+   ============================================================ */
+.dt-toasts {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.dt-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 220px;
+  max-width: 360px;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  animation: dt-slide-in 0.22s ease;
+}
+
+.dt-toast--success {
+  border-left-color: #16a34a;
+}
+.dt-toast--success .dt-toast__icon { color: #16a34a; }
+
+.dt-toast--error {
+  border-left-color: #dc2626;
+}
+.dt-toast--error .dt-toast__icon { color: #dc2626; }
+
+.dt-toast__icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+.dt-toast__text { flex: 1; }
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes dt-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes dt-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes dt-pop-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 560px) {
-  .dt-add {
-    flex-direction: column;
-    max-width: none;
-  }
+  .dt-add { flex-direction: column; max-width: none; }
   .btn { justify-content: center; }
+
+  .dt-toasts {
+    left: 1rem;
+    right: 1rem;
+  }
+  .dt-toast { max-width: none; }
 }

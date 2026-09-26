@@ -43,6 +43,7 @@
     <a *ngFor="let item of navItems; let i = index"
        [routerLink]="item.route"
        routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: item.route === '/admin' }"
        class="nav-item"
        [style.--i]="i">
 

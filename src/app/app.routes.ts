@@ -3,7 +3,8 @@ import { Routes } from '@angular/router';
 import { ContactComponent } from './contact/contact/contact';
 import { HeroComponent } from './hero.component/hero.component';
 import { DressForm } from './dress/dress-form/dress-form';
-import { DressType } from './dress/dress-type/dress-type'; // ✅ component class, not service
+import { DressType } from './dress/dress-type/dress-type';
+import { SizeForm } from './size-form/size-form';                             // ✅ path fixed
 import { Login } from './login/login';
 import { Register } from './register/register';
 import { MainLayout } from './layout/main-layout/main-layout';
@@ -18,33 +19,29 @@ import { ShopCartComponent } from './shop-cart/shop-cart';
 import { UserProfile } from './profile/user-profile/user-profile';
 
 export const routes: Routes = [
-  // ---------- No header/footer ----------
   { path: 'login', component: Login },
   { path: 'register', component: Register },
 
-  // ---------- Public site (MainLayout) ----------
   {
     path: '',
     component: MainLayout,
     children: [
       { path: '', component: HeroComponent },
       { path: 'contact', component: ContactComponent },
-      {path:'product-detail',component:ProductDetailComponent},
-      {path:'cart',component:ShopCartComponent},
-      {path:'user-profile',component:UserProfile},
-
       { path: 'product-detail', component: ProductDetailComponent },
+      { path: 'cart', component: ShopCartComponent },
+      { path: 'user-profile', component: UserProfile },
     ]
   },
 
-  // ---------- Admin section (AdminLayout) ----------
   {
     path: 'admin',
     component: AdminLayout,
     children: [
       { path: '', component: Admin },
       { path: 'dress-form', component: DressForm },
-      { path: 'dress-type', component: DressType }, // ✅ fixed
+      { path: 'dress-type', component: DressType },
+      { path: 'size', component: SizeForm },                        // ✅ new route
       { path: 'customer-list', component: Customers },
       { path: 'orders', component: Orders },
       { path: 'courier', component: CourierForm },
@@ -52,6 +49,5 @@ export const routes: Routes = [
     ]
   },
 
-  // ---------- Fallback ----------
   { path: '**', redirectTo: '' }
 ];

@@ -1,9 +1,4 @@
 /* register.component.css */
-/* Same visual design as login.component.css — layout, brand, and image panel unchanged.
-   Only the form fields differ (handled in register.component.html), so all class names
-   below are reused as-is. If your build already loads login.component.css globally,
-   you can skip this file and just reference the same classes. */
-
 /* ==========================================================================
    Auth pages — built on Macarena global design tokens
    ========================================================================== */
@@ -116,14 +111,8 @@
 }
 
 @keyframes brand-letter-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.5em);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(0.5em); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .auth-page__brand-link--logo {
@@ -174,9 +163,7 @@
 }
 
 @keyframes squiggle-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
+  to { stroke-dashoffset: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -196,16 +183,12 @@
   opacity: 0;
   transform: translateY(0.4em) scale(0.94);
   animation: logo-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease;
   will-change: transform;
 }
 
 @keyframes logo-in {
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  to { opacity: 1; transform: none; }
 }
 
 .auth-page__brand-link--logo:hover .logo {
@@ -228,9 +211,7 @@
   .auth-page__brand-link--logo:hover .logo {
     transform: none;
   }
-  .auth-page__brand-link::after {
-    transition: none;
-  }
+  .auth-page__brand-link::after { transition: none; }
 }
 
 /* ---- Content block ---- */
@@ -273,30 +254,6 @@
   transform: translateX(-50%);
 }
 
-.auth-page__intro {
-  margin-bottom: clamp(0.85rem, 2.5vh, 1.5rem);
-  flex-shrink: 0;
-}
-
-.auth-page__heading {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vh, 2.5rem);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
-  margin: 0 0 0.5rem;
-}
-
-.auth-page__subheading {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(0.85rem, 1.8vh, 1.05rem);
-  color: var(--color-ink-soft);
-  margin: 0;
-}
-
 /* ==========================================================================
    AUTH CARD
    ========================================================================== */
@@ -311,41 +268,6 @@
   box-shadow: var(--shadow-md);
   width: 100%;
   min-width: 0;
-  flex-shrink: 0;
-}
-
-/* ---- OAuth buttons ---- */
-.oauth-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  width: 100%;
-  padding: clamp(0.5rem, 1.6vh, 0.75rem) 1rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-line);
-  background: var(--color-bg);
-  color: var(--color-ink);
-  font-size: clamp(0.82rem, 2vw, 0.9rem);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  transition:
-    background var(--dur) var(--ease),
-    border-color var(--dur) var(--ease),
-    transform var(--dur) var(--ease);
-}
-
-.oauth-btn:hover {
-  background: var(--color-bg-muted);
-  border-color: var(--color-ink-soft);
-}
-
-.oauth-btn:active {
-  transform: scale(0.99);
-}
-
-.oauth-btn__icon {
   flex-shrink: 0;
 }
 
@@ -395,37 +317,17 @@ form {
   color: var(--color-ink-soft);
 }
 
-.field__label-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.field__aux-link {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-accent);
-  letter-spacing: 0.02em;
-  transition: color var(--dur) var(--ease);
-}
-
-.field__aux-link:hover {
-  color: var(--color-accent-light);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
+/* ✅ Inputs — including tel */
 .field input[type='email'],
 .field input[type='password'],
-.field input[type='text'] {
+.field input[type='text'],
+.field input[type='tel'] {
   width: 100%;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
   background: var(--color-bg);
   padding: clamp(0.5rem, 1.4vh, 0.7rem) 0.85rem;
-  font-size: max(0.9rem, 16px); /* 16px+ prevents iOS auto-zoom on focus */
+  font-size: max(0.9rem, 16px);
   font-family: var(--font-body);
   color: var(--color-ink);
   transition:
@@ -442,6 +344,15 @@ form {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(107, 31, 42, 0.08);
+}
+
+.field input[type='tel']::-webkit-outer-spin-button,
+.field input[type='tel']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.field input[type='tel'] {
+  -moz-appearance: textfield;
 }
 
 /* ---- Password toggle ---- */
@@ -472,25 +383,6 @@ form {
   color: var(--color-accent);
 }
 
-/* ---- Checkbox ---- */
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-  color: var(--color-ink-soft);
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox-row input {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  accent-color: var(--color-accent);
-  cursor: pointer;
-}
-
 /* ---- Error ---- */
 .form-error {
   font-size: 0.82rem;
@@ -511,9 +403,7 @@ form {
   font-weight: 500;
   letter-spacing: 0.02em;
   width: 100%;
-  transition:
-    background var(--dur) var(--ease),
-    transform var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -575,7 +465,6 @@ form {
   object-position: center 30%;
 }
 
-/* ---- Overlay content ---- */
 .auth-page__overlay {
   position: relative;
   z-index: 1;
@@ -625,7 +514,6 @@ form {
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
-
 @media (max-width: 1100px) {
   .auth-page {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
@@ -662,17 +550,9 @@ form {
     margin-bottom: 0;
   }
 
-  .auth-page__overlay {
-    padding: 1.25rem;
-  }
-
-  .auth-page__overlay-sub {
-    display: none;
-  }
-
-  .auth-page__brand {
-    margin-bottom: 1.25rem;
-  }
+  .auth-page__overlay { padding: 1.25rem; }
+  .auth-page__overlay-sub { display: none; }
+  .auth-page__brand { margin-bottom: 1.25rem; }
 
   .auth-page__content {
     max-width: 480px;
@@ -686,14 +566,8 @@ form {
     min-height: 160px;
     height: 160px;
   }
-
-  .auth-page__overlay-title {
-    font-size: 1.35rem;
-  }
-
-  .auth-page__overlay-tag {
-    display: none;
-  }
+  .auth-page__overlay-title { font-size: 1.35rem; }
+  .auth-page__overlay-tag { display: none; }
 
   .auth-card {
     padding: 1rem;
@@ -701,13 +575,7 @@ form {
     border-radius: var(--radius-sm, 0.5rem);
   }
 
-  form {
-    gap: 0.75rem;
-  }
-
-  .oauth-btn span {
-    font-size: 0.82rem;
-  }
+  form { gap: 0.75rem; }
 }
 
 /* Very small phones */
@@ -715,9 +583,5 @@ form {
   .auth-page__left {
     padding-left: 1rem;
     padding-right: 1rem;
-  }
-
-  .auth-page__heading {
-    font-size: 1.4rem;
   }
 }

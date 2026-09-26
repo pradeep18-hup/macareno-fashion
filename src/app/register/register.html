@@ -36,25 +36,8 @@
       <p class="auth-page__theme-line">Timeless Dresses, Made for the Modern Woman</p>
 
       <div class="auth-card">
-        <button type="button" class="oauth-btn">
-          <svg class="oauth-btn__icon" width="18" height="18" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.63h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.81Z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.92l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A11.998 11.998 0 0 0 12 24Z"/>
-            <path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54v-3.1H1.27a12 12 0 0 0 0 10.74l4-3.1Z"/>
-            <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.63l4 3.1C6.22 6.87 8.87 4.75 12 4.75Z"/>
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-
-        <button type="button" class="oauth-btn">
-          <svg class="oauth-btn__icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M16.36 1.01c.1 1.05-.3 2.07-.94 2.83-.66.77-1.73 1.38-2.78 1.3-.12-1.02.36-2.08.98-2.78.7-.79 1.9-1.38 2.74-1.35ZM20.4 17.2c-.44 1.02-.97 1.98-1.66 2.9-.86 1.14-1.72 2.28-3.1 2.3-1.35.03-1.78-.79-3.32-.79-1.53 0-2.02.77-3.3.82-1.33.05-2.34-1.23-3.2-2.36-1.75-2.32-3.1-6.56-1.29-9.43.9-1.42 2.5-2.33 4.24-2.35 1.3-.02 2.53.87 3.32.87.79 0 2.28-1.08 3.85-.92.65.03 2.5.26 3.68 1.98-.1.06-2.2 1.27-2.18 3.8.02 3.02 2.66 4.02 2.96 4.18Z"/>
-          </svg>
-          <span>Continue with Apple</span>
-        </button>
-
         <div class="auth-card__divider">
-          <span>or sign up with email</span>
+          <span>Sign up with email</span>
         </div>
 
         <form (ngSubmit)="onSubmit()" novalidate>
@@ -82,6 +65,21 @@
               placeholder="Enter your email"
               [ngModel]="email()"
               (ngModelChange)="email.set($event)"
+              required
+            />
+          </div>
+
+          <!-- Phone number -->
+          <div class="field">
+            <label for="phoneNumber">Phone number</label>
+            <input
+              id="phoneNumber"
+              type="tel"
+              name="phoneNumber"
+              autocomplete="tel"
+              placeholder="Enter your phone number"
+              [ngModel]="phoneNumber()"
+              (ngModelChange)="phoneNumber.set($event)"
               required
             />
           </div>
@@ -151,7 +149,7 @@
 
   <!-- RIGHT: Editorial image panel -->
   <aside class="auth-page__right">
-      <img
+    <img
       class="auth-page__image"
       src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1400&auto=format&fit=crop&q=80"
       alt="Macarena Autumn / Winter 26 collection"

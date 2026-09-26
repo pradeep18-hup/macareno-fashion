@@ -1,6 +1,11 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder, FormGroup, ReactiveFormsModule, Validators
+} from '@angular/forms';
+import {
+  ProductService, DressType, SizeOption
+} from '../../services/product.service';
 
 interface SizeQty {
   size: string;
@@ -12,6 +17,11 @@ interface PhotoItem {
   url: string;
 }
 
+interface Toast {
+  type: 'success' | 'error';
+  message: string;
+}
+
 @Component({
   selector: 'app-dress-form',
   standalone: true,
@@ -19,20 +29,21 @@ interface PhotoItem {
   templateUrl: './dress-form.html',
   styleUrl: './dress-form.css'
 })
-export class DressForm implements OnDestroy {
+export class DressForm implements OnInit, OnDestroy {
 
-  dressTypes = [
-    'Shirt', 'T-Shirt', 'Jeans', 'Trousers', 'Skirt', 'Frock',
-    'Kurti', 'Saree', 'Lehenga', 'Gown', 'Jacket', 'Shorts'
-  ];
+  private fb = inject(FormBuilder);
+  private productService = inject(ProductService);
+  private cdr = inject(ChangeDetectorRef);   // ✅ ADDED
 
+  // Guards & cache
+  private dressTypesLoaded = false;
+  private sizeCache = new Map<string, string[]>();
+
+  dressTypes: DressType[] = [];
   sizeTypeOptions = [
     { value: 'number',   label: 'Number (28, 30, 32...)' },
     { value: 'alphabet', label: 'Alphabet (S, M, L...)' }
   ];
-
-  numberSizes = ['26', '28', '30', '32', '34', '36', '38', '40', '42', '44'];
-  alphabetSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
   availableSizes: string[] = [];
   selectedSizes: SizeQty[] = [];
@@ -44,26 +55,46 @@ export class DressForm implements OnDestroy {
 
   dressForm: FormGroup;
   submitAttempted = false;
+  submitting = false;
 
-  constructor(private fb: FormBuilder) {
+  toasts: Toast[] = [];
+
+  constructor() {
     this.dressForm = this.fb.group({
       dressName:       ['', Validators.required],
-      dressType:       ['', Validators.required],
+      dressTypeId:     [null as number | null, Validators.required],
       price:           [null, [Validators.required, Validators.min(1)]],
       offerPercentage: [null, [Validators.min(0), Validators.max(100)]],
       offerPrice:      [null, [Validators.required, Validators.min(0)]],
       sizeType:        ['', Validators.required]
     });
 
-    // emitEvent: false is used when patching to avoid infinite update loops
     this.dressForm.get('price')?.valueChanges.subscribe(() => this.onPriceChange());
     this.dressForm.get('offerPrice')?.valueChanges.subscribe(() => this.onOfferPriceChange());
     this.dressForm.get('offerPercentage')?.valueChanges.subscribe(() => this.onPercentageChange());
-    this.dressForm.get('sizeType')?.valueChanges.subscribe(val => this.onSizeTypeChange(val));
+    this.dressForm.get('sizeType')?.valueChanges.subscribe(
+      val => this.onSizeTypeChange(val)
+    );
   }
 
-  // ---------- Price / offer logic ----------
+  ngOnInit(): void {
+    if (this.dressTypesLoaded) return;
+    this.dressTypesLoaded = true;
+    this.loadDressTypes();
+  }
 
+  // ============== Load dress types ==============
+  private loadDressTypes(): void {
+    this.productService.getDressTypes().subscribe({
+      next: (list: DressType[]) => {
+        this.dressTypes = list;
+        this.cdr.markForCheck();       // ✅ force view update
+      },
+      error: () => this.notify('error', 'Failed to load dress types.')
+    });
+  }
+
+  // ============== Price / Offer logic ==============
   private round2(value: number): number {
     return Math.round(value * 100) / 100;
   }
@@ -74,24 +105,19 @@ export class DressForm implements OnDestroy {
     return isNaN(n) ? null : n;
   }
 
-  // Price changed: keep offer price, recalculate percentage
   private onPriceChange(): void {
     const price = this.toNumber(this.dressForm.get('price')?.value);
     const offerPrice = this.toNumber(this.dressForm.get('offerPrice')?.value);
     const pct = this.toNumber(this.dressForm.get('offerPercentage')?.value);
 
     if (price && price > 0) {
-      if (offerPrice !== null) {
-        this.patchPercentageFromOffer(price, offerPrice);
-      } else if (pct !== null) {
-        this.patchOfferFromPercentage(price, pct);
-      }
+      if (offerPrice !== null) this.patchPercentageFromOffer(price, offerPrice);
+      else if (pct !== null) this.patchOfferFromPercentage(price, pct);
     } else {
       this.dressForm.get('offerPercentage')?.setValue(null, { emitEvent: false });
     }
   }
 
-  // Offer price typed: calculate percentage
   private onOfferPriceChange(): void {
     const price = this.toNumber(this.dressForm.get('price')?.value);
     const offerPrice = this.toNumber(this.dressForm.get('offerPrice')?.value);
@@ -103,7 +129,6 @@ export class DressForm implements OnDestroy {
     }
   }
 
-  // Percentage typed: calculate offer price
   private onPercentageChange(): void {
     const price = this.toNumber(this.dressForm.get('price')?.value);
     const pct = this.toNumber(this.dressForm.get('offerPercentage')?.value);
@@ -145,11 +170,34 @@ export class DressForm implements OnDestroy {
     return 0;
   }
 
-  // ---------- Sizes ----------
-
+  // ============== Sizes — loaded from backend (with cache + view refresh) ==============
   onSizeTypeChange(type: string): void {
-    this.availableSizes = type === 'number' ? this.numberSizes : this.alphabetSizes;
     this.selectedSizes = [];
+    this.availableSizes = [];
+    this.cdr.markForCheck();             // ✅ update immediately
+
+    if (!type) return;
+
+    // Cached → instant
+    const cached = this.sizeCache.get(type);
+    if (cached) {
+      this.availableSizes = cached;
+      this.cdr.markForCheck();           // ✅ update with cached list
+      return;
+    }
+
+    this.productService.getSizes(type as 'alphabet' | 'number').subscribe({
+      next: (list: SizeOption[]) => {
+        const labels = list.map((s: SizeOption) => s.label);
+        this.sizeCache.set(type, labels);
+        this.availableSizes = labels;
+        this.cdr.markForCheck();         // ✅ force view update after HTTP
+      },
+      error: () => {
+        this.notify('error', `Failed to load ${type} sizes.`);
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   toggleSize(size: string): void {
@@ -159,6 +207,7 @@ export class DressForm implements OnDestroy {
     } else {
       this.selectedSizes = [...this.selectedSizes, { size, qty: null }];
     }
+    this.cdr.markForCheck();
   }
 
   isSizeSelected(size: string): boolean {
@@ -174,6 +223,7 @@ export class DressForm implements OnDestroy {
     this.selectedSizes = this.selectedSizes.map(s =>
       s.size === size ? { ...s, qty } : s
     );
+    this.cdr.markForCheck();
   }
 
   get totalQty(): number {
@@ -184,8 +234,7 @@ export class DressForm implements OnDestroy {
     return this.selectedSizes.some(s => !s.qty || s.qty <= 0);
   }
 
-  // ---------- Photos ----------
-
+  // ============== Photos ==============
   onPhotosSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
@@ -207,7 +256,7 @@ export class DressForm implements OnDestroy {
       this.photos = [...this.photos, { file, url: URL.createObjectURL(file) }];
     }
 
-    // Clear the input so the same file can be selected again later
+    this.cdr.markForCheck();
     input.value = '';
   }
 
@@ -215,6 +264,7 @@ export class DressForm implements OnDestroy {
     URL.revokeObjectURL(this.photos[index].url);
     this.photos = this.photos.filter((_, i) => i !== index);
     this.photoError = '';
+    this.cdr.markForCheck();
   }
 
   private clearPhotos(): void {
@@ -227,8 +277,7 @@ export class DressForm implements OnDestroy {
     this.clearPhotos();
   }
 
-  // ---------- Submit / reset ----------
-
+  // ============== Submit ==============
   onSubmit(): void {
     this.submitAttempted = true;
     this.dressForm.markAllAsTouched();
@@ -240,25 +289,43 @@ export class DressForm implements OnDestroy {
       this.selectedSizes.length === 0 ||
       this.hasInvalidSizeQty
     ) {
+      this.notify('error', 'Please fix the form errors and try again.');
       return;
     }
 
-    const payload = {
-      ...this.dressForm.value,
-      sizes: this.selectedSizes,
-      totalQty: this.totalQty,
-      photos: this.photos.map(p => p.file)
-    };
-
-    // Build multipart form data for the API upload
+    const v = this.dressForm.value;
     const formData = new FormData();
-    const { photos, sizes, ...rest } = payload;
-    Object.entries(rest).forEach(([key, value]) => formData.append(key, String(value)));
-    formData.append('sizes', JSON.stringify(sizes));
-    photos.forEach((file: File) => formData.append('photos', file));
+    formData.append('dressName', v.dressName);
+    formData.append('dressTypeId', String(v.dressTypeId));
+    formData.append('price', String(v.price));
+    if (v.offerPercentage !== null && v.offerPercentage !== undefined) {
+      formData.append('offerPercentage', String(v.offerPercentage));
+    }
+    formData.append('offerPrice', String(v.offerPrice));
+    formData.append('sizeType', v.sizeType);
+    formData.append('totalQty', String(this.totalQty));
 
-    console.log('Dress payload:', payload);
-    // TODO: this.dressService.saveDress(formData).subscribe(...)
+    this.selectedSizes.forEach(s => {
+      formData.append('sizeLabels', s.size);
+      formData.append('sizeQty', String(s.qty));
+    });
+
+    this.photos.forEach(p => formData.append('photos', p.file, p.file.name));
+
+    this.submitting = true;
+    this.productService.createProduct(formData).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.notify('success', 'Product added successfully.');
+        this.resetForm();
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        this.submitting = false;
+        this.notify('error', err.error?.error || 'Failed to save product.');
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   resetForm(): void {
@@ -267,5 +334,21 @@ export class DressForm implements OnDestroy {
     this.availableSizes = [];
     this.submitAttempted = false;
     this.clearPhotos();
+    this.cdr.markForCheck();
+  }
+
+  // ============== Toasts ==============
+  private notify(type: 'success' | 'error', message: string): void {
+    const t = { type, message };
+    this.toasts.push(t);
+    setTimeout(() => {
+      this.toasts = this.toasts.filter(x => x !== t);
+      this.cdr.markForCheck();
+    }, 3000);
+  }
+
+  dismissToast(t: Toast): void {
+    this.toasts = this.toasts.filter(x => x !== t);
+    this.cdr.markForCheck();
   }
 }
