@@ -16,7 +16,7 @@
       <div class="pd-gallery">
         <div class="pd-gallery__main">
           <img
-            [src]="product().images[activeImageIndex()] || 'assets/placeholder-product.jpg'"
+            [src]="product().images[activeImageIndex()] || 'assets/placeholder-product.svg'"
             [alt]="product().name" />
 
           <button
@@ -94,17 +94,24 @@
           </p>
         </div>
 
-        <!-- Quantity -->
+        <!-- Quantity — with cart-aware hint -->
         <div class="pd-qty-block">
           <p class="pd-block-label">
             Quantity
-            <span class="pd-stock-hint">
-              · min {{ minOrderQty }}<ng-container *ngIf="maxQuantity() > 0 && maxQuantity() < 99"> · max {{ maxQuantity() }}</ng-container>
+            <span class="pd-stock-hint" *ngIf="alreadyInCart() > 0">
+              · {{ alreadyInCart() }} in cart
+            </span>
+            <span class="pd-stock-hint" *ngIf="maxQuantity() > 0 && maxQuantity() < 99">
+              · max {{ maxQuantity() }}
+            </span>
+            <span class="pd-stock-hint pd-stock-hint--danger"
+                  *ngIf="maxQuantity() <= 0 && alreadyInCart() > 0">
+              · cart limit reached
             </span>
           </p>
           <div class="pd-qty-control">
             <button class="pd-qty-btn" (click)="decreaseQuantity()"
-                    [disabled]="quantity() <= minOrderQty">−</button>
+                    [disabled]="quantity() <= 1">−</button>
             <span class="pd-qty-value">{{ quantity() }}</span>
             <button class="pd-qty-btn" (click)="increaseQuantity()"
                     [disabled]="quantity() >= maxQuantity()">+</button>
@@ -113,18 +120,12 @@
 
         <!-- CTA -->
         <div class="pd-cta-row">
-          <!-- Buy Now — commented out
-          <button class="pd-btn pd-btn--primary"
-                  (click)="buyNow()"
-                  [disabled]="addingToCart()">
-            {{ addingToCart() ? 'Processing…' : 'Buy Now' }}
-          </button>
-          -->
-
           <button class="pd-btn pd-btn--primary pd-btn--full"
                   (click)="addToCart()"
-                  [disabled]="addingToCart()">
-            {{ addingToCart() ? 'Adding…' : 'Add to Cart' }}
+                  [disabled]="addingToCart() || maxQuantity() <= 0">
+            {{ addingToCart()
+               ? 'Adding…'
+               : (maxQuantity() <= 0 ? 'Max quantity reached' : 'Add to Cart') }}
           </button>
         </div>
 
@@ -186,3 +187,8 @@
     </div>
   </div>
 </section>
+
+<!-- Toast notification -->
+<div class="pd-toast" *ngIf="toastMessage()" role="status">
+  {{ toastMessage() }}
+</div>

@@ -15,6 +15,7 @@ interface CartItemView {
   offerPrice?: number;
   size: string;
   qty: number;
+  stock: number;
 }
 
 @Component({
@@ -34,15 +35,20 @@ export class ShopCartComponent implements OnInit {
   loading = signal(true);
   loadError = signal('');
 
-  // ✅ Minimum order quantity
   readonly minOrderQty = 5;
 
   ngOnInit(): void {
-    this.loadCart();
+    this.loadCart(true);   // 👈 initial load shows spinner
   }
 
-  private loadCart(): void {
-    this.loading.set(true);
+  /**
+   * @param showSpinner — true on initial load, false on silent refreshes.
+   * Setting it to false avoids the "shutter" (DOM teardown + rebuild) on every qty click.
+   */
+  private loadCart(showSpinner: boolean = false): void {
+    if (showSpinner) {
+      this.loading.set(true);
+    }
     this.loadError.set('');
 
     this.cartService.getCart().pipe(
@@ -72,18 +78,21 @@ export class ShopCartComponent implements OnInit {
     });
   }
 
+  /** Manual retry (from error state) — always shows spinner. */
   reload(): void {
-    this.loadCart();
+    this.loadCart(true);
   }
 
   private enrich(item: ApiCartItem, p: ProductResponse): CartItemView {
     const image = (p.photoUrls || [])
       .map(u => this.productService.imageUrl(u))[0]
-      || 'assets/placeholder-product.jpg';
+      || 'assets/placeholder-product.svg';
 
     const selling = (p.offerPrice && p.offerPrice > 0 && p.offerPrice < p.price)
       ? p.offerPrice
       : undefined;
+
+    const stock = this.stockForSize(p, item.size);
 
     return {
       id: item.id,
@@ -93,8 +102,28 @@ export class ShopCartComponent implements OnInit {
       price: p.price,
       offerPrice: selling,
       size: item.size,
-      qty: item.quantity
+      qty: item.quantity,
+      stock
     };
+  }
+
+  private stockForSize(p: ProductResponse, size: string): number {
+    const sizes: any[] = (p as any).sizes || [];
+    if (!sizes.length) return 99;
+    if (sizes.length === 1 && sizes[0].size === 'One Size') {
+      return sizes[0].quantity ?? sizes[0].stock ?? 99;
+    }
+    const match = sizes.find(s => s.size === size);
+    if (!match) return 0;
+    return (
+      match.quantity ??
+      match.stock ??
+      match.availableQty ??
+      match.available ??
+      match.qty ??
+      match.count ??
+      0
+    );
   }
 
   private fallback(item: ApiCartItem): CartItemView {
@@ -102,11 +131,12 @@ export class ShopCartComponent implements OnInit {
       id: item.id,
       productId: item.productId,
       name: `Product #${item.productId}`,
-      image: 'assets/placeholder-product.jpg',
+      image: 'assets/placeholder-product.svg',
       price: 0,
       offerPrice: undefined,
       size: item.size,
-      qty: item.quantity
+      qty: item.quantity,
+      stock: 99
     };
   }
 
@@ -139,7 +169,6 @@ export class ShopCartComponent implements OnInit {
     return this.originalTotal - this.payableTotal;
   }
 
-  // ✅ Minimum check
   get meetsMinimum(): boolean {
     return this.totalCount >= this.minOrderQty;
   }
@@ -148,11 +177,22 @@ export class ShopCartComponent implements OnInit {
     return Math.max(0, this.minOrderQty - this.totalCount);
   }
 
+  canIncrease(item: CartItemView): boolean {
+    return item.qty < item.stock;
+  }
+
+  trackByItemId(_: number, item: CartItemView): number {
+    return item.id;
+  }
+
   // ---------- Actions ----------
+  // 👇 All three now use loadCart(false) — silent refresh, no spinner, no flicker.
+
   increase(item: CartItemView): void {
+    if (!this.canIncrease(item)) return;
     const newQty = item.qty + 1;
     this.cartService.updateQuantity(item.id, newQty).subscribe({
-      next: () => this.loadCart(),
+      next: () => this.loadCart(false),
       error: (err) => alert(err?.error?.error || 'Failed to update quantity.')
     });
   }
@@ -161,25 +201,21 @@ export class ShopCartComponent implements OnInit {
     if (item.qty <= 1) return;
     const newQty = item.qty - 1;
     this.cartService.updateQuantity(item.id, newQty).subscribe({
-      next: () => this.loadCart(),
+      next: () => this.loadCart(false),
       error: (err) => alert(err?.error?.error || 'Failed to update quantity.')
     });
   }
 
   remove(item: CartItemView): void {
     if (!confirm(`Remove "${item.name}" (${item.size}) from your cart?`)) return;
-
     this.cartService.remove(item.id).subscribe({
-      next: () => this.loadCart(),
+      next: () => this.loadCart(false),
       error: (err) => alert(err?.error?.error || 'Failed to remove item.')
     });
   }
 
-  // ✅ Buy Now guard
   goToCheckout(): void {
-    if (!this.meetsMinimum) {
-      return; // guard — button is disabled anyway
-    }
+    if (!this.meetsMinimum) return;
     this.router.navigate(['/checkout'], {
       queryParams: { mode: 'cart' }
     });

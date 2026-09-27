@@ -17,7 +17,7 @@
          *ngIf="!loading() && !loadError() && cartItems().length; else emptyCart">
 
   <div class="cart-list">
-    <div class="cart-row" *ngFor="let item of cartItems()">
+    <div class="cart-row" *ngFor="let item of cartItems(); trackBy: trackByItemId">
 
       <img class="cart-row__img" [src]="item.image" [alt]="item.name" />
 
@@ -38,11 +38,20 @@
 
         <div class="cart-row__qty">
           <button class="qty-btn" (click)="decrease(item)"
+                  [disabled]="item.qty <= 1"
                   aria-label="Decrease quantity">–</button>
           <span class="qty-value">{{ item.qty }}</span>
           <button class="qty-btn" (click)="increase(item)"
+                  [disabled]="!canIncrease(item)"
+                  [attr.title]="!canIncrease(item) ? ('Only ' + item.stock + ' in stock') : null"
                   aria-label="Increase quantity">+</button>
         </div>
+
+        <!-- Max-stock hint -->
+        <p class="cart-row__stock-warn"
+           *ngIf="item.stock < 99 && item.qty >= item.stock">
+          Max stock reached ({{ item.stock }})
+        </p>
 
         <div class="cart-row__actions">
           <button class="action-link action-link--remove" (click)="remove(item)">
@@ -84,7 +93,7 @@
       You will save ₹{{ savings | number }} on this order
     </p>
 
-    <!-- ✅ Minimum order notice -->
+    <!-- Minimum order notice -->
     <div class="cart-min-notice" [class.cart-min-notice--ok]="meetsMinimum">
       <span class="cart-min-notice__icon">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"

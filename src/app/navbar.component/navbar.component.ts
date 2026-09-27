@@ -31,28 +31,30 @@ export class NavbarComponent implements OnInit {
 
   readonly isMenuOpen   = signal(false);
   readonly isScrolled   = signal(false);
-  readonly cartCount    = signal(0);
   readonly showUserMenu = signal(false);
 
   readonly isLoggedIn = signal(false);
   readonly userName   = signal('');
   readonly isAdmin    = signal(false);
 
-  /** Reactive like count for the badge. */
+  /** 👇 Live cart count — comes from CartService. */
+  readonly cartCount = this.cartService.count;
+
+  /** Live likes count — from LikesService. */
   readonly likesCount = this.likesService.likedCount;
 
   readonly links: NavLink[] = [];
 
   ngOnInit(): void {
     this.refreshAuth();
-    this.refreshCartCount();
-    this.likesService.loadLikes();       // 👈 load likes on navbar init
+    this.cartService.refreshCount();
+    this.likesService.loadLikes();
 
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
         this.refreshAuth();
-        this.refreshCartCount();
+        this.cartService.refreshCount();
         this.closeUserMenu();
       });
   }
@@ -64,64 +66,23 @@ export class NavbarComponent implements OnInit {
     this.isAdmin.set(user?.userType === 'admin');
   }
 
-  refreshCartCount(): void {
-    if (!this.authService.isCustomer()) {
-      this.cartCount.set(0);
-      return;
-    }
-
-    this.cartService.getCart().subscribe({
-      next: (items) => {
-        const total = (items || []).reduce((sum, i) => sum + i.quantity, 0);
-        this.cartCount.set(total);
-      },
-      error: () => this.cartCount.set(0)
-    });
-  }
-
   // ---------- Navigation ----------
-  goToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-  goToCart(): void {
-    this.router.navigate(['/cart']);
-  }
-
-  goToLikes(): void {
-    this.router.navigate(['/liked-products']);
-  }
-
-  goToMyOrders(): void {
-    this.router.navigate(['/my-orders']);
-  }
-
-  goToProfile(): void {
-    this.router.navigate(['/user-profile']);
-  }
-
-  goToContact(): void {
-    this.router.navigate(['/contact']);
-  }
-
-  goToLogin(): void {
-    this.router.navigate(['/login']);
-  }
-
-  goToRegister(): void {
-    this.router.navigate(['/register']);
-  }
-
-  goToAdmin(): void {
-    this.router.navigate(['/admin']);
-  }
+  goToHome(): void { this.router.navigate(['/']); }
+  goToCart(): void { this.router.navigate(['/cart']); }
+  goToLikes(): void { this.router.navigate(['/liked-products']); }
+  goToMyOrders(): void { this.router.navigate(['/my-orders']); }
+  goToProfile(): void { this.router.navigate(['/user-profile']); }
+  goToContact(): void { this.router.navigate(['/contact']); }
+  goToLogin(): void { this.router.navigate(['/login']); }
+  goToRegister(): void { this.router.navigate(['/register']); }
+  goToAdmin(): void { this.router.navigate(['/admin']); }
 
   logout(): void {
     if (!confirm('Sign out?')) return;
     this.authService.logout();
     this.refreshAuth();
-    this.cartCount.set(0);
-    this.likesService.loadLikes();       // 👈 clears cache (guest)
+    this.cartService.clearCount();
+    this.likesService.loadLikes();
     this.closeUserMenu();
     this.router.navigate(['/login']);
   }
@@ -132,28 +93,17 @@ export class NavbarComponent implements OnInit {
     this.showUserMenu.update(v => !v);
   }
 
-  closeUserMenu(): void {
-    this.showUserMenu.set(false);
-  }
+  closeUserMenu(): void { this.showUserMenu.set(false); }
 
   @HostListener('document:click')
-  onDocumentClick(): void {
-    this.closeUserMenu();
-  }
+  onDocumentClick(): void { this.closeUserMenu(); }
 
   // ---------- Mobile menu ----------
-  toggleMenu(): void {
-    this.isMenuOpen.update(open => !open);
-  }
-
-  closeMenu(): void {
-    this.isMenuOpen.set(false);
-  }
+  toggleMenu(): void { this.isMenuOpen.update(open => !open); }
+  closeMenu(): void { this.isMenuOpen.set(false); }
 
   @HostListener('window:scroll')
-  onWindowScroll(): void {
-    this.isScrolled.set(window.scrollY > 12);
-  }
+  onWindowScroll(): void { this.isScrolled.set(window.scrollY > 12); }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {

@@ -45,6 +45,7 @@
       <button
         class="icon-btn icon-btn--cart"
         type="button"
+        [class.icon-btn--cart-active]="cartCount() > 0"
         [attr.aria-label]="'Cart, ' + cartCount() + ' items'"
         (click)="goToCart()">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -53,7 +54,7 @@
           <circle cx="17" cy="20" r="1.4" />
           <path d="M2 3h2.2l2.4 11.4a1.6 1.6 0 0 0 1.6 1.3h8.7a1.6 1.6 0 0 0 1.6-1.2L21 7H5" />
         </svg>
-        <span class="icon-btn__badge">{{ cartCount() }}</span>
+        <span class="icon-btn__badge" *ngIf="cartCount() > 0">{{ cartCount() }}</span>
       </button>
 
       <!-- User menu -->

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { ProductService, ProductResponse } from '../services/product.service';
-import { CartService } from '../services/cart.service';
+import { CartService, CartItem as ApiCartItem } from '../services/cart.service';
 import { LikesService } from '../services/likes.service';
 
 export interface Product {
@@ -42,8 +42,6 @@ const EMPTY_PRODUCT: Product = {
   deliveryDays: 5
 };
 
-const MIN_ORDER_QTY = 5;
-
 @Component({
   selector: 'app-product-detail',
   standalone: true,
@@ -65,11 +63,15 @@ export class ProductDetailComponent implements OnInit {
 
   activeImageIndex = signal(0);
   selectedSize = signal<string | null>(null);
-  quantity = signal(MIN_ORDER_QTY);
+  quantity = signal(1);
   addingToCart = signal(false);
   liking = signal(false);
 
-  readonly minOrderQty = MIN_ORDER_QTY;
+  /** How many of this product+size are already in the cart. */
+  alreadyInCart = signal<number>(0);
+
+  toastMessage = signal('');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   discount = computed(() => {
     const p = this.product();
@@ -80,7 +82,6 @@ export class ProductDetailComponent implements OnInit {
 
   totalPrice = computed(() => this.product().price * this.quantity());
 
-  /** True if the currently loaded product is liked. */
   isLiked = computed<boolean>(() => {
     const id = this.product().id;
     return id > 0 && this.likesService.isLiked(id);
@@ -92,20 +93,27 @@ export class ProductDetailComponent implements OnInit {
     return this.product().sizeStock[size] ?? 0;
   });
 
+  /**
+   * Max you can ADD NOW = total stock − what's already in the cart.
+   */
   maxQuantity = computed<number>(() => {
     const p = this.product();
     if (!p.sizes.length) return 99;
+
+    // "One Size" product
     if (p.sizes.length === 1 && p.sizes[0] === 'One Size') {
-      return p.sizeStock['One Size'] ?? 99;
+      const totalStock = p.sizeStock['One Size'] ?? 99;
+      return Math.max(0, totalStock - this.alreadyInCart());
     }
+
+    // Multi-size
     if (!this.selectedSize()) return 0;
-    return this.selectedSizeStock();
+    const totalStock = this.selectedSizeStock();
+    return Math.max(0, totalStock - this.alreadyInCart());
   });
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'auto' });
-
-    // Ensure like state is fresh
     this.likesService.loadLikes();
 
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -133,6 +141,9 @@ export class ProductDetailComponent implements OnInit {
 
         this.loading.set(false);
         window.scrollTo({ top: 0, behavior: 'auto' });
+
+        // Load cart to compute remaining addable qty
+        this.refreshCartCount();
       },
       error: (err: any) => {
         console.error('Failed to load product', err);
@@ -142,9 +153,35 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
+  private refreshCartCount(): void {
+    this.cartService.getCart().subscribe({
+      next: (items: ApiCartItem[]) => this.updateAlreadyInCart(items || []),
+      error: () => this.alreadyInCart.set(0)
+    });
+  }
+
+  private updateAlreadyInCart(items: ApiCartItem[]): void {
+    const p = this.product();
+    if (!p.id) { this.alreadyInCart.set(0); return; }
+
+    const size = this.selectedSize();
+
+    // One Size
+    if (p.sizes.length === 1 && p.sizes[0] === 'One Size') {
+      const match = items.find(i => i.productId === p.id);
+      this.alreadyInCart.set(match ? match.quantity : 0);
+      return;
+    }
+
+    // Multi-size
+    if (!size) { this.alreadyInCart.set(0); return; }
+    const match = items.find(i => i.productId === p.id && i.size === size);
+    this.alreadyInCart.set(match ? match.quantity : 0);
+  }
+
   private mapToUiProduct(p: ProductResponse): Product {
     const images = (p.photoUrls || []).map(u => this.productService.imageUrl(u));
-    const firstImage = images[0] || 'assets/placeholder-product.jpg';
+    const firstImage = images[0] || 'assets/placeholder-product.svg';
     const mrp = p.price;
     const sellingPrice = (p.offerPrice && p.offerPrice > 0) ? p.offerPrice : p.price;
 
@@ -180,8 +217,16 @@ export class ProductDetailComponent implements OnInit {
   selectSize(size: string): void {
     const stock = this.product().sizeStock[size] ?? 0;
     if (stock <= 0) return;
+
     this.selectedSize.set(size);
-    if (this.quantity() > stock) this.quantity.set(Math.max(1, stock));
+    this.refreshCartCount();
+
+    const remaining = Math.max(0, stock - this.alreadyInCart());
+    if (this.quantity() > remaining && remaining > 0) {
+      this.quantity.set(remaining);
+    } else if (remaining <= 0) {
+      this.quantity.set(1);
+    }
   }
 
   stockFor(size: string): number {
@@ -194,10 +239,10 @@ export class ProductDetailComponent implements OnInit {
   }
 
   decreaseQuantity(): void {
-    if (this.quantity() > MIN_ORDER_QTY) this.quantity.update(q => q - 1);
+    if (this.quantity() > 1) this.quantity.update(q => q - 1);
   }
 
-  // ---------- Favorite (backend-backed) ----------
+  // ---------- Favorite ----------
   toggleFavorite(): void {
     const id = this.product().id;
     if (!id) return;
@@ -207,7 +252,7 @@ export class ProductDetailComponent implements OnInit {
       next: () => this.liking.set(false),
       error: () => {
         this.liking.set(false);
-        alert('Could not update likes. Please try again.');
+        this.showToast('Could not update likes. Please try again.');
       }
     });
   }
@@ -216,25 +261,33 @@ export class ProductDetailComponent implements OnInit {
     return '₹' + price.toLocaleString('en-IN');
   }
 
+  // ---------- Validation ----------
   private validateSelection(): string | null {
     const p = this.product();
+
     if (p.sizes.length && p.sizes[0] !== 'One Size' && !this.selectedSize()) {
       return 'Please select a size first.';
     }
+
     const max = this.maxQuantity();
-    if (max <= 0) return 'This item is out of stock.';
-    if (this.quantity() < MIN_ORDER_QTY) {
-      return `Minimum order quantity is ${MIN_ORDER_QTY}.`;
+
+    if (max <= 0) {
+      if (this.alreadyInCart() > 0) {
+        return 'You already have the maximum available quantity in your cart.';
+      }
+      return 'This item is out of stock.';
     }
+
     if (this.quantity() > max) {
-      return `Only ${max} unit${max === 1 ? '' : 's'} available.`;
+      return `Only ${max} more can be added (you already have ${this.alreadyInCart()} in your cart).`;
     }
+
     return null;
   }
 
   addToCart(): void {
     const error = this.validateSelection();
-    if (error) { alert(error); return; }
+    if (error) { this.showToast(error); return; }
 
     const p = this.product();
     const size = this.selectedSize() ?? 'One Size';
@@ -243,13 +296,19 @@ export class ProductDetailComponent implements OnInit {
     this.cartService.addToCart(p.id, size, this.quantity()).subscribe({
       next: () => {
         this.addingToCart.set(false);
-        alert(`Added ${this.quantity()} × ${p.name} (${size}) to cart.`);
-        this.router.navigate(['/cart']);
+        this.showToast(`Added ${this.quantity()} × ${p.name} (${size}) to cart ✓`);
+        this.refreshCartCount();   // recompute remaining
       },
       error: (err) => {
         this.addingToCart.set(false);
-        alert(err?.error?.error || 'Failed to add to cart.');
+        this.showToast(err?.error?.error || 'Failed to add to cart.');
       }
     });
+  }
+
+  private showToast(message: string): void {
+    this.toastMessage.set(message);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toastMessage.set(''), 3000);
   }
 }

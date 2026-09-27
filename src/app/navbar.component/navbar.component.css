@@ -546,3 +546,40 @@
   width: 22px;
   height: 22px;
 }
+
+/* ============================================================
+   Cart icon — active state when it has items
+   ============================================================ */
+
+.icon-btn--cart {
+  transition: color 0.25s ease, background 0.25s ease;
+}
+
+.icon-btn--cart.icon-btn--cart-active {
+  color: var(--color-accent, #6b1f2a);
+}
+
+.icon-btn--cart.icon-btn--cart-active svg {
+  stroke: var(--color-accent, #6b1f2a);
+}
+
+.icon-btn--cart.icon-btn--cart-active:hover {
+  background: var(--color-accent-soft, rgba(107, 31, 42, 0.1));
+}
+
+/* Pop animation when count changes */
+@keyframes cart-badge-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.icon-btn--cart.icon-btn--cart-active .icon-btn__badge {
+  animation: cart-badge-pop 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-btn--cart.icon-btn--cart-active .icon-btn__badge {
+    animation: none;
+  }
+}

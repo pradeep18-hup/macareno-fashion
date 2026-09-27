@@ -1,3 +1,7 @@
+/* ============================================================
+   MACARENA — Liked Products
+   ============================================================ */
+
 .lp-wrap {
   background: #fff;
   min-height: 100vh;
@@ -10,6 +14,7 @@
   padding: 0 2rem;
 }
 
+/* ---------- Header ---------- */
 .lp-header {
   display: flex;
   justify-content: space-between;
@@ -21,6 +26,7 @@
 }
 
 .eyebrow {
+  font-family: var(--font-body, sans-serif);
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -34,15 +40,18 @@
   font-weight: 600;
   color: var(--color-ink, #17130f);
   margin: 0.2rem 0 0.35rem;
+  letter-spacing: -0.01em;
 }
 
 .lp-subtitle {
+  font-family: var(--font-body, sans-serif);
   font-size: 0.85rem;
   color: var(--color-ink-soft, #6b635b);
   margin: 0;
 }
 
 .lp-count {
+  font-family: var(--font-body, sans-serif);
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--color-ink-soft, #6b635b);
@@ -50,9 +59,11 @@
   white-space: nowrap;
 }
 
+/* ---------- States ---------- */
 .lp-state {
   padding: 3rem 1rem;
   text-align: center;
+  font-family: var(--font-body, sans-serif);
   font-size: 0.92rem;
   color: var(--color-ink-soft, #6b635b);
 }
@@ -80,6 +91,7 @@
 }
 
 .lp-empty__text {
+  font-family: var(--font-body, sans-serif);
   font-size: 0.9rem;
   color: var(--color-ink-soft, #6b635b);
   margin: 0 0 1.6rem;
@@ -91,6 +103,7 @@
   padding: 0.75rem 1.6rem;
   background: var(--color-ink, #17130f);
   color: #fff;
+  font-family: var(--font-body, sans-serif);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -105,6 +118,7 @@
   transform: translateY(-1px);
 }
 
+/* ---------- Grid ---------- */
 .lp-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -118,6 +132,7 @@
   }
 }
 
+/* ---------- Card ---------- */
 .lp-card {
   position: relative;
   background: #fff;
@@ -161,6 +176,7 @@
 }
 
 .lp-card__name {
+  font-family: var(--font-body, sans-serif);
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--color-ink, #17130f);
@@ -173,12 +189,14 @@
 }
 
 .lp-card__price {
+  font-family: var(--font-body, sans-serif);
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--color-ink, #17130f);
   margin: 0;
 }
 
+/* ---------- Heart / unlike button ---------- */
 .lp-card__heart {
   position: absolute;
   top: 10px;

@@ -424,3 +424,18 @@ body {
 .cart-empty__link:hover {
   text-decoration: underline;
 }
+
+/* Disabled qty buttons */
+.qty-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Max-stock hint under the qty row */
+.cart-row__stock-warn {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  color: #b7791f;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
