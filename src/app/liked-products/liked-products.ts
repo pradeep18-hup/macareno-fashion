@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LikesService, LikedProductDetails } from '../services/likes.service';
-import { ProductService } from '../services/product.service';   // 👈 for imageUrl()
+import { ProductService } from '../services/product.service';
 
 @Component({
   selector: 'app-liked-products',
@@ -14,7 +14,7 @@ import { ProductService } from '../services/product.service';   // 👈 for imag
 export class LikedProductsComponent implements OnInit {
 
   private likesService = inject(LikesService);
-  private productService = inject(ProductService);   // 👈 NEW
+  private productService = inject(ProductService);
 
   items = signal<LikedProductDetails[]>([]);
   loading = signal(true);
@@ -28,7 +28,7 @@ export class LikedProductsComponent implements OnInit {
 
     this.likesService.getLikedProductsDetailed().subscribe({
       next: (list) => {
-        // Prefix relative photo paths with the backend URL
+        // Prefix relative photo paths with backend base URL
         const withUrls = (list || []).map(item => ({
           ...item,
           image: item.image ? this.productService.imageUrl(item.image) : undefined
@@ -44,19 +44,18 @@ export class LikedProductsComponent implements OnInit {
     });
   }
 
-  // 👇 ADDED — used by *ngFor trackBy
+  /** 👈 Angular *ngFor trackBy — required by the template */
   trackById(_: number, item: LikedProductDetails): number {
     return item.productId;
   }
 
-  // 👇 ADDED — click handler on the card's heart button
+  /** 👈 Un-like button handler on each card */
   unlike(event: Event, productId: number): void {
     event.preventDefault();
     event.stopPropagation();
 
     this.likesService.remove(productId).subscribe({
       next: () => {
-        // Remove from the local list so the UI updates instantly
         this.items.update(list => list.filter(i => i.productId !== productId));
       },
       error: (err) => {

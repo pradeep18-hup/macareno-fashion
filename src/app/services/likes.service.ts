@@ -18,34 +18,27 @@ export class LikesService {
 
   private readonly api = 'http://localhost:8080/api/likes';
 
-  /** Set of liked product IDs for the current user. */
   private readonly likedIds = signal<Set<number>>(new Set());
 
-  /** Reactive count for the navbar badge. */
   readonly likedCount = computed(() => this.likedIds().size);
 
-  /** Is the given product currently liked? */
   isLiked(productId: number): boolean {
     return this.likedIds().has(productId);
   }
 
-  /** Load liked product IDs from the backend. Call on login / app init. */
   loadLikes(): void {
     if (!this.authService.isCustomer()) {
       this.likedIds.set(new Set());
       return;
     }
-
     this.http.get<number[]>(this.api).subscribe({
       next: (ids) => this.likedIds.set(new Set(ids || [])),
       error: () => this.likedIds.set(new Set())
     });
   }
 
-  /** Toggle like state. Returns the NEW state (true = liked). */
   toggle(productId: number): Observable<boolean> {
     const wasLiked = this.likedIds().has(productId);
-
     const req$: Observable<unknown> = wasLiked
       ? this.http.delete<void>(`${this.api}/${productId}`)
       : this.http.post<void>(`${this.api}/${productId}`, {});
@@ -60,12 +53,11 @@ export class LikesService {
       }),
       catchError((err) => {
         console.error('Like toggle failed', err);
-        return of(wasLiked); // revert on failure
+        return of(wasLiked);
       })
     );
   }
 
-  /** Explicit add. */
   add(productId: number): Observable<void> {
     return this.http.post<void>(`${this.api}/${productId}`, {}).pipe(
       tap(() => {
@@ -76,7 +68,6 @@ export class LikesService {
     );
   }
 
-  /** Explicit remove. */
   remove(productId: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${productId}`).pipe(
       tap(() => {
@@ -87,7 +78,6 @@ export class LikesService {
     );
   }
 
-  /** Fetch enriched liked products for the /liked-products page. */
   getLikedProductsDetailed(): Observable<LikedProductDetails[]> {
     return this.http.get<LikedProductDetails[]>(`${this.api}/details`);
   }
