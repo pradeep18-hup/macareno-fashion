@@ -7,6 +7,7 @@ import {
   ProductResponse,
   DressType
 } from '../services/product.service';
+import { LikesService } from '../services/likes.service';
 
 export interface Product {
   id: number;
@@ -39,6 +40,7 @@ export interface Product {
 export class HeroComponent implements OnInit {
 
   private productService = inject(ProductService);
+  private likesService = inject(LikesService);
   private router = inject(Router);
 
   // ---------- UI state ----------
@@ -51,11 +53,12 @@ export class HeroComponent implements OnInit {
 
   // ---------- Lifecycle ----------
   ngOnInit(): void {
+    this.likesService.loadLikes();
     this.loadDressTypes();
     this.loadProducts();
   }
 
-  // ---------- Load dress types (for filter tabs) ----------
+  // ---------- Load dress types ----------
   private loadDressTypes(): void {
     this.productService.getDressTypes().subscribe({
       next: (list: DressType[]) => {
@@ -68,7 +71,7 @@ export class HeroComponent implements OnInit {
     });
   }
 
-  // ---------- Load products (for cards) ----------
+  // ---------- Load products ----------
   private loadProducts(): void {
     this.loading.set(true);
     this.loadError.set('');
@@ -90,12 +93,13 @@ export class HeroComponent implements OnInit {
   reload(): void {
     this.loadDressTypes();
     this.loadProducts();
+    this.likesService.loadLikes();
   }
 
   // ---------- Map backend → UI ----------
   private mapToUiProduct(p: ProductResponse): Product {
     const images = (p.photoUrls || []).map(u => this.productService.imageUrl(u));
-    const firstImage = images[0] || 'assets/placeholder-product.jpg';
+    const firstImage = images[0] || 'assets/placeholder-product.svg';
     const mrp = p.price;
     const sellingPrice = (p.offerPrice && p.offerPrice > 0) ? p.offerPrice : p.price;
 
@@ -121,13 +125,29 @@ export class HeroComponent implements OnInit {
     };
   }
 
-  // ---------- UI events ----------
-  toggleFavorite(product: Product, event: Event): void {
-    event.stopPropagation();
-    product.isFavorite = !product.isFavorite;
-    this.products.set([...this.products()]);
+  // ---------- Like (backend-backed) ----------
+  isLiked(productId: number): boolean {
+    return this.likesService.isLiked(productId);
   }
 
+  toggleFavorite(product: Product, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+
+    this.likesService.toggle(product.id).subscribe({
+      next: () => { /* reactive signal updates the UI automatically */ },
+      error: (err) => {
+        console.error('Like toggle failed', err);
+      }
+    });
+  }
+
+  // ---------- 👇 ADDED — used by *ngFor trackBy ----------
+  trackById(_: number, product: Product): number {
+    return product.id;
+  }
+
+  // ---------- UI events ----------
   selectCategory(category: string): void {
     this.activeCategory.set(category);
   }

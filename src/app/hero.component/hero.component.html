@@ -15,22 +15,35 @@
     </div>
 
     <div class="hero__gallery">
-      <img class="hero__img hero__img--top-left" src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=900&q=90" alt="Korean fashion editorial detail" />
-      <img class="hero__img hero__img--top-right" src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&w=700&q=90" alt="Macarena store interior" />
-      <img class="hero__img hero__img--center" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=90" alt="Model wearing oversized Korean streetwear coat" />
-      <img class="hero__img hero__img--mid-right" src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=700&q=90" alt="Close-up fashion detail" />
-      <img class="hero__img hero__img--bottom-left" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=90" alt="Model in oversized hoodie" />
-      <img class="hero__img hero__img--bottom-right" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=90" alt="Korean clothing rack" />
+      <img class="hero__img hero__img--top-left"
+           src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=900&q=90"
+           alt="Korean fashion editorial detail" />
+      <img class="hero__img hero__img--top-right"
+           src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&w=700&q=90"
+           alt="Macarena store interior" />
+      <img class="hero__img hero__img--center"
+           src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=90"
+           alt="Model wearing oversized Korean streetwear coat" />
+      <img class="hero__img hero__img--mid-right"
+           src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=700&q=90"
+           alt="Close-up fashion detail" />
+      <img class="hero__img hero__img--bottom-left"
+           src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=90"
+           alt="Model in oversized hoodie" />
+      <img class="hero__img hero__img--bottom-right"
+           src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=90"
+           alt="Korean clothing rack" />
     </div>
   </div>
 </section>
 
 <!-- ===== FILTER SECTION ===== -->
-<section class="filter-section">
+<section class="filter-section" id="new-in">
   <div class="filter-container">
     <div class="filter-tabs">
       <button
         class="filter-tab"
+        type="button"
         *ngFor="let cat of categories()"
         [class.active]="activeCategory() === cat"
         (click)="selectCategory(cat)"
@@ -45,7 +58,7 @@
 </section>
 
 <!-- ===== CARDS SECTION ===== -->
-<section class="cards-section">
+<section class="cards-section" id="collections">
   <div class="cards-container">
 
     <!-- Loading -->
@@ -58,26 +71,39 @@
     </div>
 
     <!-- Grid -->
-    <div class="cards-grid"
-         *ngIf="!loading() && !loadError() && filteredProducts().length; else emptyState">
-
+    <div
+      class="cards-grid"
+      *ngIf="!loading() && !loadError() && filteredProducts().length; else emptyState"
+    >
       <div
         class="product-card"
-        *ngFor="let product of filteredProducts()"
+        *ngFor="let product of filteredProducts(); trackBy: trackById"
         (click)="openProduct(product)"
         role="button"
         tabindex="0"
         (keydown.enter)="openProduct(product)"
       >
-        <div class="card-image-wrapper" routerLink="product-detail">
+        <div class="card-image-wrapper">
           <img [src]="product.image" [alt]="product.name" loading="lazy" />
 
-          <button class="favorite-btn" (click)="toggleFavorite(product, $event)">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                    [attr.fill]="product.isFavorite ? 'currentColor' : 'none'"
-                    [style.color]="product.isFavorite ? '#6b1f2a' : 'currentColor'"/>
+          <button
+            class="favorite-btn"
+            type="button"
+            [class.favorite-btn--active]="isLiked(product.id)"
+            [attr.aria-label]="isLiked(product.id) ? 'Remove from likes' : 'Add to likes'"
+            (click)="toggleFavorite(product, $event)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              [attr.fill]="isLiked(product.id) ? 'currentColor' : 'none'"
+            >
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              />
             </svg>
           </button>
 

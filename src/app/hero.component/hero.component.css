@@ -599,3 +599,19 @@
     font-size: 0.7rem;
   }
 }
+
+.favorite-btn {
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.08);
+}
+
+.favorite-btn--active svg {
+  color: #6b1f2a;
+}
+
+.favorite-btn--active {
+  background: rgba(107, 31, 42, 0.08);
+}
