@@ -38,6 +38,7 @@
           <tr>
             <th class="col-index">#</th>
             <th>Name</th>
+            <th>Email</th>
             <th>Created</th>
             <th class="col-action">Action</th>
           </tr>
@@ -49,6 +50,7 @@
               <span class="avatar">{{ admin.name.charAt(0).toUpperCase() }}</span>
               <span>{{ admin.name }}</span>
             </td>
+            <td class="cell-muted" data-label="Email">{{ admin.email }}</td>
             <td class="cell-muted" data-label="Created">
               {{ admin.createdAt | date: 'dd MMM yyyy, hh:mm a' }}
             </td>
@@ -96,6 +98,7 @@
               aria-label="Close" (click)="closeForm()">×</button>
     </div>
 
+    <!-- Name -->
     <div class="form-group">
       <label for="adminName">Name</label>
       <input id="adminName" type="text" formControlName="name"
@@ -103,6 +106,22 @@
       <span class="error-text" *ngIf="isInvalid('name')">Name is required</span>
     </div>
 
+    <!-- Email -->
+    <div class="form-group">
+      <label for="adminEmail">Email</label>
+      <input id="adminEmail" type="email" formControlName="email"
+             placeholder="admin@macarena.com" autocomplete="email" />
+      <span class="error-text"
+            *ngIf="adminForm.get('email')?.touched && adminForm.get('email')?.hasError('required')">
+        Email is required
+      </span>
+      <span class="error-text"
+            *ngIf="adminForm.get('email')?.touched && adminForm.get('email')?.hasError('email')">
+        Enter a valid email
+      </span>
+    </div>
+
+    <!-- Password -->
     <div class="form-group">
       <label for="adminPassword">Password</label>
       <div class="password-row">
@@ -120,6 +139,7 @@
       </span>
     </div>
 
+    <!-- Confirm Password -->
     <div class="form-group">
       <label for="adminConfirm">Confirm Password</label>
       <input id="adminConfirm"

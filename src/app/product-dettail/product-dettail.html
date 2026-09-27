@@ -1,22 +1,41 @@
 <section class="pd-wrap">
   <div class="pd-container">
-    <div class="pd-grid">
+
+    <!-- Loading -->
+    <div class="pd-state" *ngIf="loading()">Loading product…</div>
+
+    <!-- Error -->
+    <div class="pd-state pd-state--error" *ngIf="!loading() && loadError()">
+      ⚠️ {{ loadError() }}
+    </div>
+
+    <!-- Product content -->
+    <div class="pd-grid" *ngIf="!loading() && !loadError()">
 
       <!-- ===== GALLERY ===== -->
       <div class="pd-gallery">
         <div class="pd-gallery__main">
-          <img [src]="product().images[activeImageIndex()]" [alt]="product().name" />
-          <button class="pd-favorite" (click)="toggleFavorite()">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <img
+            [src]="product().images[activeImageIndex()] || 'assets/placeholder-product.jpg'"
+            [alt]="product().name" />
+
+          <button
+            class="pd-favorite"
+            type="button"
+            [class.pd-favorite--active]="isLiked()"
+            [disabled]="liking()"
+            [attr.aria-label]="isLiked() ? 'Remove from likes' : 'Add to likes'"
+            (click)="toggleFavorite()">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 [attr.fill]="isLiked() ? 'currentColor' : 'none'">
               <path
-                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                [attr.fill]="product().isFavorite ? 'currentColor' : 'none'"
-                [style.color]="product().isFavorite ? '#6b1f2a' : 'currentColor'" />
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
         </div>
 
-        <div class="pd-thumbs">
+        <div class="pd-thumbs" *ngIf="product().images.length > 1">
           <button
             class="pd-thumb"
             *ngFor="let img of product().images; let i = index"
@@ -33,205 +52,132 @@
         <p class="pd-category">{{ product().category }}</p>
         <h1 class="pd-title">{{ product().name }}</h1>
 
-        <div class="pd-rating-row">
+        <div class="pd-rating-row" *ngIf="product().rating > 0">
           <span class="pd-rating-badge">{{ product().rating }} ★</span>
-          <span class="pd-rating-count">{{ product().ratingCount | number }} ratings</span>
+          <span class="pd-rating-count">
+            {{ product().ratingCount | number }} ratings
+          </span>
         </div>
 
         <div class="pd-price-row">
           <span class="pd-price">{{ formatPrice(product().price) }}</span>
-          <span class="pd-mrp" *ngIf="product().mrp > product().price">{{ formatPrice(product().mrp) }}</span>
-          <span class="pd-discount" *ngIf="discount() > 0">{{ discount() }}% off</span>
+          <span class="pd-mrp" *ngIf="product().mrp > product().price">
+            {{ formatPrice(product().mrp) }}
+          </span>
+          <span class="pd-discount" *ngIf="discount() > 0">
+            {{ discount() }}% off
+          </span>
         </div>
         <p class="pd-tax-note">Inclusive of all taxes</p>
 
         <!-- Sizes -->
-        <div class="pd-size-block" *ngIf="product().sizes.length && product().sizes[0] !== 'One Size'">
+        <div class="pd-size-block"
+             *ngIf="product().sizes.length && product().sizes[0] !== 'One Size'">
           <p class="pd-block-label">Select Size</p>
           <div class="pd-size-row">
             <button
               class="pd-size-btn"
               *ngFor="let size of product().sizes"
               [class.active]="selectedSize() === size"
+              [class.out-of-stock]="stockFor(size) <= 0"
+              [disabled]="stockFor(size) <= 0"
               (click)="selectSize(size)"
             >
-              {{ size }}
+              <span class="pd-size-label">{{ size }}</span>
+              <span class="pd-size-stock">{{ stockFor(size) }}</span>
             </button>
           </div>
+
+          <p class="pd-stock-warn"
+             *ngIf="selectedSize() && selectedSizeStock() > 0 && selectedSizeStock() <= 3">
+            Only {{ selectedSizeStock() }} left in this size
+          </p>
         </div>
 
         <!-- Quantity -->
         <div class="pd-qty-block">
-          <p class="pd-block-label">Quantity</p>
+          <p class="pd-block-label">
+            Quantity
+            <span class="pd-stock-hint">
+              · min {{ minOrderQty }}<ng-container *ngIf="maxQuantity() > 0 && maxQuantity() < 99"> · max {{ maxQuantity() }}</ng-container>
+            </span>
+          </p>
           <div class="pd-qty-control">
-            <button class="pd-qty-btn" (click)="decreaseQuantity()">−</button>
+            <button class="pd-qty-btn" (click)="decreaseQuantity()"
+                    [disabled]="quantity() <= minOrderQty">−</button>
             <span class="pd-qty-value">{{ quantity() }}</span>
-            <button class="pd-qty-btn" (click)="increaseQuantity()">+</button>
+            <button class="pd-qty-btn" (click)="increaseQuantity()"
+                    [disabled]="quantity() >= maxQuantity()">+</button>
           </div>
         </div>
 
         <!-- CTA -->
         <div class="pd-cta-row">
-          <button class="pd-btn pd-btn--primary" (click)="buyNow()">Buy Now</button>
-          <button class="pd-btn pd-btn--secondary" routerLink="/cart">Add to Cart</button>
+          <!-- Buy Now — commented out
+          <button class="pd-btn pd-btn--primary"
+                  (click)="buyNow()"
+                  [disabled]="addingToCart()">
+            {{ addingToCart() ? 'Processing…' : 'Buy Now' }}
+          </button>
+          -->
+
+          <button class="pd-btn pd-btn--primary pd-btn--full"
+                  (click)="addToCart()"
+                  [disabled]="addingToCart()">
+            {{ addingToCart() ? 'Adding…' : 'Add to Cart' }}
+          </button>
         </div>
 
-        <!-- Delivery -->
-        <div class="pd-delivery-card">
-          <p class="pd-block-label">Delivery Details</p>
-
-          <div class="pd-pincode-row">
-            <input
-              class="pd-pincode-input"
-              type="text"
-              maxlength="6"
-              placeholder="Enter pincode"
-              [ngModel]="pincode()"
-              (ngModelChange)="pincode.set($event)"
-            />
-            <button class="pd-check-btn" (click)="checkDelivery()">Check</button>
+        <!-- Trust badges -->
+        <div class="pd-badges">
+          <div class="pd-badge">
+            <div class="pd-badge__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="6" width="16" height="14" rx="2" />
+                <path d="M4 10h16" />
+                <path d="M9 15l2 2 4-4" />
+              </svg>
+            </div>
+            <span class="pd-badge__label">Secure</span>
+            <span class="pd-badge__desc">Packaging</span>
           </div>
 
-          <ul class="pd-delivery-list">
-            <li>
-              <span class="pd-delivery-icon">🚚</span>
-              <span>
-                <strong>{{ product().deliveryCharge === 0 ? 'Free Delivery' : formatPrice(product().deliveryCharge) + ' delivery charge' }}</strong>
-                <ng-container *ngIf="deliveryChecked()">
-                  — arrives in <strong>{{ product().deliveryDays }} days</strong> to {{ pincode() }}
-                </ng-container>
-                <ng-container *ngIf="!deliveryChecked()">
-                  — usually arrives in {{ product().deliveryDays }} days
-                </ng-container>
-              </span>
-            </li>
-            <li>
-              <span class="pd-delivery-icon">💵</span>
-              <span>{{ product().codAvailable ? 'Cash on Delivery available' : 'Cash on Delivery not available' }}</span>
-            </li>
-            <li>
-              <span class="pd-delivery-icon">↩️</span>
-              <span>{{ product().returnPolicyDays }}-day easy return &amp; exchange</span>
-            </li>
-          </ul>
-
-          <!-- ===== DELIVERY ADDRESS MODULE ===== -->
-          <div class="pd-address-block">
-            <p class="pd-block-label">Delivery Address</p>
-
-            <!-- Saved address summary -->
-            <div class="pd-address-card" *ngIf="savedAddress() as addr; else noAddress">
-              <div class="pd-address-card__text">
-                <p class="pd-address-name">{{ addr.fullName || 'Recipient' }} <span *ngIf="addr.phone">· {{ addr.phone }}</span></p>
-                <p class="pd-address-line">
-                  {{ addr.houseNo }}, {{ addr.street }}<ng-container *ngIf="addr.landmark">, near {{ addr.landmark }}</ng-container>
-                </p>
-                <p class="pd-address-line">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
-              </div>
-              <div class="pd-address-card__actions">
-                <button class="pd-address-edit" (click)="openAddressForm()">Edit</button>
-                <button class="pd-address-remove" (click)="removeAddress()">Remove</button>
-              </div>
+          <div class="pd-badge">
+            <div class="pd-badge__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7h13v10H3z" />
+                <path d="M16 10h3l2 3v4h-5" />
+                <circle cx="7" cy="17" r="1.6" />
+                <circle cx="18" cy="17" r="1.6" />
+              </svg>
             </div>
+            <span class="pd-badge__label">Delivery</span>
+            <span class="pd-badge__desc">in 4–7 days</span>
+          </div>
 
-            <ng-template #noAddress>
-              <button class="pd-add-address-btn" (click)="openAddressForm()" *ngIf="!showAddressForm()">
-                + Add Delivery Address
-              </button>
-            </ng-template>
-
-            <!-- Address entry form -->
-            <div class="pd-address-form" *ngIf="showAddressForm()">
-              <div class="pd-address-form__row">
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  placeholder="Full name"
-                  [ngModel]="addressDraft().fullName"
-                  (ngModelChange)="addressField('fullName', $event)"
-                />
-                <input
-                  class="pd-address-input"
-                  type="tel"
-                  maxlength="10"
-                  placeholder="Phone number"
-                  [ngModel]="addressDraft().phone"
-                  (ngModelChange)="addressField('phone', $event)"
-                />
-              </div>
-
-              <div class="pd-address-form__row">
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  placeholder="House / Flat no."
-                  [ngModel]="addressDraft().houseNo"
-                  (ngModelChange)="addressField('houseNo', $event)"
-                />
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  placeholder="Street / Area"
-                  [ngModel]="addressDraft().street"
-                  (ngModelChange)="addressField('street', $event)"
-                />
-              </div>
-
-              <div class="pd-address-form__row">
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  placeholder="Landmark (optional)"
-                  [ngModel]="addressDraft().landmark"
-                  (ngModelChange)="addressField('landmark', $event)"
-                />
-              </div>
-
-              <div class="pd-address-form__row">
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  placeholder="City"
-                  [ngModel]="addressDraft().city"
-                  (ngModelChange)="addressField('city', $event)"
-                />
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  placeholder="State"
-                  [ngModel]="addressDraft().state"
-                  (ngModelChange)="addressField('state', $event)"
-                />
-                <input
-                  class="pd-address-input"
-                  type="text"
-                  maxlength="6"
-                  placeholder="Pincode"
-                  [ngModel]="addressDraft().pincode"
-                  (ngModelChange)="addressField('pincode', $event)"
-                />
-              </div>
-
-              <p class="pd-address-error" *ngIf="addressError()">{{ addressError() }}</p>
-
-              <div class="pd-address-form__actions">
-                <button class="pd-btn pd-btn--secondary" (click)="cancelAddressForm()">Cancel</button>
-                <button class="pd-btn pd-btn--primary" (click)="saveAddress()">Save Address</button>
-              </div>
+          <div class="pd-badge">
+            <div class="pd-badge__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3l18 18" />
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l4.5-4.5" />
+              </svg>
             </div>
+            <span class="pd-badge__label">No Return</span>
+            <span class="pd-badge__desc">on this item</span>
           </div>
         </div>
 
-        <!-- Highlights -->
-        <div class="pd-info-block">
+        <div class="pd-info-block" *ngIf="product().highlights.length">
           <p class="pd-block-label">Highlights</p>
           <ul class="pd-highlights">
             <li *ngFor="let h of product().highlights">{{ h }}</li>
           </ul>
         </div>
 
-        <!-- Description -->
-        <div class="pd-info-block">
+        <div class="pd-info-block" *ngIf="product().description">
           <p class="pd-block-label">Description</p>
           <p class="pd-description">{{ product().description }}</p>
         </div>

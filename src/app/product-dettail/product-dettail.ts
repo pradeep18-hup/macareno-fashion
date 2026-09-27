@@ -1,7 +1,10 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
+import { ProductService, ProductResponse } from '../services/product.service';
+import { CartService } from '../services/cart.service';
+import { LikesService } from '../services/likes.service';
 
 export interface Product {
   id: number;
@@ -16,64 +19,30 @@ export interface Product {
   description: string;
   highlights: string[];
   sizes: string[];
+  sizeStock: Record<string, number>;
   deliveryCharge: number;
   deliveryDays: number;
-  codAvailable: boolean;
-  returnPolicyDays: number;
 }
 
-export interface DeliveryAddress {
-  fullName: string;
-  phone: string;
-  houseNo: string;
-  street: string;
-  landmark: string;
-  city: string;
-  state: string;
-  pincode: string;
-}
-
-// ===== FAKE PRODUCT (no route, no API) =====
-const FAKE_PRODUCT: Product = {
-  id: 1,
-  name: 'Seoul Silk Midi Dress',
-  price: 199,
-  mrp: 399,
-  images: [
-    'https://images.unsplash.com/photo-1612336307429-8a898d10e223?auto=format&fit=crop&w=1000&q=90',
-    'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1000&q=90',
-    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=90',
-    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=90'
-  ],
-  category: 'Dresses',
-  rating: 4.8,
-  ratingCount: 1243,
+const EMPTY_PRODUCT: Product = {
+  id: 0,
+  name: '',
+  price: 0,
+  mrp: 0,
+  images: [],
+  category: '',
+  rating: 0,
+  ratingCount: 0,
   isFavorite: false,
-  description:
-    'A fluid silk-blend midi dress cut for everyday ease. Soft drape, bias-inspired seaming and a relaxed silhouette that moves with you.',
-  highlights: [
-    '100% mulberry silk blend',
-    'Bias-cut, relaxed fit',
-    'Hidden side-zip closure',
-    'Dry clean only'
-  ],
-  sizes: ['XS', 'S', 'M', 'L', 'XL'],
+  description: '',
+  highlights: [],
+  sizes: [],
+  sizeStock: {},
   deliveryCharge: 0,
-  deliveryDays: 4,
-  codAvailable: true,
-  returnPolicyDays: 14
+  deliveryDays: 5
 };
 
-const EMPTY_ADDRESS: DeliveryAddress = {
-  fullName: '',
-  phone: '',
-  houseNo: '',
-  street: '',
-  landmark: '',
-  city: '',
-  state: '',
-  pincode: ''
-};
+const MIN_ORDER_QTY = 5;
 
 @Component({
   selector: 'app-product-detail',
@@ -82,116 +51,205 @@ const EMPTY_ADDRESS: DeliveryAddress = {
   templateUrl: './product-dettail.html',
   styleUrl: './product-dettail.css'
 })
-export class ProductDetailComponent {
-  product = signal<Product>({ ...FAKE_PRODUCT });
+export class ProductDetailComponent implements OnInit {
+
+  private productService = inject(ProductService);
+  private cartService = inject(CartService);
+  private likesService = inject(LikesService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
+  product = signal<Product>({ ...EMPTY_PRODUCT });
+  loading = signal(true);
+  loadError = signal('');
 
   activeImageIndex = signal(0);
   selectedSize = signal<string | null>(null);
-  quantity = signal(1);
-  pincode = signal('');
-  deliveryChecked = signal(false);
+  quantity = signal(MIN_ORDER_QTY);
+  addingToCart = signal(false);
+  liking = signal(false);
+
+  readonly minOrderQty = MIN_ORDER_QTY;
 
   discount = computed(() => {
     const p = this.product();
-    return p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+    return p.mrp > p.price
+      ? Math.round(((p.mrp - p.price) / p.mrp) * 100)
+      : 0;
   });
 
   totalPrice = computed(() => this.product().price * this.quantity());
 
-  setActiveImage(i: number) {
-    this.activeImageIndex.set(i);
+  /** True if the currently loaded product is liked. */
+  isLiked = computed<boolean>(() => {
+    const id = this.product().id;
+    return id > 0 && this.likesService.isLiked(id);
+  });
+
+  selectedSizeStock = computed<number>(() => {
+    const size = this.selectedSize();
+    if (!size) return 0;
+    return this.product().sizeStock[size] ?? 0;
+  });
+
+  maxQuantity = computed<number>(() => {
+    const p = this.product();
+    if (!p.sizes.length) return 99;
+    if (p.sizes.length === 1 && p.sizes[0] === 'One Size') {
+      return p.sizeStock['One Size'] ?? 99;
+    }
+    if (!this.selectedSize()) return 0;
+    return this.selectedSizeStock();
+  });
+
+  ngOnInit(): void {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+
+    // Ensure like state is fresh
+    this.likesService.loadLikes();
+
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? Number(idParam) : null;
+
+    if (!id || Number.isNaN(id)) {
+      this.router.navigate(['/']);
+      return;
+    }
+    this.loadProduct(id);
   }
 
-  selectSize(size: string) {
+  private loadProduct(id: number): void {
+    this.loading.set(true);
+    this.loadError.set('');
+
+    this.productService.getById(id).subscribe({
+      next: (p: ProductResponse) => {
+        const uiProduct = this.mapToUiProduct(p);
+        this.product.set(uiProduct);
+
+        if (uiProduct.sizes.length === 1) {
+          this.selectedSize.set(uiProduct.sizes[0]);
+        }
+
+        this.loading.set(false);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      },
+      error: (err: any) => {
+        console.error('Failed to load product', err);
+        this.loadError.set(err?.error?.error || 'Failed to load product.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private mapToUiProduct(p: ProductResponse): Product {
+    const images = (p.photoUrls || []).map(u => this.productService.imageUrl(u));
+    const firstImage = images[0] || 'assets/placeholder-product.jpg';
+    const mrp = p.price;
+    const sellingPrice = (p.offerPrice && p.offerPrice > 0) ? p.offerPrice : p.price;
+
+    const rawSizes: any[] = p.sizes || [];
+    const sizeLabels: string[] = rawSizes.map(s => s.size);
+    const sizeStock: Record<string, number> = {};
+    rawSizes.forEach(s => {
+      sizeStock[s.size] =
+        s.quantity ?? s.stock ?? s.availableQty ?? s.available ?? s.qty ?? s.count ?? 0;
+    });
+
+    return {
+      id: p.id,
+      name: p.dressName,
+      price: sellingPrice,
+      mrp: mrp,
+      images: images.length ? images : [firstImage],
+      category: p.dressTypeName || 'Uncategorised',
+      rating: 0,
+      ratingCount: 0,
+      isFavorite: false,
+      description: '',
+      highlights: [],
+      sizes: sizeLabels,
+      sizeStock,
+      deliveryCharge: 0,
+      deliveryDays: 5
+    };
+  }
+
+  setActiveImage(i: number): void { this.activeImageIndex.set(i); }
+
+  selectSize(size: string): void {
+    const stock = this.product().sizeStock[size] ?? 0;
+    if (stock <= 0) return;
     this.selectedSize.set(size);
+    if (this.quantity() > stock) this.quantity.set(Math.max(1, stock));
   }
 
-  increaseQuantity() {
-    this.quantity.update(q => q + 1);
+  stockFor(size: string): number {
+    return this.product().sizeStock[size] ?? 0;
   }
 
-  decreaseQuantity() {
-    if (this.quantity() > 1) this.quantity.update(q => q - 1);
+  increaseQuantity(): void {
+    const max = this.maxQuantity();
+    if (this.quantity() < max) this.quantity.update(q => q + 1);
   }
 
-  toggleFavorite() {
-    this.product.update(p => ({ ...p, isFavorite: !p.isFavorite }));
+  decreaseQuantity(): void {
+    if (this.quantity() > MIN_ORDER_QTY) this.quantity.update(q => q - 1);
   }
 
-  checkDelivery() {
-    if (this.pincode().trim().length >= 4) this.deliveryChecked.set(true);
+  // ---------- Favorite (backend-backed) ----------
+  toggleFavorite(): void {
+    const id = this.product().id;
+    if (!id) return;
+
+    this.liking.set(true);
+    this.likesService.toggle(id).subscribe({
+      next: () => this.liking.set(false),
+      error: () => {
+        this.liking.set(false);
+        alert('Could not update likes. Please try again.');
+      }
+    });
   }
 
   formatPrice(price: number): string {
     return '₹' + price.toLocaleString('en-IN');
   }
 
-  addToCart() {
+  private validateSelection(): string | null {
     const p = this.product();
     if (p.sizes.length && p.sizes[0] !== 'One Size' && !this.selectedSize()) {
-      alert('Please select a size first.');
-      return;
+      return 'Please select a size first.';
     }
-    alert(
-      `Added ${this.quantity()} x ${p.name} (${this.selectedSize() ?? 'One Size'}) to cart!\nTotal: ${this.formatPrice(this.totalPrice())}`
-    );
-  }
-
-  buyNow() {
-    this.addToCart();
-  }
-
-  // ===================== DELIVERY ADDRESS MODULE =====================
-
-  /** The address the customer has saved, or null if none saved yet */
-  savedAddress = signal<DeliveryAddress | null>(null);
-
-  /** Whether the "enter address" form is currently open */
-  showAddressForm = signal(false);
-
-  /** Draft values while the form is open (only committed on save) */
-  addressDraft = signal<DeliveryAddress>({ ...EMPTY_ADDRESS });
-
-  /** Validation message for the address form, empty when valid */
-  addressError = signal('');
-
-  addressField<K extends keyof DeliveryAddress>(key: K, value: string) {
-    this.addressDraft.update(a => ({ ...a, [key]: value }));
-  }
-
-  openAddressForm() {
-    // Pre-fill the form with the saved address if the user is editing
-    this.addressDraft.set(this.savedAddress() ? { ...this.savedAddress()! } : { ...EMPTY_ADDRESS });
-    this.addressError.set('');
-    this.showAddressForm.set(true);
-  }
-
-  cancelAddressForm() {
-    this.showAddressForm.set(false);
-    this.addressError.set('');
-  }
-
-  saveAddress() {
-    const a = this.addressDraft();
-
-    if (!a.houseNo.trim() || !a.street.trim() || !a.city.trim() || !a.pincode.trim()) {
-      this.addressError.set('House no, street, city and pincode are required.');
-      return;
+    const max = this.maxQuantity();
+    if (max <= 0) return 'This item is out of stock.';
+    if (this.quantity() < MIN_ORDER_QTY) {
+      return `Minimum order quantity is ${MIN_ORDER_QTY}.`;
     }
-    if (!/^\d{6}$/.test(a.pincode.trim())) {
-      this.addressError.set('Enter a valid 6-digit pincode.');
-      return;
+    if (this.quantity() > max) {
+      return `Only ${max} unit${max === 1 ? '' : 's'} available.`;
     }
-
-    this.savedAddress.set({ ...a });
-    this.pincode.set(a.pincode.trim());
-    this.deliveryChecked.set(true);
-    this.showAddressForm.set(false);
-    this.addressError.set('');
+    return null;
   }
 
-  removeAddress() {
-    this.savedAddress.set(null);
-    this.deliveryChecked.set(false);
+  addToCart(): void {
+    const error = this.validateSelection();
+    if (error) { alert(error); return; }
+
+    const p = this.product();
+    const size = this.selectedSize() ?? 'One Size';
+    this.addingToCart.set(true);
+
+    this.cartService.addToCart(p.id, size, this.quantity()).subscribe({
+      next: () => {
+        this.addingToCart.set(false);
+        alert(`Added ${this.quantity()} × ${p.name} (${size}) to cart.`);
+        this.router.navigate(['/cart']);
+      },
+      error: (err) => {
+        this.addingToCart.set(false);
+        alert(err?.error?.error || 'Failed to add to cart.');
+      }
+    });
   }
 }

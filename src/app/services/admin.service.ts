@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface AdminRequest {
   name: string;
+  email: string;
   password: string;
   confirmPassword: string;
 }
@@ -11,6 +12,7 @@ export interface AdminRequest {
 export interface AdminResponse {
   id: number;
   name: string;
+  email: string;
   createdAt: string;
   message?: string | null;
 }

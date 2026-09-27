@@ -1,5 +1,8 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, of, Observable } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 export type OrderStatus = 'new' | 'packed' | 'dispatched' | 'delivered' | 'cancelled' | 'returned';
 export type OrderTab = 'recent' | OrderStatus;
@@ -34,13 +37,9 @@ export interface Order {
   timeline: TimelineEvent[];
 }
 
-const SLA_HOURS = 48;          // Seller must dispatch within this time
-const RETURN_WINDOW_DAYS = 7;  // Customer can return within this period after delivery
+const SLA_HOURS = 48;
+const RETURN_WINDOW_DAYS = 7;
 const HOUR = 3600000;
-
-// Sample data helpers: a date N hours before now
-const hoursAgo = (h: number): Date => new Date(Date.now() - h * HOUR);
-const ev = (status: OrderStatus, h: number, note?: string): TimelineEvent => ({ status, at: hoursAgo(h), note });
 
 @Component({
   selector: 'app-orders',
@@ -49,76 +48,15 @@ const ev = (status: OrderStatus, h: number, note?: string): TimelineEvent => ({ 
   templateUrl: './orders.html',
   styleUrl: './orders.css'
 })
-export class Orders {
-  // Sample data. Replace with real data later.
-  orders: Order[] = [
-    {
-      id: 'ORD-1010', customer: 'Gokul Krishnan', phone: '9500987654', city: 'Salem',
-      address: '12, Gandhi Road, Fairlands, Salem - 636016', paymentMode: 'Prepaid',
-      items: [{ name: 'Cotton Kurti', size: 'M', qty: 2, price: 1249.5 }], amount: 2499,
-      status: 'new', orderedAt: hoursAgo(2), trackingId: null, courier: null, timeline: [ev('new', 2)]
-    },
-    {
-      id: 'ORD-1009', customer: 'Nisha Fathima', phone: '9003456712', city: 'Vellore',
-      address: '45, Anna Salai, Katpadi, Vellore - 632007', paymentMode: 'COD',
-      items: [{ name: 'Denim Jacket', size: 'L', qty: 1, price: 1299 }], amount: 1299,
-      status: 'new', orderedAt: hoursAgo(20), trackingId: null, courier: null, timeline: [ev('new', 20)]
-    },
-    {
-      id: 'ORD-1008', customer: 'Lavanya R', phone: '9791234567', city: 'Chennai',
-      address: '7, Lake View Street, T Nagar, Chennai - 600017', paymentMode: 'Prepaid',
-      items: [
-        { name: 'Silk Saree', size: 'Free', qty: 1, price: 3200 },
-        { name: 'Blouse Piece', size: 'Free', qty: 1, price: 950 }
-      ], amount: 4150,
-      status: 'new', orderedAt: hoursAgo(52), trackingId: null, courier: null, timeline: [ev('new', 52)]
-    },
-    {
-      id: 'ORD-1007', customer: 'Vignesh M', phone: '9600123456', city: 'Coimbatore',
-      address: '88, Race Course Road, Coimbatore - 641018', paymentMode: 'Prepaid',
-      items: [{ name: 'Slim Fit Shirt', size: '40', qty: 1, price: 899 }], amount: 899,
-      status: 'packed', orderedAt: hoursAgo(30), trackingId: null, courier: null,
-      timeline: [ev('new', 30), ev('packed', 12)]
-    },
-    {
-      id: 'ORD-1006', customer: 'Anitha Selvam', phone: '9871234560', city: 'Tiruppur',
-      address: '3, Kumaran Road, Tiruppur - 641601', paymentMode: 'COD',
-      items: [{ name: 'Cotton Frock', size: 'S', qty: 2, price: 1600 }], amount: 3200,
-      status: 'dispatched', orderedAt: hoursAgo(70), trackingId: 'TRK482915067', courier: 'Delhivery',
-      timeline: [ev('new', 70), ev('packed', 60), ev('dispatched', 46, 'Courier: Delhivery, Tracking ID: TRK482915067')]
-    },
-    {
-      id: 'ORD-1005', customer: 'Suresh Babu', phone: '9988776655', city: 'Erode',
-      address: '21, Perundurai Road, Erode - 638011', paymentMode: 'Prepaid',
-      items: [
-        { name: 'Jeans', size: '32', qty: 2, price: 1890 },
-        { name: 'T-Shirt', size: 'L', qty: 2, price: 555 }
-      ], amount: 4890,
-      status: 'delivered', orderedAt: hoursAgo(120), trackingId: 'TRK193746205', courier: 'DTDC',
-      timeline: [ev('new', 120), ev('packed', 110), ev('dispatched', 100, 'Courier: DTDC, Tracking ID: TRK193746205'), ev('delivered', 48)]
-    },
-    {
-      id: 'ORD-1004', customer: 'Meena Devi', phone: '9123456780', city: 'Trichy',
-      address: '9, Srirangam Main Road, Trichy - 620006', paymentMode: 'Prepaid',
-      items: [{ name: 'Lehenga', size: 'M', qty: 1, price: 6750 }], amount: 6750,
-      status: 'delivered', orderedAt: hoursAgo(300), trackingId: 'TRK550281934', courier: 'Xpressbees',
-      timeline: [ev('new', 300), ev('packed', 290), ev('dispatched', 280, 'Courier: Xpressbees, Tracking ID: TRK550281934'), ev('delivered', 240)]
-    },
-    {
-      id: 'ORD-1003', customer: 'Priya Sharma', phone: '9876543210', city: 'Coimbatore',
-      address: '15, Avinashi Road, Coimbatore - 641037', paymentMode: 'Prepaid',
-      items: [{ name: 'Gown', size: 'M', qty: 1, price: 2100 }], amount: 2100,
-      status: 'cancelled', orderedAt: hoursAgo(90), trackingId: null, courier: null,
-      timeline: [ev('new', 90), ev('cancelled', 80, 'Customer requested cancellation')]
-    },
-    {
-      id: 'ORD-1002', customer: 'Karthik Raj', phone: '9445098765', city: 'Salem',
-      address: '60, Omalur Main Road, Salem - 636009', paymentMode: 'COD',
-      items: [{ name: 'Trousers', size: '34', qty: 1, price: 1450 }], amount: 1450,
-      status: 'returned', orderedAt: hoursAgo(200), trackingId: 'TRK730164882', courier: 'Delhivery',
-      timeline: [ev('new', 200), ev('packed', 190), ev('dispatched', 180, 'Courier: Delhivery, Tracking ID: TRK730164882'), ev('returned', 130, 'Delivery failed: Customer refused delivery')]
-    }
-  ];
+export class Orders implements OnInit {
+
+  private http = inject(HttpClient);
+  private readonly api = 'http://localhost:8080/api/orders';
+
+  // ✅ Real data (loaded from API) — now a signal so change detection fires reliably
+  orders = signal<Order[]>([]);
+  loading = signal(true);
+  loadError = signal('');
 
   tabs: { key: OrderTab; label: string }[] = [
     { key: 'recent',     label: 'Recent' },
@@ -160,8 +98,6 @@ export class Orders {
     'Professional Couriers', 'ST Courier', 'Local delivery', 'Other'
   ];
 
-  // Tracking page templates. {id} is replaced with the tracking ID.
-  // Verify these URLs, couriers change their tracking pages sometimes.
   private readonly trackingUrls: Record<string, string> = {
     'Delhivery':  'https://www.delhivery.com/track-v2/package/{id}',
     'DTDC':       'https://www.dtdc.in/tracking.html',
@@ -172,13 +108,11 @@ export class Orders {
   activeTab: OrderTab = 'recent';
   searchTerm = '';
 
-  // Modal state
   detailOrder: Order | null = null;
   reasonOrder: Order | null = null;
   reasonType: ReasonType = 'cancel';
   selectedReason = '';
 
-  // Dispatch popup state
   dispatchOrder: Order | null = null;
   courierName = '';
   trackingInput = '';
@@ -187,23 +121,140 @@ export class Orders {
   toastMessage = '';
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // ---------- Derived data ----------
+  // ============================================================
+  // Lifecycle
+  // ============================================================
+  ngOnInit(): void {
+    this.loadOrders();
+  }
 
+  // ============================================================
+  // Load orders from backend
+  // ============================================================
+  loadOrders(): void {
+    this.loading.set(true);
+    this.loadError.set('');
+
+    this.http.get<any[]>(this.api).pipe(
+      switchMap((list) => {
+        if (!list || list.length === 0) return of<Order[]>([]);
+        const enriched$ = list.map(order => this.enrichOrder(order));
+        return forkJoin(enriched$);
+      })
+    ).subscribe({
+      next: (orders) => {
+        // Set as new array reference → signal emits → template re-renders
+        this.orders.set(orders);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.loadError.set(err?.error?.error || 'Failed to load orders.');
+      }
+    });
+  }
+
+  reload(): void {
+    this.loadOrders();
+  }
+
+  // ============================================================
+  // Map API order → UI Order
+  // ============================================================
+  private enrichOrder(apiOrder: any): Observable<Order> {
+    const items: any[] = apiOrder.items || [];
+
+    const uiItems: OrderItem[] = items.map(i => ({
+      name: i.productName || `Product #${i.productId}`,
+      size: i.size || 'One Size',
+      qty: i.quantity || 1,
+      price: i.unitPrice || 0
+    }));
+
+    const uiOrder: Order = {
+      id: `ORD-${apiOrder.id}`,
+      customer: apiOrder.fullName || 'Customer',
+      phone: apiOrder.phoneNumber || '',
+      city: apiOrder.city || '',
+      address: [
+        apiOrder.addressLine,
+        apiOrder.city,
+        apiOrder.state,
+        apiOrder.pincode
+      ].filter(Boolean).join(', '),
+      paymentMode: (apiOrder.paymentMethod === 'COD' ? 'COD' : 'Prepaid'),
+      items: uiItems,
+      amount: apiOrder.totalAmount || 0,
+      status: this.mapStatus(apiOrder.status),
+      orderedAt: new Date(apiOrder.createdAt || Date.now()),
+      trackingId: apiOrder.trackingId || null,
+      courier: apiOrder.courier || null,
+      timeline: this.buildTimeline(apiOrder)
+    };
+
+    return of(uiOrder);
+  }
+
+  private mapStatus(backendStatus: string): OrderStatus {
+    const s = (backendStatus || '').toUpperCase();
+    switch (s) {
+      case 'PENDING':
+      case 'TRIAL':
+      case 'PAID':
+        return 'new';
+      case 'PACKED':
+        return 'packed';
+      case 'SHIPPED':
+      case 'DISPATCHED':
+        return 'dispatched';
+      case 'DELIVERED':
+        return 'delivered';
+      case 'CANCELLED':
+        return 'cancelled';
+      case 'RETURNED':
+        return 'returned';
+      default:
+        return 'new';
+    }
+  }
+
+  private buildTimeline(apiOrder: any): TimelineEvent[] {
+    const created = new Date(apiOrder.createdAt || Date.now());
+    const events: TimelineEvent[] = [
+      { status: 'new', at: created, note: `Order #${apiOrder.id} placed` }
+    ];
+    const current = this.mapStatus(apiOrder.status);
+    if (current !== 'new') {
+      events.push({ status: current, at: new Date(), note: `Status: ${apiOrder.status}` });
+    }
+    return events;
+  }
+
+  // ============================================================
+  // Signal helper — force emit after in-place mutation
+  // ============================================================
+  private refreshOrders(): void {
+    this.orders.set([...this.orders()]);
+  }
+
+  // ============================================================
+  // Derived data
+  // ============================================================
   count(tab: OrderTab): number {
+    const list = this.orders();
     return tab === 'recent'
-      ? this.orders.length
-      : this.orders.filter(o => o.status === tab).length;
+      ? list.length
+      : list.filter(o => o.status === tab).length;
   }
 
   get overdueCount(): number {
-    return this.orders.filter(o => this.isOverdue(o)).length;
+    return this.orders().filter(o => this.isOverdue(o)).length;
   }
 
-  // Orders for the active tab, filtered by search, latest activity first
   get visibleOrders(): Order[] {
     const term = this.searchTerm.trim().toLowerCase();
 
-    return this.orders
+    return this.orders()
       .filter(o => this.activeTab === 'recent' || o.status === this.activeTab)
       .filter(o =>
         !term ||
@@ -216,7 +267,7 @@ export class Orders {
   }
 
   lastUpdate(order: Order): Date {
-    return order.timeline[order.timeline.length - 1].at;
+    return order.timeline[order.timeline.length - 1]?.at ?? order.orderedAt;
   }
 
   private eventTime(order: Order, status: OrderStatus): Date | null {
@@ -224,7 +275,7 @@ export class Orders {
   }
 
   lastNote(order: Order): string | undefined {
-    return order.timeline[order.timeline.length - 1].note;
+    return order.timeline[order.timeline.length - 1]?.note;
   }
 
   statusLabel(status: OrderStatus): string {
@@ -251,8 +302,9 @@ export class Orders {
     return labels[status];
   }
 
-  // ---------- Dispatch SLA ----------
-
+  // ============================================================
+  // SLA (dispatch)
+  // ============================================================
   private dispatchDeadline(order: Order): Date {
     return new Date(order.orderedAt.getTime() + SLA_HOURS * HOUR);
   }
@@ -273,8 +325,9 @@ export class Orders {
       : `Dispatch within ${diffH}h`;
   }
 
-  // ---------- Return window ----------
-
+  // ============================================================
+  // Return window
+  // ============================================================
   canReturn(order: Order): boolean {
     if (order.status !== 'delivered') return false;
     const deliveredAt = this.eventTime(order, 'delivered');
@@ -282,29 +335,41 @@ export class Orders {
     return Date.now() - deliveredAt.getTime() <= RETURN_WINDOW_DAYS * 24 * HOUR;
   }
 
-  // ---------- Status actions ----------
-
+  // ============================================================
+  // Status actions
+  // ============================================================
   private addEvent(order: Order, status: OrderStatus, note?: string): void {
     order.status = status;
     order.timeline = [...order.timeline, { status, at: new Date(), note }];
+    this.refreshOrders(); // ✅ force signal emit so template updates
   }
 
-  // New -> Packed
   pack(order: Order): void {
     if (order.status !== 'new') return;
-    this.addEvent(order, 'packed');
-    this.showToast(`${order.id} marked as packed`);
+    this.updateBackendStatus(order, 'PACKED');
   }
 
-  // Dispatched -> Delivered
   markDelivered(order: Order): void {
     if (order.status !== 'dispatched') return;
-    this.addEvent(order, 'delivered');
-    this.showToast(`${order.id} delivered to customer`);
+    this.updateBackendStatus(order, 'DELIVERED');
   }
 
-  // ---------- Dispatch with courier details (Packed -> Dispatched) ----------
+  private updateBackendStatus(order: Order, backendStatus: string): void {
+    const id = Number(order.id.replace('ORD-', ''));
+    this.http.put<any>(`${this.api}/${id}/status`, { status: backendStatus }).subscribe({
+      next: () => {
+        this.showToast(`${order.id} updated`);
+        this.reload();
+      },
+      error: (err) => {
+        this.showToast(err?.error?.error || 'Failed to update status');
+      }
+    });
+  }
 
+  // ============================================================
+  // Dispatch popup
+  // ============================================================
   openDispatch(order: Order): void {
     if (order.status !== 'packed') return;
     this.dispatchOrder = order;
@@ -332,7 +397,7 @@ export class Orders {
       this.dispatchError = 'Enter a valid tracking ID (6 to 30 letters or numbers)';
       return;
     }
-    if (this.orders.some(o => o.id !== order.id && o.trackingId === id)) {
+    if (this.orders().some(o => o.id !== order.id && o.trackingId === id)) {
       this.dispatchError = 'This tracking ID is already used for another order';
       return;
     }
@@ -344,15 +409,15 @@ export class Orders {
     this.closeDispatch();
   }
 
-  // ---------- Tracking link and sharing ----------
-
+  // ============================================================
+  // Tracking
+  // ============================================================
   trackingUrl(order: Order): string | null {
     if (!order.trackingId) return null;
     const template = order.courier ? this.trackingUrls[order.courier] : undefined;
     if (template) {
       return template.replace('{id}', encodeURIComponent(order.trackingId));
     }
-    // Fallback: search for the tracking ID
     const query = `${order.courier ?? ''} tracking ${order.trackingId}`.trim();
     return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
   }
@@ -386,15 +451,15 @@ export class Orders {
     }
   }
 
-  // ---------- CSV export for courier bulk upload ----------
-
-  // Orders that still need to be shipped
+  // ============================================================
+  // CSV export
+  // ============================================================
   get exportableCount(): number {
-    return this.orders.filter(o => o.status === 'new' || o.status === 'packed').length;
+    return this.orders().filter(o => o.status === 'new' || o.status === 'packed').length;
   }
 
   exportCsv(): void {
-    const rows = this.orders.filter(o => o.status === 'new' || o.status === 'packed');
+    const rows = this.orders().filter(o => o.status === 'new' || o.status === 'packed');
     if (!rows.length) {
       this.showToast('No orders to export');
       return;
@@ -421,7 +486,6 @@ export class Orders {
       ].map(cell).join(',');
     });
 
-    // BOM keeps Excel from breaking special characters
     const csv = '\uFEFF' + [header.map(cell).join(','), ...lines].join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -435,8 +499,9 @@ export class Orders {
     this.showToast(`${rows.length} orders exported`);
   }
 
-  // ---------- Reason modal (cancel, delivery failed, return) ----------
-
+  // ============================================================
+  // Reason modal
+  // ============================================================
   openReason(order: Order, type: ReasonType): void {
     this.reasonOrder = order;
     this.reasonType = type;
@@ -481,8 +546,9 @@ export class Orders {
     this.closeReason();
   }
 
-  // ---------- UI helpers ----------
-
+  // ============================================================
+  // UI helpers
+  // ============================================================
   setTab(tab: OrderTab): void {
     this.activeTab = tab;
   }

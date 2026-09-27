@@ -31,7 +31,7 @@
     <div class="filter-tabs">
       <button
         class="filter-tab"
-        *ngFor="let cat of categories"
+        *ngFor="let cat of categories()"
         [class.active]="activeCategory() === cat"
         (click)="selectCategory(cat)"
       >
@@ -44,10 +44,23 @@
   </div>
 </section>
 
-<!-- ===== CARDS SECTION (click card -> product detail page) ===== -->
+<!-- ===== CARDS SECTION ===== -->
 <section class="cards-section">
   <div class="cards-container">
-    <div class="cards-grid">
+
+    <!-- Loading -->
+    <div class="hero-state" *ngIf="loading()">Loading products…</div>
+
+    <!-- Error -->
+    <div class="hero-state hero-state--error" *ngIf="!loading() && loadError()">
+      ⚠️ {{ loadError() }}
+      <button type="button" class="hero-retry" (click)="reload()">Retry</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="cards-grid"
+         *ngIf="!loading() && !loadError() && filteredProducts().length; else emptyState">
+
       <div
         class="product-card"
         *ngFor="let product of filteredProducts()"
@@ -58,14 +71,18 @@
       >
         <div class="card-image-wrapper" routerLink="product-detail">
           <img [src]="product.image" [alt]="product.name" loading="lazy" />
+
           <button class="favorite-btn" (click)="toggleFavorite(product, $event)">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
                     [attr.fill]="product.isFavorite ? 'currentColor' : 'none'"
                     [style.color]="product.isFavorite ? '#6b1f2a' : 'currentColor'"/>
             </svg>
           </button>
-          <div class="card-badge">★ {{ product.rating }}</div>
+
+          <!-- Rating badge — only shows if rating > 0 -->
+          <div class="card-badge" *ngIf="product.rating > 0">★ {{ product.rating }}</div>
         </div>
 
         <div class="card-content">
@@ -73,12 +90,23 @@
 
           <div class="price-row">
             <span class="card-price">{{ formatPrice(product.price) }}</span>
-            <span class="card-mrp" *ngIf="product.mrp > product.price">{{ formatPrice(product.mrp) }}</span>
-            <span class="card-discount" *ngIf="getDiscount(product) > 0">{{ getDiscount(product) }}% off</span>
+            <span class="card-mrp" *ngIf="product.mrp > product.price">
+              {{ formatPrice(product.mrp) }}
+            </span>
+            <span class="card-discount" *ngIf="getDiscount(product) > 0">
+              {{ getDiscount(product) }}% off
+            </span>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Empty state -->
+    <ng-template #emptyState>
+      <div class="hero-state" *ngIf="!loading() && !loadError()">
+        No products found{{ activeCategory() !== 'All' ? ' in ' + activeCategory() : '' }}.
+      </div>
+    </ng-template>
+
   </div>
 </section>
-

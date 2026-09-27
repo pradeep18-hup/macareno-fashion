@@ -320,3 +320,107 @@ body {
     text-align: right;
   }
 }
+/* ============================================================
+   Minimum order notice
+   ============================================================ */
+.cart-min-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  color: #b91c1c;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin: 0 0 1rem;
+}
+
+.cart-min-notice__icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.cart-min-notice__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cart-min-notice__text strong {
+  font-weight: 700;
+}
+
+/* Success state — when minimum is met */
+.cart-min-notice--ok {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+/* Disabled Buy Now button */
+.cart-btn--primary:disabled {
+  background: var(--color-line);
+  color: var(--color-ink-soft);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.cart-btn--primary:disabled:hover {
+  background: var(--color-line);
+  box-shadow: none;
+}
+
+/* Loading / Error states */
+.cart-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+}
+
+.cart-state--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  max-width: 520px;
+  margin: 2rem auto;
+  padding: 1rem 1.25rem;
+}
+
+.retry-btn {
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.cart-empty__link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cart-empty__link:hover {
+  text-decoration: underline;
+}

@@ -27,7 +27,7 @@ export class Admin implements OnInit {
 
   private fb = inject(FormBuilder);
   private adminService = inject(AdminService);
-  private cdr = inject(ChangeDetectorRef);      // ✅ ADDED
+  private cdr = inject(ChangeDetectorRef);
 
   admins: AdminResponse[] = [];
   loading = true;
@@ -43,6 +43,7 @@ export class Admin implements OnInit {
     this.adminForm = this.fb.group(
       {
         name:            ['', [Validators.required, Validators.maxLength(30)]],
+        email:           ['', [Validators.required, Validators.email]],
         password:        ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', Validators.required]
       },
@@ -58,13 +59,13 @@ export class Admin implements OnInit {
   private loadAdmins(): void {
     this.loading = true;
     this.loadError = '';
-    this.cdr.detectChanges();                    // ✅ render loading state
+    this.cdr.detectChanges();
 
     this.adminService.getAll().subscribe({
       next: (list) => {
         this.admins = Array.isArray(list) ? [...list] : [];
         this.loading = false;
-        this.cdr.detectChanges();                // ✅ force table to render
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
@@ -72,7 +73,7 @@ export class Admin implements OnInit {
           || err?.message
           || 'Failed to load admins.';
         this.admins = [];
-        this.cdr.detectChanges();                // ✅ force error to render
+        this.cdr.detectChanges();
       }
     });
   }
@@ -91,7 +92,12 @@ export class Admin implements OnInit {
     this.showForm = false;
     this.showPassword = false;
     this.error = '';
-    this.adminForm.reset({ name: '', password: '', confirmPassword: '' });
+    this.adminForm.reset({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
     this.cdr.detectChanges();
   }
 
@@ -106,6 +112,7 @@ export class Admin implements OnInit {
 
     this.adminService.create({
       name: value.name.trim(),
+      email: value.email.trim().toLowerCase(),
       password: value.password,
       confirmPassword: value.confirmPassword
     }).subscribe({

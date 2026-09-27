@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -16,12 +16,26 @@ interface SidebarItem {
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar {
+export class Sidebar implements OnInit {
 
   private authService = inject(AuthService);
   private router = inject(Router);
 
   isCollapsed = false;
+
+  // Live admin info from localStorage (populated at login)
+  adminName = '';
+  adminEmail = '';
+  adminInitial = '';
+
+  ngOnInit(): void {
+    const user = this.authService.getUser();
+    if (user) {
+      this.adminName = user.name || 'Admin';
+      this.adminEmail = user.email || '';
+      this.adminInitial = this.adminName.charAt(0).toUpperCase();
+    }
+  }
 
   toggle(): void {
     this.isCollapsed = !this.isCollapsed;
@@ -32,6 +46,10 @@ export class Sidebar {
 
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  goHome(): void {
+    this.router.navigate(['/']);
   }
 
   navItems: SidebarItem[] = [

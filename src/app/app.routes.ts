@@ -17,9 +17,13 @@ import { DeliveryChargeForm } from './delivery-charge-form/delivery-charge-form'
 import { ProductDetailComponent } from './product-dettail/product-dettail';
 import { ShopCartComponent } from './shop-cart/shop-cart';
 import { UserProfile } from './profile/user-profile/user-profile';
+import { Checkout } from './checkout/checkout';
+import { MyOrders } from './my-orders/my-orders';
+import { LikedProductsComponent } from './liked-products/liked-products';   // 👈 NEW
 
 import { adminGuard } from './guards/admin.guard';
 import { customerGuard } from './guards/customer.guard';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   // ---------- Auth (no layout) ----------
@@ -33,11 +37,18 @@ export const routes: Routes = [
     children: [
       { path: '', component: HeroComponent },
       { path: 'contact', component: ContactComponent },
-      { path: 'product-detail', component: ProductDetailComponent },
 
-      // Customer-only pages
-      { path: 'cart',         component: ShopCartComponent, canActivate: [customerGuard] },
-      { path: 'user-profile', component: UserProfile,       canActivate: [customerGuard] },
+      // Product detail — with :id parameter
+      { path: 'product-detail/:id', component: ProductDetailComponent },
+
+      // Customer-only
+      { path: 'cart',           component: ShopCartComponent,     canActivate: [customerGuard] },
+      { path: 'checkout',       component: Checkout,              canActivate: [customerGuard] },
+      { path: 'my-orders',      component: MyOrders,              canActivate: [customerGuard] },
+      { path: 'liked-products', component: LikedProductsComponent, canActivate: [customerGuard] },  // 👈 NEW
+
+      // Both customer AND admin — only auth
+      { path: 'user-profile', component: UserProfile, canActivate: [authGuard] },
     ]
   },
 

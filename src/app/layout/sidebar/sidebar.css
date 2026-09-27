@@ -210,6 +210,41 @@
   border-radius: 0 3px 3px 0;
 }
 
+/* ============================================================
+   Back to Store — separate from main nav
+   ============================================================ */
+.nav-item--home {
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-line);
+  border-radius: 0;
+  opacity: 0.9;
+}
+
+.nav-item--home:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-sm);
+  opacity: 1;
+}
+
+/* Keep the divider visible even on hover */
+.nav-item--home:hover::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-line);
+}
+
 /* ---------- Footer ---------- */
 .sidebar-footer {
   margin-top: 20px;
@@ -256,20 +291,28 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .footer-status {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--color-ink-soft);
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
 }
 .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .footer-action {
@@ -316,6 +359,13 @@
 .admin-sidebar.is-collapsed .nav-item { justify-content: center; }
 .admin-sidebar.is-collapsed .footer-card { justify-content: center; }
 
+/* Collapsed state for Back to Store */
+.admin-sidebar.is-collapsed .nav-item--home {
+  padding-top: 14px;
+  margin-top: 8px;
+  border-top: 1px solid var(--color-line);
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 768px) {
   .admin-sidebar {
@@ -351,4 +401,12 @@
   }
   .nav-item .nav-text { display: none; }
   .nav-item.active::before { display: none; }
+
+  /* Home button on mobile — no divider */
+  .nav-item--home {
+    margin: 0;
+    padding: 10px 12px;
+    border-top: none;
+  }
+  .nav-item--home:hover::after { display: none; }
 }

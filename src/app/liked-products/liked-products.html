@@ -1,0 +1,71 @@
+<section class="lp-wrap">
+  <div class="lp-container">
+
+    <!-- Header -->
+    <header class="lp-header">
+      <div>
+        <span class="eyebrow">Atelier · Saved</span>
+        <h1 class="lp-title">Liked Products</h1>
+        <p class="lp-subtitle">
+          Pieces you've marked. Tap the heart to remove.
+        </p>
+      </div>
+
+      <span class="lp-count" *ngIf="!loading() && items().length > 0">
+        {{ items().length }} item{{ items().length === 1 ? '' : 's' }}
+      </span>
+    </header>
+
+    <!-- Loading -->
+    <div class="lp-state" *ngIf="loading()">Loading your likes…</div>
+
+    <!-- Empty -->
+    <div class="lp-empty" *ngIf="!loading() && items().length === 0">
+      <svg viewBox="0 0 60 60" aria-hidden="true" class="lp-empty__icon">
+        <path d="M30 48 L12 30 A10 10 0 0 1 26 16 L30 20 L34 16 A10 10 0 0 1 48 30 Z"
+              fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45" />
+      </svg>
+      <h3 class="lp-empty__title">Nothing liked yet</h3>
+      <p class="lp-empty__text">
+        Tap the heart on any product to save it here.
+      </p>
+      <a routerLink="/" class="lp-empty__cta">Browse the collection</a>
+    </div>
+
+    <!-- Grid -->
+    <div class="lp-grid" *ngIf="!loading() && items().length > 0">
+      <div class="lp-card" *ngFor="let item of items(); trackBy: trackById">
+
+        <a class="lp-card__link" [routerLink]="['/product-detail', item.productId]">
+          <div class="lp-card__img">
+            <img
+              [src]="item.image || 'assets/placeholder-product.jpg'"
+              [alt]="item.name || 'Product'" />
+          </div>
+
+          <div class="lp-card__body">
+            <p class="lp-card__name">
+              {{ item.name || ('Product #' + item.productId) }}
+            </p>
+            <p class="lp-card__price" *ngIf="item.price != null">
+              {{ item.price | currency: 'INR' : 'symbol' : '1.0-0' }}
+            </p>
+          </div>
+        </a>
+
+        <!-- Unlike (heart) button -->
+        <button
+          class="lp-card__heart"
+          type="button"
+          aria-label="Remove from likes"
+          (click)="unlike($event, item.productId)">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" fill="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>

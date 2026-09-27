@@ -1,3 +1,7 @@
+/* ==========================================================================
+   MACARENA — Product Detail
+   ========================================================================== */
+
 .pd-wrap {
   background: white;
   min-height: 100vh;
@@ -10,22 +14,26 @@
   padding: 0 2rem;
 }
 
-.pd-back {
-  background: none;
-  border: none;
+/* ---------- Loading / Error ---------- */
+.pd-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   color: var(--color-ink-soft);
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 0.5rem 0;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
 }
 
-.pd-back:hover {
-  color: var(--color-accent);
+.pd-state--error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  max-width: 520px;
+  margin: 2rem auto;
+  padding: 1rem 1.25rem;
 }
 
+/* ---------- Grid ---------- */
 .pd-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -185,84 +193,200 @@
   margin-bottom: 1.4rem;
 }
 
+/* ---------- Block label (refined eyebrow style) ---------- */
 .pd-block-label {
-  font-size: 0.85rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-ink);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
-/* Sizes */
+.pd-stock-hint {
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-ink-soft);
+  opacity: 0.8;
+}
+
+/* ---------- Sizes ---------- */
 .pd-size-block {
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.75rem;
 }
 
 .pd-size-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.55rem;
   flex-wrap: wrap;
 }
 
 .pd-size-btn {
-  min-width: 42px;
-  height: 42px;
-  padding: 0 0.8rem;
-  border-radius: 8px;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0.5rem 0.85rem;
+
   border: 1.5px solid var(--color-line);
-  background: var(--color-surface);
-  font-size: 0.85rem;
-  font-weight: 500;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--color-ink);
   cursor: pointer;
-  transition: all 0.2s ease;
+
+  font-family: var(--font-body);
+  line-height: 1;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
 }
 
-.pd-size-btn:hover {
+.pd-size-btn:hover:not(:disabled) {
   border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  transform: translateY(-1px);
 }
 
 .pd-size-btn.active {
   background: var(--color-ink);
   border-color: var(--color-ink);
-  color: white;
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(23, 19, 15, 0.35);
 }
 
-/* Quantity */
+.pd-size-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Stock number below the size */
+.pd-size-stock {
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-soft);
+  opacity: 0.75;
+}
+
+.pd-size-btn.active .pd-size-stock {
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 1;
+}
+
+.pd-size-btn:hover:not(:disabled) .pd-size-stock {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+/* Out-of-stock sizes */
+.pd-size-btn.out-of-stock,
+.pd-size-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: #fafaf9;
+  border-style: dashed;
+}
+
+.pd-size-btn.out-of-stock .pd-size-label {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.pd-size-btn.out-of-stock:hover,
+.pd-size-btn:disabled:hover {
+  transform: none;
+  border-color: var(--color-line);
+  background: #fafaf9;
+}
+
+/* Low-stock warning under sizes */
+.pd-stock-warn {
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #b7791f;
+}
+
+/* ---------- Quantity ---------- */
 .pd-qty-block {
-  margin-bottom: 1.6rem;
+  margin-bottom: 1.75rem;
 }
 
 .pd-qty-control {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  background: var(--color-surface);
+  background: #fff;
   border: 1.5px solid var(--color-line);
-  border-radius: 8px;
-  padding: 0.2rem 0.4rem;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 48px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pd-qty-control:hover {
+  border-color: var(--color-accent);
 }
 
 .pd-qty-btn {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 100%;
+
+  background: transparent;
   border: none;
-  width: 30px;
-  height: 30px;
-  font-size: 1.1rem;
-  border-radius: 6px;
+  color: var(--color-ink);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1;
   cursor: pointer;
-  transition: background 0.2s ease;
+
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.pd-qty-btn:hover {
-  background: var(--color-bg);
+.pd-qty-btn:hover:not(:disabled) {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.pd-qty-btn:active:not(:disabled) {
+  background: var(--color-accent-soft);
+}
+
+.pd-qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .pd-qty-value {
-  min-width: 20px;
+  min-width: 44px;
+  padding: 0 0.5rem;
   text-align: center;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   font-weight: 600;
+  color: var(--color-ink);
+  user-select: none;
 }
 
-/* CTA */
+/* ---------- CTA ---------- */
 .pd-cta-row {
   display: flex;
   gap: 0.9rem;
@@ -281,7 +405,6 @@
   transition: all 0.25s ease;
 }
 
-/* Only the side-by-side Buy Now / Add to Cart buttons should grow */
 .pd-cta-row .pd-btn {
   flex: 1;
 }
@@ -291,7 +414,7 @@
   color: white;
 }
 
-.pd-btn--primary:hover {
+.pd-btn--primary:hover:not(:disabled) {
   background: var(--color-accent-light);
 }
 
@@ -300,78 +423,83 @@
   color: white;
 }
 
-.pd-btn--secondary:hover {
+.pd-btn--secondary:hover:not(:disabled) {
   background: var(--color-ink-soft);
 }
 
-/* Delivery card */
-.pd-delivery-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-sm);
-  padding: 1.1rem 1.2rem;
-  margin-bottom: 1.6rem;
+.pd-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.pd-pincode-row {
+/* ============================================================
+   Trust badges strip — Macarena palette
+   ============================================================ */
+.pd-badges {
   display: flex;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 1rem;
+  padding: 1.4rem 0.5rem;
+  margin-bottom: 1.6rem;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
 }
 
-.pd-pincode-input {
-  flex: 1;
-  padding: 0.6rem 0.8rem;
-  border-radius: 6px;
-  border: 1.5px solid var(--color-line);
-  font-size: 0.85rem;
-  font-family: var(--font-body);
-}
-
-.pd-pincode-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.pd-check-btn {
-  background: var(--color-ink);
-  color: white;
-  border: none;
-  padding: 0 1.2rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.pd-check-btn:hover {
-  background: var(--color-accent);
-}
-
-.pd-delivery-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.pd-badge {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
 }
 
-.pd-delivery-list li {
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
-  font-size: 0.85rem;
+.pd-badge__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-bottom: 0.2rem;
+  transition: background var(--dur) var(--ease),
+              color var(--dur) var(--ease),
+              transform var(--dur) var(--ease);
+}
+
+.pd-badge:hover .pd-badge__icon {
+  background: var(--color-accent);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.pd-badge__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pd-badge__label {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+
+.pd-badge__desc {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
   color: var(--color-ink-soft);
-}
-
-.pd-delivery-icon {
-  font-size: 1rem;
   line-height: 1.3;
+  opacity: 0.85;
 }
 
-/* Highlights / description */
+/* ---------- Highlights / description ---------- */
 .pd-info-block {
   margin-bottom: 1.4rem;
 }
@@ -390,44 +518,6 @@
   font-size: 0.9rem;
   line-height: 1.7;
   color: var(--color-ink-soft);
-}
-
-/* Loading state (fake API delay) */
-.pd-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  min-height: 60vh;
-  color: var(--color-ink-soft);
-  font-size: 0.9rem;
-}
-
-.pd-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-line);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: pd-spin 0.8s linear infinite;
-}
-
-@keyframes pd-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Not found */
-.pd-not-found {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2rem;
-  min-height: 50vh;
-  text-align: center;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -453,153 +543,63 @@
   .pd-btn {
     min-width: 100%;
   }
+
+  .pd-badges {
+    padding: 1rem 0;
+    gap: 0.6rem;
+  }
+  .pd-badge__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .pd-badge__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .pd-badge__label {
+    font-size: 0.75rem;
+  }
+  .pd-badge__desc {
+    font-size: 0.66rem;
+  }
+
+  /* Size + quantity on small screens */
+  .pd-size-btn {
+    min-width: 52px;
+    min-height: 52px;
+    padding: 0.4rem 0.7rem;
+  }
+  .pd-size-label {
+    font-size: 0.85rem;
+  }
+  .pd-size-stock {
+    font-size: 0.62rem;
+  }
+  .pd-qty-control {
+    height: 44px;
+  }
+  .pd-qty-btn {
+    width: 40px;
+  }
+  .pd-qty-value {
+    min-width: 36px;
+  }
 }
-/* ==========================================================================
-   Delivery Address Module — append to product-dettail.css
-   ========================================================================== */
-
-.pd-address-block {
-  border-top: 1px solid var(--color-line, #ddd2c2);
-  margin-top: 1rem;
-  padding-top: 1rem;
+/* Heart state */
+.pd-favorite--active {
+  color: #6b1f2a;
+}
+.pd-favorite--active svg {
+  fill: currentColor;
+}
+.pd-favorite:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
-/* ---- Add-address trigger ---- */
-
-.pd-add-address-btn {
-  background: none;
-  border: 1px dashed var(--color-accent, #6b1f2a);
-  color: var(--color-accent, #6b1f2a);
-  border-radius: var(--radius-sm, 12px);
-  padding: 0.75rem 1rem;
+/* Full-width single CTA */
+.pd-btn--full {
+  flex: 1 1 100%;
   width: 100%;
-  text-align: left;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.pd-add-address-btn:hover {
-  background: var(--color-accent-soft, #ead9d2);
-}
-
-/* ---- Saved address summary card ---- */
-
-.pd-address-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-line, #ddd2c2);
-  border-radius: var(--radius-sm, 12px);
-  padding: 0.9rem 1rem;
-}
-
-.pd-address-name {
-  font-weight: 600;
-  color: var(--color-ink, #17130f);
-  margin: 0 0 0.3rem;
-  font-size: 0.92rem;
-}
-
-.pd-address-line {
-  color: var(--color-ink-soft, #4a433c);
-  margin: 0.1rem 0;
-  font-size: 0.85rem;
-}
-
-.pd-address-card__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-.pd-address-edit,
-.pd-address-remove {
-  background: none;
-  border: none;
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0;
-  text-align: right;
-}
-
-.pd-address-edit {
-  color: var(--color-accent, #6b1f2a);
-  font-weight: 600;
-}
-
-.pd-address-remove {
-  color: var(--color-ink-soft, #4a433c);
-}
-
-.pd-address-remove:hover {
-  color: #b3261e;
-}
-
-/* ---- Address entry form ---- */
-
-.pd-address-form {
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-line, #ddd2c2);
-  border-radius: var(--radius-sm, 12px);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-.pd-address-form__row {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-}
-
-.pd-address-input {
-  flex: 1 1 140px;
-  min-width: 0;
-  border: 1px solid var(--color-line, #ddd2c2);
-  border-radius: 8px;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.88rem;
-  font-family: inherit;
-  color: var(--color-ink, #17130f);
-  background: var(--color-bg, #f6f1ea);
-}
-
-.pd-address-input:focus {
-  outline: 2px solid var(--color-accent, #6b1f2a);
-  outline-offset: 1px;
-  background: var(--color-surface, #fff);
-}
-
-.pd-address-error {
-  color: #b3261e;
-  font-size: 0.82rem;
-  margin: 0;
-}
-
-.pd-address-form__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 0.2rem;
-}
-
-.pd-address-form__actions .pd-btn {
-  padding: 0.55rem 1.1rem;
-  font-size: 0.85rem;
-}
-
-@media (max-width: 480px) {
-  .pd-address-form__row {
-    flex-direction: column;
-  }
-  .pd-address-card {
-    flex-direction: column;
-  }
-  .pd-address-card__actions {
-    flex-direction: row;
-  }
 }

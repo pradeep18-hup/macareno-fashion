@@ -3,14 +3,30 @@
   <span class="cart-header__count">{{ totalCount }} items</span>
 </header>
 
-<section class="cart-page" *ngIf="cartItems.length; else emptyCart">
+<!-- Loading -->
+<div class="cart-state" *ngIf="loading()">Loading cart…</div>
+
+<!-- Error -->
+<div class="cart-state cart-state--error" *ngIf="!loading() && loadError()">
+  ⚠️ {{ loadError() }}
+  <button class="retry-btn" (click)="reload()">Retry</button>
+</div>
+
+<!-- Cart content -->
+<section class="cart-page"
+         *ngIf="!loading() && !loadError() && cartItems().length; else emptyCart">
 
   <div class="cart-list">
-    <div class="cart-row" *ngFor="let item of cartItems">
+    <div class="cart-row" *ngFor="let item of cartItems()">
+
       <img class="cart-row__img" [src]="item.image" [alt]="item.name" />
 
       <div class="cart-row__info">
         <p class="cart-row__name">{{ item.name }}</p>
+
+        <p class="cart-row__size" *ngIf="item.size && item.size !== 'One Size'">
+          Size: <strong>{{ item.size }}</strong>
+        </p>
 
         <div class="cart-row__price">
           <span class="price-offer">₹{{ unitPrice(item) | number }}</span>
@@ -21,13 +37,17 @@
         </div>
 
         <div class="cart-row__qty">
-          <button class="qty-btn" (click)="decrease(item)" aria-label="Decrease quantity">–</button>
+          <button class="qty-btn" (click)="decrease(item)"
+                  aria-label="Decrease quantity">–</button>
           <span class="qty-value">{{ item.qty }}</span>
-          <button class="qty-btn" (click)="increase(item)" aria-label="Increase quantity">+</button>
+          <button class="qty-btn" (click)="increase(item)"
+                  aria-label="Increase quantity">+</button>
         </div>
 
         <div class="cart-row__actions">
-          <button class="action-link action-link--remove" (click)="remove(item)">REMOVE</button>
+          <button class="action-link action-link--remove" (click)="remove(item)">
+            REMOVE
+          </button>
         </div>
       </div>
 
@@ -64,13 +84,36 @@
       You will save ₹{{ savings | number }} on this order
     </p>
 
-    <button class="cart-btn cart-btn--primary">Buy Now</button>
+    <!-- ✅ Minimum order notice -->
+    <div class="cart-min-notice" [class.cart-min-notice--ok]="meetsMinimum">
+      <span class="cart-min-notice__icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6.5" />
+          <path d="M8 5v3.5M8 11h.01" />
+        </svg>
+      </span>
+      <span class="cart-min-notice__text" *ngIf="!meetsMinimum">
+        <strong>Minimum {{ minOrderQty }} products</strong> required.
+        Add {{ itemsNeeded }} more to proceed.
+      </span>
+      <span class="cart-min-notice__text" *ngIf="meetsMinimum">
+        Minimum order satisfied. You can proceed.
+      </span>
+    </div>
+
+    <button class="cart-btn cart-btn--primary"
+            [disabled]="!meetsMinimum"
+            (click)="goToCheckout()">
+      Buy Now
+    </button>
   </aside>
 
 </section>
 
 <ng-template #emptyCart>
-  <div class="cart-empty">
+  <div class="cart-empty" *ngIf="!loading() && !loadError()">
     <p>Your cart is empty.</p>
+    <a routerLink="/" class="cart-empty__link">Start shopping →</a>
   </div>
 </ng-template>
