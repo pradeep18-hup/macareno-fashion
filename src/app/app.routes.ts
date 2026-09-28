@@ -25,6 +25,8 @@ import { adminGuard } from './guards/admin.guard';
 import { customerGuard } from './guards/customer.guard';
 import { authGuard } from './guards/auth.guard';
 
+import { ProductListComponent } from './product/product-list/product-list';
+
 export const routes: Routes = [
   // ---------- Auth (no layout) ----------
   { path: 'login', component: Login },
@@ -66,6 +68,7 @@ export const routes: Routes = [
       { path: 'orders',                  component: Orders },
       { path: 'courier',                 component: CourierForm },
       { path: 'deliver-charge-settings', component: DeliveryChargeForm },
+      {path:'product-list',component:ProductListComponent},
     ]
   },
 

@@ -21,6 +21,18 @@ export interface ProductResponse {
   photoUrls: string[];
 }
 
+/** Payload for editing an existing product (no photo re-upload). */
+export interface ProductUpdateRequest {
+  dressName: string;
+  dressTypeId: number;
+  price: number;
+  offerPercentage?: number | null;
+  offerPrice: number;
+  sizeType: string;
+  totalQty: number;
+  sizes: ProductSizeDto[];
+}
+
 export interface DressType {
   id: number;
   name: string;
@@ -54,6 +66,14 @@ export class ProductService {
 
   createProduct(formData: FormData): Observable<ProductResponse> {
     return this.http.post<ProductResponse>(this.productsApi, formData);
+  }
+
+  update(id: number, payload: ProductUpdateRequest): Observable<ProductResponse> {
+    return this.http.put<ProductResponse>(`${this.productsApi}/${id}`, payload);
+  }
+    // Edit with same multipart format as create (photos optional)
+  updateProduct(id: number, formData: FormData): Observable<ProductResponse> {
+    return this.http.put<ProductResponse>(`${this.productsApi}/${id}`, formData);
   }
 
   deleteProduct(id: number): Observable<{ message: string; id: number }> {

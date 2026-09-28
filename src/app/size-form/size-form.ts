@@ -36,6 +36,7 @@ export class SizeForm implements OnInit, OnDestroy {
   private subs = new Subscription();
   private hasLoaded = false;        // ✅ guard so it only loads once
 
+  
   // ---------- Form ----------
   sizeForm = this.fb.group({
     label: ['', [Validators.required, Validators.maxLength(10)]],

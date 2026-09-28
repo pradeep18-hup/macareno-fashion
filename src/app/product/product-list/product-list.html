@@ -1,0 +1,192 @@
+<section class="product-list container">
+  <header class="product-list__header">
+    <h2>Products</h2>
+    <p class="product-list__count" *ngIf="!loading()">
+      {{ products().length }} item{{ products().length === 1 ? '' : 's' }}
+    </p>
+  </header>
+
+  <p class="product-list__error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+  <div class="product-list__loading" *ngIf="loading()">Loading products…</div>
+  <div class="product-list__empty" *ngIf="!loading() && products().length === 0 && !errorMessage()">
+    No products yet.
+  </div>
+
+  <div class="table-wrap" *ngIf="!loading() && products().length > 0">
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Photo</th><th>Name</th><th>Price</th><th>Offer %</th>
+          <th>Offer price</th><th>Size type</th><th>Sizes</th><th>Stock</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products(); let i = index; trackBy: trackByProductId">
+          <td>{{ i + 1 }}</td>
+          <td>
+            <img class="thumb" *ngIf="product.photoUrls?.length"
+                 [src]="imageUrl(product.photoUrls[0])" [alt]="product.dressName" />
+            <span class="no-photo" *ngIf="!product.photoUrls?.length">No photo</span>
+          </td>
+          <td>{{ product.dressName }}</td>
+          <td [class.struck]="product.offerPercentage">₹{{ product.price }}</td>
+          <td>{{ product.offerPercentage ? product.offerPercentage + '%' : '-' }}</td>
+          <td><strong>₹{{ product.offerPrice }}</strong></td>
+          <td>{{ product.sizeType }}</td>
+          <td>
+            <span class="size-chip-mini" *ngFor="let s of product.sizes">{{ s.size }}: {{ s.qty }}</span>
+          </td>
+          <td>{{ product.totalQty }}</td>
+          <td class="actions">
+            <button type="button" class="btn btn--ghost" (click)="openEdit(product)">Edit</button>
+
+            <ng-container *ngIf="pendingDeleteId() !== product.id; else confirmBlock">
+              <button type="button" class="btn btn--danger-ghost" (click)="requestDelete(product.id)">Delete</button>
+            </ng-container>
+            <ng-template #confirmBlock>
+              <span class="confirm-delete">
+                Sure?
+                <button type="button" class="btn btn--danger" [disabled]="deletingId() === product.id"
+                        (click)="confirmDelete(product.id)">
+                  {{ deletingId() === product.id ? 'Deleting…' : 'Yes' }}
+                </button>
+                <button type="button" class="btn btn--ghost" (click)="cancelDelete()">No</button>
+              </span>
+            </ng-template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ Edit modal ============ -->
+<div class="modal-backdrop" *ngIf="editingProduct" (click)="closeEdit()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <header class="modal__header">
+      <h3>Edit product</h3>
+      <button type="button" class="modal__close" (click)="closeEdit()" aria-label="Close">✕</button>
+    </header>
+
+    <form class="modal__body form-grid" [formGroup]="editForm" (ngSubmit)="saveEdit()">
+      <p class="product-list__error full" *ngIf="modalError">{{ modalError }}</p>
+
+      <div class="form-group">
+        <label for="e-name">Product Name</label>
+        <input id="e-name" type="text" formControlName="dressName" placeholder="Enter product name" />
+        <span class="error-text" *ngIf="editForm.get('dressName')?.touched && editForm.get('dressName')?.invalid">
+          Product name is required
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="e-type">Product Type</label>
+        <select id="e-type" formControlName="dressTypeId">
+          <option [ngValue]="null" disabled>Select product type</option>
+          <option *ngFor="let t of dressTypes" [ngValue]="t.id">{{ t.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="e-price">Price (₹)</label>
+        <input id="e-price" type="number" min="1" formControlName="price" />
+        <span class="error-text" *ngIf="editForm.get('price')?.touched && editForm.get('price')?.invalid">
+          Enter a valid price
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="e-pct">Discount (%)</label>
+        <input id="e-pct" type="number" min="0" max="100" formControlName="offerPercentage" />
+        <span class="error-text" *ngIf="editForm.get('offerPercentage')?.invalid">
+          Discount must be between 0 and 100
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="e-offer">Offer Price (₹)</label>
+        <input id="e-offer" type="number" min="0" formControlName="offerPrice" />
+        <span class="error-text" *ngIf="offerExceedsPrice">Offer price cannot be higher than the price</span>
+      </div>
+
+      <div class="form-group">
+        <label>You Save</label>
+        <div class="readout">
+          <span class="readout-value" *ngIf="savedAmount > 0">₹{{ savedAmount }}</span>
+          <span class="readout-empty" *ngIf="savedAmount === 0">—</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Total Quantity</label>
+        <div class="readout"><span class="readout-value">{{ totalQty }}</span> <span class="readout-note">units</span></div>
+      </div>
+
+      <div class="form-group full">
+        <label for="e-sizetype">Size Type</label>
+        <select id="e-sizetype" formControlName="sizeType">
+          <option value="" disabled>Select size type</option>
+          <option *ngFor="let opt of sizeTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+
+      <div class="form-group full" *ngIf="availableSizes.length">
+        <label>Available Sizes — select a size, then enter quantity</label>
+        <div class="size-chip-group">
+          <div class="size-chip-item" *ngFor="let size of availableSizes">
+            <button type="button" class="size-chip"
+                    [class.size-chip--active]="isSizeSelected(size)"
+                    (click)="toggleSize(size)">{{ size }}</button>
+           <input *ngIf="isSizeSelected(size)" type="number" min="0"
+       class="size-qty-box" placeholder="Qty"
+       [value]="getSizeQty(size)"
+       (input)="updateSizeQty(size, $any($event.target).value)" />
+<span class="oos-tag" *ngIf="isSizeSelected(size) && getSizeQty(size) === 0">Out of stock</span>
+          </div>
+        </div>
+       <span class="error-text" *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
+  Enter a quantity (0 or more) for every selected size
+</span>
+        <span class="error-text" *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
+          Enter a quantity greater than 0 for every selected size
+        </span>
+      </div>
+
+      <div class="form-group full">
+        <label>Photos (optional — new photo add panna mattum)</label>
+
+        <div class="photo-grid">
+          <div class="photo-item" *ngFor="let url of editingProduct.photoUrls">
+            <img [src]="imageUrl(url)" alt="current photo" />
+          </div>
+          <div class="photo-item" *ngFor="let p of newPhotos; let i = index">
+            <img [src]="p.url" [alt]="p.file.name" />
+            <button type="button" class="photo-remove" (click)="removeNewPhoto(i)" aria-label="Remove">×</button>
+          </div>
+          <input #photoInput type="file" accept="image/*" multiple hidden (change)="onPhotosSelected($event)" />
+          <button type="button" class="photo-add" *ngIf="newPhotos.length < maxPhotos" (click)="photoInput.click()">
+            <span>+ Add photo</span>
+          </button>
+        </div>
+        <span class="error-text" *ngIf="photoError">{{ photoError }}</span>
+      </div>
+
+      <footer class="modal__footer full">
+        <button type="button" class="btn btn--ghost" (click)="closeEdit()" [disabled]="saving">Cancel</button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving">
+          {{ saving ? 'Saving…' : 'Save changes' }}
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="pr-toasts">
+  <div class="pr-toast" *ngFor="let t of toasts"
+       [class.pr-toast--success]="t.type === 'success'"
+       [class.pr-toast--error]="t.type === 'error'"
+       (click)="dismissToast(t)">
+    <span>{{ t.message }}</span>
+  </div>
+</div>
