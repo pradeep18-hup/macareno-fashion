@@ -37,14 +37,19 @@ export class ShopCartComponent implements OnInit {
 
   readonly minOrderQty = 5;
 
+  /** 👇 Modal state for "Remove item?" */
+  readonly showRemoveConfirm = signal(false);
+  readonly removeTarget = signal<CartItemView | null>(null);
+
+  /** 👇 Toast feedback */
+  readonly toastMessage = signal('');
+  readonly toastKind = signal<'success' | 'error'>('success');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
   ngOnInit(): void {
-    this.loadCart(true);   // 👈 initial load shows spinner
+    this.loadCart(true);
   }
 
-  /**
-   * @param showSpinner — true on initial load, false on silent refreshes.
-   * Setting it to false avoids the "shutter" (DOM teardown + rebuild) on every qty click.
-   */
   private loadCart(showSpinner: boolean = false): void {
     if (showSpinner) {
       this.loading.set(true);
@@ -78,7 +83,6 @@ export class ShopCartComponent implements OnInit {
     });
   }
 
-  /** Manual retry (from error state) — always shows spinner. */
   reload(): void {
     this.loadCart(true);
   }
@@ -185,15 +189,13 @@ export class ShopCartComponent implements OnInit {
     return item.id;
   }
 
-  // ---------- Actions ----------
-  // 👇 All three now use loadCart(false) — silent refresh, no spinner, no flicker.
-
+  // ---------- Quantity actions ----------
   increase(item: CartItemView): void {
     if (!this.canIncrease(item)) return;
     const newQty = item.qty + 1;
     this.cartService.updateQuantity(item.id, newQty).subscribe({
       next: () => this.loadCart(false),
-      error: (err) => alert(err?.error?.error || 'Failed to update quantity.')
+      error: (err) => this.showToast(err?.error?.error || 'Failed to update quantity.', 'error')
     });
   }
 
@@ -202,18 +204,50 @@ export class ShopCartComponent implements OnInit {
     const newQty = item.qty - 1;
     this.cartService.updateQuantity(item.id, newQty).subscribe({
       next: () => this.loadCart(false),
-      error: (err) => alert(err?.error?.error || 'Failed to update quantity.')
+      error: (err) => this.showToast(err?.error?.error || 'Failed to update quantity.', 'error')
     });
   }
 
-  remove(item: CartItemView): void {
-    if (!confirm(`Remove "${item.name}" (${item.size}) from your cart?`)) return;
+  // ---------- Remove flow (custom modal) ----------
+  /** Called when user clicks REMOVE on a row — opens the confirm modal. */
+  openRemoveConfirm(item: CartItemView): void {
+    this.removeTarget.set(item);
+    this.showRemoveConfirm.set(true);
+  }
+
+  cancelRemove(): void {
+    this.showRemoveConfirm.set(false);
+    this.removeTarget.set(null);
+  }
+
+  /** Called when user confirms removal in the modal. */
+  confirmRemove(): void {
+    const item = this.removeTarget();
+    if (!item) return;
+
+    this.showRemoveConfirm.set(false);
+    this.removeTarget.set(null);
+
     this.cartService.remove(item.id).subscribe({
-      next: () => this.loadCart(false),
-      error: (err) => alert(err?.error?.error || 'Failed to remove item.')
+      next: () => {
+        this.loadCart(false);
+        this.showToast(`Removed "${item.name}" from your cart.`, 'success');
+      },
+      error: (err) => {
+        this.showToast(err?.error?.error || 'Failed to remove item.', 'error');
+      }
     });
   }
 
+  // ---------- Toast ----------
+  private showToast(message: string, kind: 'success' | 'error' = 'success'): void {
+    this.toastMessage.set(message);
+    this.toastKind.set(kind);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toastMessage.set(''), 3000);
+  }
+
+  // ---------- Checkout ----------
   goToCheckout(): void {
     if (!this.meetsMinimum) return;
     this.router.navigate(['/checkout'], {

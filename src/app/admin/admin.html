@@ -56,7 +56,7 @@
             </td>
             <td class="col-action" data-label="Action">
               <button type="button" class="link-btn link-btn--danger"
-                      (click)="remove(admin)">Delete</button>
+                      (click)="openDeleteConfirm(admin)">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -165,3 +165,68 @@
     </div>
   </form>
 </div>
+
+<!-- ============================================================
+     DELETE CONFIRMATION MODAL
+     ============================================================ -->
+@if (showDeleteConfirm() && deleteTarget()) {
+  @let target = deleteTarget()!;
+  <div class="confirm-overlay" (click)="cancelDelete()">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+
+      <div class="confirm-modal__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18" />
+          <path d="M8 6V4h8v2" />
+          <path d="M6 6l1 14h10l1-14" />
+          <path d="M10 11v6M14 11v6" />
+        </svg>
+      </div>
+
+      <h3 class="confirm-modal__title">Delete admin?</h3>
+      <p class="confirm-modal__text">
+        <strong>{{ target.name }}</strong><br />
+        <span class="confirm-modal__hint">{{ target.email }}</span>
+      </p>
+      <p class="confirm-modal__warning">
+        This action can't be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button type="button" class="confirm-btn confirm-btn--ghost"
+                (click)="cancelDelete()">
+          Keep it
+        </button>
+        <button type="button" class="confirm-btn confirm-btn--danger"
+                (click)="confirmDelete()">
+          Yes, delete
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ============================================================
+     TOAST
+     ============================================================ -->
+@if (toastMessage()) {
+  <div class="admin-toast" [class.admin-toast--error]="toastKind() === 'error'" role="status">
+    <span class="admin-toast__icon">
+      @if (toastKind() === 'success') {
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10.5l4 4 8-9" />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="10" cy="10" r="8" />
+          <path d="M10 6v5M10 14h.01" />
+        </svg>
+      }
+    </span>
+    <span class="admin-toast__text">{{ toastMessage() }}</span>
+  </div>
+}

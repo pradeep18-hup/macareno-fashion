@@ -37,11 +37,19 @@ export class NavbarComponent implements OnInit {
   readonly userName   = signal('');
   readonly isAdmin    = signal(false);
 
-  /** 👇 Live cart count — comes from CartService. */
+  /** Live cart count. */
   readonly cartCount = this.cartService.count;
 
-  /** Live likes count — from LikesService. */
+  /** Live likes count. */
   readonly likesCount = this.likesService.likedCount;
+
+  /** 👇 Logout confirmation modal visibility. */
+  readonly showLogoutConfirm = signal(false);
+
+  /** 👇 Toast for success/error feedback. */
+  readonly toastMessage = signal('');
+  readonly toastKind = signal<'success' | 'error'>('success');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly links: NavLink[] = [];
 
@@ -77,14 +85,38 @@ export class NavbarComponent implements OnInit {
   goToRegister(): void { this.router.navigate(['/register']); }
   goToAdmin(): void { this.router.navigate(['/admin']); }
 
-  logout(): void {
-    if (!confirm('Sign out?')) return;
+  // ---------- Logout ----------
+  /** Called by "Sign out" button — opens the confirm modal. */
+  openLogoutConfirm(): void {
+    this.closeUserMenu();
+    this.showLogoutConfirm.set(true);
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm.set(false);
+  }
+
+  /** Called when user confirms the logout in the modal. */
+  confirmLogout(): void {
+    this.showLogoutConfirm.set(false);
+
+    const name = (this.userName() || '').split(' ')[0] || 'there';
+
     this.authService.logout();
     this.refreshAuth();
     this.cartService.clearCount();
     this.likesService.loadLikes();
-    this.closeUserMenu();
+
+    this.showToast(`Goodbye, ${name}. You've been signed out.`, 'success');
     this.router.navigate(['/login']);
+  }
+
+  // ---------- Toast ----------
+  private showToast(message: string, kind: 'success' | 'error' = 'success'): void {
+    this.toastMessage.set(message);
+    this.toastKind.set(kind);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toastMessage.set(''), 3500);
   }
 
   // ---------- User menu ----------
@@ -107,6 +139,7 @@ export class NavbarComponent implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.showLogoutConfirm()) { this.cancelLogout(); return; }
     this.closeMenu();
     this.closeUserMenu();
   }

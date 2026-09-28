@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -38,6 +38,15 @@ export class Admin implements OnInit {
   showPassword = false;
   error = '';
   submitting = false;
+
+  /** 👇 Delete confirmation modal state */
+  readonly showDeleteConfirm = signal(false);
+  readonly deleteTarget = signal<AdminResponse | null>(null);
+
+  /** 👇 Toast feedback */
+  readonly toastMessage = signal('');
+  readonly toastKind = signal<'success' | 'error'>('success');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.adminForm = this.fb.group(
@@ -82,7 +91,7 @@ export class Admin implements OnInit {
     this.loadAdmins();
   }
 
-  // ============== Modal ==============
+  // ============== Modal (Add) ==============
   openForm(): void {
     this.showForm = true;
     this.cdr.detectChanges();
@@ -120,26 +129,57 @@ export class Admin implements OnInit {
         this.submitting = false;
         this.closeForm();
         this.loadAdmins();
+        this.showToast('Admin created successfully.', 'success');
       },
       error: (err) => {
         this.submitting = false;
         this.error = err?.error?.error || 'Failed to create admin.';
         this.cdr.detectChanges();
+        this.showToast(this.error, 'error');
       }
     });
   }
 
-  // ============== Delete ==============
-  remove(admin: AdminResponse): void {
-    if (!confirm(`Delete admin "${admin.name}"?`)) return;
+  // ============== Delete (custom modal) ==============
+  /** Called by the Delete button on a row — opens the confirm modal. */
+  openDeleteConfirm(admin: AdminResponse): void {
+    this.deleteTarget.set(admin);
+    this.showDeleteConfirm.set(true);
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm.set(false);
+    this.deleteTarget.set(null);
+  }
+
+  /** Called when user confirms in the modal. */
+  confirmDelete(): void {
+    const admin = this.deleteTarget();
+    if (!admin) return;
+
+    this.showDeleteConfirm.set(false);
+    this.deleteTarget.set(null);
 
     this.adminService.remove(admin.id).subscribe({
-      next: () => this.loadAdmins(),
+      next: () => {
+        this.loadAdmins();
+        this.showToast(`Admin "${admin.name}" has been deleted.`, 'success');
+      },
       error: (err) => {
-        this.error = err?.error?.error || 'Failed to delete.';
+        const msg = err?.error?.error || 'Failed to delete.';
+        this.error = msg;
         this.cdr.detectChanges();
+        this.showToast(msg, 'error');
       }
     });
+  }
+
+  // ============== Toast ==============
+  private showToast(message: string, kind: 'success' | 'error' = 'success'): void {
+    this.toastMessage.set(message);
+    this.toastKind.set(kind);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toastMessage.set(''), 3000);
   }
 
   // ============== Helpers ==============

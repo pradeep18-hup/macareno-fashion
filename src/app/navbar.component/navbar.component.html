@@ -98,12 +98,9 @@
 
             <div class="user-menu__divider"></div>
 
-            <!-- =========================================================
-                 CUSTOMER MENU — Home, Profile, My Orders, Liked, Contact, My Cart
-                 ========================================================= -->
+            <!-- ===== CUSTOMER MENU ===== -->
             <ng-container *ngIf="!isAdmin()">
 
-              <!-- Home -->
               <button class="user-menu__item" type="button"
                       (click)="goToHome(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -116,7 +113,6 @@
                 <span>Home</span>
               </button>
 
-              <!-- Profile -->
               <button class="user-menu__item" type="button"
                       (click)="goToProfile(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -128,7 +124,6 @@
                 <span>Profile</span>
               </button>
 
-              <!-- My Orders -->
               <button class="user-menu__item" type="button"
                       (click)="goToMyOrders(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -141,7 +136,6 @@
                 <span>My Orders</span>
               </button>
 
-              <!-- Liked Products -->
               <button class="user-menu__item" type="button"
                       (click)="goToLikes(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -152,7 +146,6 @@
                 <span>Liked Products</span>
               </button>
 
-              <!-- Contact -->
               <button class="user-menu__item" type="button"
                       (click)="goToContact(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -164,7 +157,6 @@
                 <span>Contact</span>
               </button>
 
-              <!-- My Cart -->
               <button class="user-menu__item" type="button"
                       (click)="goToCart(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -179,12 +171,9 @@
 
             </ng-container>
 
-            <!-- =========================================================
-                 ADMIN MENU — Profile, Contact, Admin Panel
-                 ========================================================= -->
+            <!-- ===== ADMIN MENU ===== -->
             <ng-container *ngIf="isAdmin()">
 
-              <!-- Profile -->
               <button class="user-menu__item" type="button"
                       (click)="goToProfile(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -196,7 +185,6 @@
                 <span>Profile</span>
               </button>
 
-              <!-- Contact -->
               <button class="user-menu__item" type="button"
                       (click)="goToContact(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -208,7 +196,6 @@
                 <span>Contact</span>
               </button>
 
-              <!-- Admin Panel -->
               <button class="user-menu__item" type="button"
                       (click)="goToAdmin(); closeUserMenu()">
                 <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
@@ -224,9 +211,9 @@
 
             <div class="user-menu__divider"></div>
 
-            <!-- Sign out (both roles) -->
+            <!-- Sign out → opens custom modal -->
             <button class="user-menu__item user-menu__item--danger" type="button"
-                    (click)="logout()">
+                    (click)="openLogoutConfirm()">
               <svg class="user-menu__icon" viewBox="0 0 20 20" fill="none"
                    stroke="currentColor" stroke-width="1.5"
                    stroke-linecap="round" stroke-linejoin="round">
@@ -302,21 +289,18 @@
       }
 
       <div class="mobile-menu__actions">
-        <!-- Cart — hidden for admin -->
         <a class="mobile-menu__action"
            *ngIf="!isAdmin()"
            (click)="goToCart(); closeMenu()">
           Cart ({{ cartCount() }})
         </a>
 
-        <!-- My Orders — hidden for admin -->
         <a class="mobile-menu__action"
            *ngIf="!isAdmin()"
            (click)="goToMyOrders(); closeMenu()">
           My Orders
         </a>
 
-        <!-- Liked — hidden for admin -->
         <a class="mobile-menu__action"
            *ngIf="!isAdmin()"
            (click)="goToLikes(); closeMenu()">
@@ -332,7 +316,7 @@
           <a class="mobile-menu__action" (click)="goToProfile(); closeMenu()">
             Profile
           </a>
-          <a class="mobile-menu__action" (click)="logout(); closeMenu()">
+          <a class="mobile-menu__action" (click)="openLogoutConfirm(); closeMenu()">
             Logout
           </a>
         </ng-container>
@@ -353,5 +337,64 @@
     <div class="mobile-menu__scrim"
          (click)="closeMenu()"
          aria-label="Close menu"></div>
+  }
+
+  <!-- ============================================================
+       LOGOUT CONFIRMATION MODAL
+       ============================================================ -->
+  @if (showLogoutConfirm()) {
+    <div class="logout-overlay" (click)="cancelLogout()">
+      <div class="logout-modal" (click)="$event.stopPropagation()">
+
+        <div class="logout-modal__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v9" />
+            <path d="M6.6 6.6a8 8 0 1 0 10.8 0" />
+          </svg>
+        </div>
+
+        <h3 class="logout-modal__title">Sign out?</h3>
+        <p class="logout-modal__text">
+          You'll need to sign back in to view your cart, orders, and liked items.
+        </p>
+
+        <div class="logout-modal__actions">
+          <button type="button" class="logout-btn logout-btn--ghost"
+                  (click)="cancelLogout()">
+            Stay signed in
+          </button>
+          <button type="button" class="logout-btn logout-btn--danger"
+                  (click)="confirmLogout()">
+            Yes, sign out
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================
+       TOAST — success / error
+       ============================================================ -->
+  @if (toastMessage()) {
+    <div class="navbar-toast" [class.navbar-toast--error]="toastKind() === 'error'"
+         role="status">
+      <span class="navbar-toast__icon">
+        @if (toastKind() === 'success') {
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 10.5l4 4 8-9" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10" cy="10" r="8" />
+            <path d="M10 6v5M10 14h.01" />
+          </svg>
+        }
+      </span>
+      <span class="navbar-toast__text">{{ toastMessage() }}</span>
+    </div>
   }
 </header>

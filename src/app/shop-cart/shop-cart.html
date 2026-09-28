@@ -54,7 +54,8 @@
         </p>
 
         <div class="cart-row__actions">
-          <button class="action-link action-link--remove" (click)="remove(item)">
+          <button class="action-link action-link--remove"
+                  (click)="openRemoveConfirm(item)">
             REMOVE
           </button>
         </div>
@@ -126,3 +127,63 @@
     <a routerLink="/" class="cart-empty__link">Start shopping →</a>
   </div>
 </ng-template>
+
+<!-- ============================================================
+     REMOVE CONFIRMATION MODAL
+     ============================================================ -->
+@if (showRemoveConfirm() && removeTarget()) {
+  @let target = removeTarget()!;
+  <div class="remove-overlay" (click)="cancelRemove()">
+    <div class="remove-modal" (click)="$event.stopPropagation()">
+
+      <div class="remove-modal__thumb">
+        <img [src]="target.image" [alt]="target.name" />
+      </div>
+
+      <h3 class="remove-modal__title">Remove item?</h3>
+      <p class="remove-modal__text">
+        <strong>{{ target.name }}</strong>
+        @if (target.size && target.size !== 'One Size') {
+          <span> · {{ target.size }}</span>
+        }
+        <br />
+        <span class="remove-modal__hint">This will be removed from your cart.</span>
+      </p>
+
+      <div class="remove-modal__actions">
+        <button type="button" class="remove-btn remove-btn--ghost"
+                (click)="cancelRemove()">
+          Keep it
+        </button>
+        <button type="button" class="remove-btn remove-btn--danger"
+                (click)="confirmRemove()">
+          Yes, remove
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ============================================================
+     TOAST
+     ============================================================ -->
+@if (toastMessage()) {
+  <div class="cart-toast" [class.cart-toast--error]="toastKind() === 'error'" role="status">
+    <span class="cart-toast__icon">
+      @if (toastKind() === 'success') {
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10.5l4 4 8-9" />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="10" cy="10" r="8" />
+          <path d="M10 6v5M10 14h.01" />
+        </svg>
+      }
+    </span>
+    <span class="cart-toast__text">{{ toastMessage() }}</span>
+  </div>
+}
