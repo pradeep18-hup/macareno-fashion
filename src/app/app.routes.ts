@@ -26,11 +26,13 @@ import { customerGuard } from './guards/customer.guard';
 import { authGuard } from './guards/auth.guard';
 
 import { ProductListComponent } from './product/product-list/product-list';
+import { ForgotPassword } from './auth/forgot-password/forgot-password';
 
 export const routes: Routes = [
   // ---------- Auth (no layout) ----------
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+{path:'forgot-password',component:ForgotPassword},
 
   // ---------- Public site (MainLayout) ----------
   {

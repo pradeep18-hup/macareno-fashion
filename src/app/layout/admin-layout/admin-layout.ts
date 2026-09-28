@@ -9,4 +9,6 @@ import { Sidebar } from '../sidebar/sidebar';
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css',
 })
-export class AdminLayout {}
+export class AdminLayout {
+  
+}
