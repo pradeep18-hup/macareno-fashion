@@ -11,7 +11,19 @@
   flex-direction: column;
   background: #ffffff;
 }
+.error {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+}
 
+.col-action {
+  white-space: nowrap;
+}
+
+.col-action .delete-btn + .delete-btn {
+  margin-left: 0.5rem;
+}
 /* ---------- Header ---------- */
 .cr-header {
   padding: 1.75rem clamp(1.5rem, 4vw, 3rem);

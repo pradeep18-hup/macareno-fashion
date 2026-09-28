@@ -38,12 +38,16 @@
           placeholder="10 digit number" />
       </div>
 
+      <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
       <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
         <svg viewBox="0 0 12 12" class="icon-plus" aria-hidden="true">
           <path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <span>Add courier</span>
+        <span>{{ editingId ? 'Update courier' : 'Add courier' }}</span>
       </button>
+
+      <button type="button" class="btn" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
     </form>
 
     <div class="table-scroll" *ngIf="couriers.length; else emptyState">
@@ -63,6 +67,12 @@
             </td>
             <td class="cell-mono" data-label="Phone">{{ c.phoneNumber }}</td>
             <td class="col-action" data-label="Action">
+              <button type="button" class="delete-btn" (click)="edit(c)">
+                <svg viewBox="0 0 14 14" class="icon-trash" aria-hidden="true">
+                  <path d="M2 12l.6-2.8L9.5 2.3a1 1 0 011.4 0l.8.8a1 1 0 010 1.4L4.8 11.4 2 12z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+                <span>Edit</span>
+              </button>
               <button type="button" class="delete-btn" (click)="remove(c.id)">
                 <svg viewBox="0 0 14 14" class="icon-trash" aria-hidden="true">
                   <path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4l.6 8h5.8l.6-8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
