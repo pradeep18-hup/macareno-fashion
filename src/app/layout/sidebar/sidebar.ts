@@ -56,6 +56,7 @@ export class Sidebar implements OnInit {
     { label: 'Admin',        icon: 'bi bi-person-badge',  route: '/admin' },
     { label: 'Add Product',  icon: 'bi bi-plus-circle',   route: '/admin/dress-form' },
     { label: 'Product Type', icon: 'bi bi-tags',          route: '/admin/dress-type' },
+      { label: 'Product List', icon: 'bi bi-tags',          route: '/admin/product-list' },
     { label: 'Sizes',        icon: 'bi bi-grid-3x3-gap',  route: '/admin/size' },
     { label: 'Customer',     icon: 'bi bi-people',        route: '/admin/customer-list' },
     { label: 'Orders',       icon: 'bi bi-bag-check',     route: '/admin/orders' },

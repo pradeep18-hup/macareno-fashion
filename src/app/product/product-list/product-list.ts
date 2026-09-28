@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
@@ -8,6 +8,7 @@ import {
 interface SizeQty { size: string; qty: number | null; }
 interface NewPhoto { file: File; url: string; }
 interface Toast { type: 'success' | 'error'; message: string; }
+type SortKey = 'name' | 'type' | 'price' | 'offerPercentage' | 'offerPrice' | 'sizeType' | 'totalQty';
 
 @Component({
   selector: 'app-product-list',
@@ -24,6 +25,39 @@ export class ProductListComponent implements OnInit {
   products = signal<ProductResponse[]>([]);
   loading = signal(true);
   errorMessage = signal('');
+
+  // Search + Sort
+  searchTerm = signal('');
+  sortKey = signal<SortKey | null>(null);
+  sortDir = signal<'asc' | 'desc'>('asc');
+  typeMap = signal<Record<number, string>>({});
+
+  filteredProducts = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    let list = this.products();
+
+    if (term) {
+      list = list.filter((p) =>
+        [p.dressName, this.typeName(p), p.sizeType, String(p.price), String(p.offerPrice)]
+          .join(' ')
+          .toLowerCase()
+          .includes(term)
+      );
+    }
+
+    const key = this.sortKey();
+    if (!key) return list;
+    const dir = this.sortDir() === 'asc' ? 1 : -1;
+
+    return [...list].sort((a, b) => {
+      const va = this.sortValue(a, key);
+      const vb = this.sortValue(b, key);
+      if (typeof va === 'string' && typeof vb === 'string') {
+        return va.localeCompare(vb) * dir;
+      }
+      return ((va as number) - (vb as number)) * dir;
+    });
+  });
 
   // Delete
   pendingDeleteId = signal<number | null>(null);
@@ -54,7 +88,11 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     this.fetchProducts();
     this.productService.getDressTypes().subscribe({
-      next: (l) => { this.dressTypes = l; this.cdr.markForCheck(); },
+      next: (l) => {
+        this.dressTypes = l;
+        this.typeMap.set(Object.fromEntries(l.map((t) => [t.id, t.name])));
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -76,6 +114,45 @@ export class ProductListComponent implements OnInit {
   }
 
   trackByProductId(_i: number, p: ProductResponse): number { return p.id; }
+
+  // ================= Search / Sort helpers =================
+  typeName(p: ProductResponse): string {
+    return this.typeMap()[p.dressTypeId as number] ?? '-';
+  }
+
+  private sortValue(p: ProductResponse, key: SortKey): string | number {
+    switch (key) {
+      case 'name': return (p.dressName ?? '').toLowerCase();
+      case 'type': return this.typeName(p).toLowerCase();
+      case 'price': return Number(p.price) || 0;
+      case 'offerPercentage': return Number(p.offerPercentage) || 0;
+      case 'offerPrice': return Number(p.offerPrice) || 0;
+      case 'sizeType': return (p.sizeType ?? '').toLowerCase();
+      case 'totalQty': return Number(p.totalQty) || 0;
+    }
+  }
+
+  onSearch(value: string): void {
+    this.searchTerm.set(value);
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
+  }
+
+  sortBy(key: SortKey): void {
+    if (this.sortKey() === key) {
+      this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortKey.set(key);
+      this.sortDir.set('asc');
+    }
+  }
+
+  sortIcon(key: SortKey): string {
+    if (this.sortKey() !== key) return '↕';
+    return this.sortDir() === 'asc' ? '▲' : '▼';
+  }
 
   // ================= Edit: open / close =================
   openEdit(product: ProductResponse): void {
@@ -159,10 +236,10 @@ export class ProductListComponent implements OnInit {
     return this.selectedSizes.reduce((sum, s) => sum + (s.qty || 0), 0);
   }
 
-get hasInvalidSizeQty(): boolean {
-  // 0 allowed (out of stock). Empty illa negative mattum invalid
-  return this.selectedSizes.some(s => s.qty === null || s.qty < 0);
-}
+  get hasInvalidSizeQty(): boolean {
+    // 0 allowed (out of stock). Empty illa negative mattum invalid
+    return this.selectedSizes.some((s) => s.qty === null || s.qty < 0);
+  }
 
   // ================= Price / offer logic =================
   private round2(v: number): number { return Math.round(v * 100) / 100; }

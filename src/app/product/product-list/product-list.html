@@ -2,26 +2,49 @@
   <header class="product-list__header">
     <h2>Products</h2>
     <p class="product-list__count" *ngIf="!loading()">
-      {{ products().length }} item{{ products().length === 1 ? '' : 's' }}
+      {{ filteredProducts().length }} of {{ products().length }} item{{ products().length === 1 ? '' : 's' }}
     </p>
   </header>
+
+  <div class="toolbar" *ngIf="!loading() && products().length > 0">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search by name, type, size type, price…"
+        [value]="searchTerm()"
+        (input)="onSearch($any($event.target).value)" />
+      <button type="button" class="search-clear" *ngIf="searchTerm()" (click)="clearSearch()" aria-label="Clear">✕</button>
+    </div>
+  </div>
 
   <p class="product-list__error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
   <div class="product-list__loading" *ngIf="loading()">Loading products…</div>
   <div class="product-list__empty" *ngIf="!loading() && products().length === 0 && !errorMessage()">
     No products yet.
   </div>
+  <div class="product-list__empty" *ngIf="!loading() && products().length > 0 && filteredProducts().length === 0">
+    No products match "{{ searchTerm() }}".
+  </div>
 
-  <div class="table-wrap" *ngIf="!loading() && products().length > 0">
+  <div class="table-wrap" *ngIf="!loading() && filteredProducts().length > 0">
     <table class="product-table">
       <thead>
         <tr>
-          <th>#</th><th>Photo</th><th>Name</th><th>Price</th><th>Offer %</th>
-          <th>Offer price</th><th>Size type</th><th>Sizes</th><th>Stock</th><th>Actions</th>
+          <th>#</th>
+          <th>Photo</th>
+          <th class="sortable" (click)="sortBy('name')">Name <span class="sort-icon">{{ sortIcon('name') }}</span></th>
+          <th class="sortable" (click)="sortBy('type')">Product type <span class="sort-icon">{{ sortIcon('type') }}</span></th>
+          <th class="sortable" (click)="sortBy('price')">Price <span class="sort-icon">{{ sortIcon('price') }}</span></th>
+          <th class="sortable" (click)="sortBy('offerPercentage')">Offer % <span class="sort-icon">{{ sortIcon('offerPercentage') }}</span></th>
+          <th class="sortable" (click)="sortBy('offerPrice')">Offer price <span class="sort-icon">{{ sortIcon('offerPrice') }}</span></th>
+          <th class="sortable" (click)="sortBy('sizeType')">Size type <span class="sort-icon">{{ sortIcon('sizeType') }}</span></th>
+          <th>Sizes</th>
+          <th class="sortable" (click)="sortBy('totalQty')">Stock <span class="sort-icon">{{ sortIcon('totalQty') }}</span></th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let product of products(); let i = index; trackBy: trackByProductId">
+        <tr *ngFor="let product of filteredProducts(); let i = index; trackBy: trackByProductId">
           <td>{{ i + 1 }}</td>
           <td>
             <img class="thumb" *ngIf="product.photoUrls?.length"
@@ -29,6 +52,7 @@
             <span class="no-photo" *ngIf="!product.photoUrls?.length">No photo</span>
           </td>
           <td>{{ product.dressName }}</td>
+          <td>{{ typeName(product) }}</td>
           <td [class.struck]="product.offerPercentage">₹{{ product.price }}</td>
           <td>{{ product.offerPercentage ? product.offerPercentage + '%' : '-' }}</td>
           <td><strong>₹{{ product.offerPrice }}</strong></td>
@@ -137,18 +161,15 @@
             <button type="button" class="size-chip"
                     [class.size-chip--active]="isSizeSelected(size)"
                     (click)="toggleSize(size)">{{ size }}</button>
-           <input *ngIf="isSizeSelected(size)" type="number" min="0"
-       class="size-qty-box" placeholder="Qty"
-       [value]="getSizeQty(size)"
-       (input)="updateSizeQty(size, $any($event.target).value)" />
-<span class="oos-tag" *ngIf="isSizeSelected(size) && getSizeQty(size) === 0">Out of stock</span>
+            <input *ngIf="isSizeSelected(size)" type="number" min="0"
+                   class="size-qty-box" placeholder="Qty"
+                   [value]="getSizeQty(size)"
+                   (input)="updateSizeQty(size, $any($event.target).value)" />
+            <span class="oos-tag" *ngIf="isSizeSelected(size) && getSizeQty(size) === 0">Out of stock</span>
           </div>
         </div>
-       <span class="error-text" *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
-  Enter a quantity (0 or more) for every selected size
-</span>
         <span class="error-text" *ngIf="submitAttempted && selectedSizes.length > 0 && hasInvalidSizeQty">
-          Enter a quantity greater than 0 for every selected size
+          Enter a quantity (0 or more) for every selected size
         </span>
       </div>
 

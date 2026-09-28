@@ -3,14 +3,18 @@
    ========================================================================== */
 
 :host {
+  display: block;
   --sb-width: 268px;
   --sb-width-collapsed: 84px;
 }
 
 .admin-sidebar {
-  position: relative;
+  position: sticky;          /* stays in place while the page scrolls */
+  top: 0;
+  align-self: flex-start;    /* needed for sticky inside a flex parent */
   width: var(--sb-width);
-  min-height: 100vh;
+  height: 100vh;             /* fixed height instead of min-height */
+  height: 100dvh;            /* better on mobile browsers */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -18,7 +22,7 @@
   background: var(--color-surface);
   border-right: 1px solid var(--color-line);
   color: var(--color-ink);
-  overflow: hidden;
+  overflow: hidden;          /* fine now, the nav scrolls inside */
   transition: width var(--dur) var(--ease);
 }
 
@@ -43,6 +47,7 @@
   margin-bottom: 22px;
   border-bottom: 1px solid var(--color-line);
   cursor: pointer;
+  flex-shrink: 0;            /* never shrink */
 }
 
 .brand-mark {
@@ -112,12 +117,24 @@
 }
 .toggle-icon.flip { transform: rotate(180deg); }
 
-/* ---------- Nav ---------- */
+/* ---------- Nav (scrollable area) ---------- */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  min-height: 0;             /* IMPORTANT: lets a flex child scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+.sidebar-nav::-webkit-scrollbar { width: 6px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 6px;
 }
 
 .nav-eyebrow {
@@ -142,6 +159,7 @@
   font-weight: 500;
   letter-spacing: 0.005em;
   text-decoration: none;
+  flex-shrink: 0;            /* items keep their size, the nav scrolls instead */
   transition: color var(--dur) var(--ease),
               background var(--dur) var(--ease);
   animation: navRise 0.5s var(--ease) backwards;
@@ -197,11 +215,11 @@
 }
 .nav-item.active .nav-arrow { opacity: 0.85; transform: translateX(0); }
 
-/* Small serif tick on active */
+/* Small tick on active (moved inside so the scroll area doesn't clip it) */
 .nav-item.active::before {
   content: "";
   position: absolute;
-  left: -20px;
+  left: -4px;                /* was -20px */
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
@@ -250,6 +268,7 @@
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid var(--color-line);
+  flex-shrink: 0;            /* always visible at the bottom */
 }
 
 .footer-card {
@@ -369,7 +388,10 @@
 /* ---------- Mobile ---------- */
 @media (max-width: 768px) {
   .admin-sidebar {
+    position: static;        /* reset sticky */
+    align-self: auto;
     width: 100%;
+    height: auto;            /* reset fixed height */
     min-height: auto;
     flex-direction: row;
     align-items: center;
@@ -392,8 +414,12 @@
   .sidebar-nav {
     flex-direction: row;
     margin: 0;
+    padding: 0;
     gap: 4px;
     flex: 0;
+    min-height: auto;
+    overflow-y: visible;     /* reset vertical scroll */
+    overflow-x: visible;
   }
   .nav-item {
     padding: 10px 12px;
