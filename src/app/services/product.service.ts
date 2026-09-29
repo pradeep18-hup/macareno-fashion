@@ -13,12 +13,14 @@ export interface ProductResponse {
   dressTypeId: number;
   dressTypeName: string;
   price: number;
-  offerPercentage?: number | null;
-  offerPrice: number;
+  offerPercentage?: number;
+  offerPrice?: number;
   sizeType: string;
   totalQty: number;
-  sizes: ProductSizeDto[];
+  sizes: { size: string; qty: number }[];
   photoUrls: string[];
+  soldOutSizes?: string[];
+  archivedAt?: string | null;    // 👈 NEW
 }
 
 /** Payload for editing an existing product (no photo re-upload). */

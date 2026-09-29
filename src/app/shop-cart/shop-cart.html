@@ -3,62 +3,77 @@
   <span class="cart-header__count">{{ totalCount }} items</span>
 </header>
 
-<!-- Loading -->
 <div class="cart-state" *ngIf="loading()">Loading cart…</div>
 
-<!-- Error -->
 <div class="cart-state cart-state--error" *ngIf="!loading() && loadError()">
   ⚠️ {{ loadError() }}
   <button class="retry-btn" (click)="reload()">Retry</button>
 </div>
 
-<!-- Cart content -->
 <section class="cart-page"
          *ngIf="!loading() && !loadError() && cartItems().length; else emptyCart">
 
   <div class="cart-list">
     <div class="cart-row"
-         [class.cart-row--sold-out]="item.soldOut"
+         [class.cart-row--sold-out]="item.soldOut && !item.unavailable"
+         [class.cart-row--unavailable]="item.unavailable"
          *ngFor="let item of cartItems(); trackBy: trackByItemId">
 
-      <img class="cart-row__img" [src]="item.image" [alt]="item.name" />
+      <!-- 👇 Image OR "No longer available" text block -->
+      <img *ngIf="!item.unavailable && item.image"
+           class="cart-row__img"
+           [src]="item.image"
+           [alt]="item.name" />
+
+      <div *ngIf="item.unavailable"
+           class="cart-row__img cart-row__img--unavailable">
+        <span>No longer<br>available</span>
+      </div>
 
       <div class="cart-row__info">
-        <p class="cart-row__name">{{ item.name }}</p>
+        <p class="cart-row__name"
+           [class.cart-row__name--unavailable]="item.unavailable">
+          {{ item.name }}
+        </p>
 
-        <!-- 👇 Sold-out tag -->
-        <p class="cart-row__sold-out-tag" *ngIf="item.soldOut">
+        <!-- Special unavailable tag -->
+        <p class="cart-row__unavailable-tag" *ngIf="item.unavailable">
+          Please remove this item to continue
+        </p>
+
+        <!-- Normal sold-out tag -->
+        <p class="cart-row__sold-out-tag" *ngIf="item.soldOut && !item.unavailable">
           Sold Out — remove to proceed
         </p>
 
-        <p class="cart-row__size" *ngIf="item.size && item.size !== 'One Size'">
-          Size: <strong>{{ item.size }}</strong>
-        </p>
+        <!-- Size + price only for available items -->
+        <ng-container *ngIf="!item.unavailable">
+          <p class="cart-row__size" *ngIf="item.size && item.size !== 'One Size'">
+            Size: <strong>{{ item.size }}</strong>
+          </p>
 
-        <div class="cart-row__price">
-          <span class="price-offer">₹{{ unitPrice(item) | number }}</span>
-          <span class="price-original" *ngIf="hasOffer(item)">₹{{ item.price | number }}</span>
-          <span class="price-off-tag" *ngIf="hasOffer(item)">
-            {{ ((item.price - unitPrice(item)) / item.price) * 100 | number: '1.0-0' }}% off
-          </span>
-        </div>
+          <div class="cart-row__price">
+            <span class="price-offer">₹{{ unitPrice(item) | number }}</span>
+            <span class="price-original" *ngIf="hasOffer(item)">₹{{ item.price | number }}</span>
+            <span class="price-off-tag" *ngIf="hasOffer(item)">
+              {{ ((item.price - unitPrice(item)) / item.price) * 100 | number: '1.0-0' }}% off
+            </span>
+          </div>
+        </ng-container>
 
-        <div class="cart-row__qty">
+        <div class="cart-row__qty"
+             [class.cart-row__qty--disabled]="item.unavailable || item.soldOut">
           <button class="qty-btn" (click)="decrease(item)"
-                  [disabled]="item.qty <= 1 || item.soldOut"
+                  [disabled]="item.qty <= 1 || item.soldOut || item.unavailable"
                   aria-label="Decrease quantity">–</button>
           <span class="qty-value">{{ item.qty }}</span>
           <button class="qty-btn" (click)="increase(item)"
                   [disabled]="!canIncrease(item)"
-                  [attr.title]="item.soldOut
-                    ? 'This item is sold out'
-                    : (!canIncrease(item) ? ('Only ' + item.stock + ' in stock') : null)"
                   aria-label="Increase quantity">+</button>
         </div>
 
-        <!-- Max-stock hint -->
         <p class="cart-row__stock-warn"
-           *ngIf="!item.soldOut && item.stock < 99 && item.qty >= item.stock">
+           *ngIf="!item.unavailable && !item.soldOut && item.stock < 99 && item.qty >= item.stock">
           Max stock reached ({{ item.stock }})
         </p>
 
@@ -70,7 +85,12 @@
         </div>
       </div>
 
-      <p class="cart-row__total">₹{{ lineTotal(item) | number }}</p>
+      <p class="cart-row__total" *ngIf="!item.unavailable">
+        ₹{{ lineTotal(item) | number }}
+      </p>
+      <p class="cart-row__total cart-row__total--unavailable" *ngIf="item.unavailable">
+        —
+      </p>
     </div>
   </div>
 
@@ -103,7 +123,7 @@
       You will save ₹{{ savings | number }} on this order
     </p>
 
-    <!-- 👇 Sold-out notice (highest priority) -->
+    <!-- Sold-out / unavailable notice -->
     <div class="cart-min-notice"
          *ngIf="hasSoldOutItem"
          style="background:#fef2f2;border-color:#fecaca;color:#b91c1c;">
@@ -115,11 +135,11 @@
         </svg>
       </span>
       <span class="cart-min-notice__text">
-        <strong>Some items are sold out.</strong> Remove them to proceed.
+        <strong>Some items are unavailable.</strong> Remove them to proceed.
       </span>
     </div>
 
-    <!-- Minimum order notice (only when no sold-out items) -->
+    <!-- Minimum order notice -->
     <div class="cart-min-notice"
          *ngIf="!hasSoldOutItem"
          [class.cart-min-notice--ok]="meetsMinimum">
@@ -155,22 +175,25 @@
   </div>
 </ng-template>
 
-<!-- ============================================================
-     REMOVE CONFIRMATION MODAL
-     ============================================================ -->
+<!-- Remove confirmation modal -->
 @if (showRemoveConfirm() && removeTarget()) {
   @let target = removeTarget()!;
   <div class="remove-overlay" (click)="cancelRemove()">
     <div class="remove-modal" (click)="$event.stopPropagation()">
 
       <div class="remove-modal__thumb">
-        <img [src]="target.image" [alt]="target.name" />
+        <img *ngIf="!target.unavailable && target.image"
+             [src]="target.image" [alt]="target.name" />
+        <div *ngIf="target.unavailable"
+             class="remove-modal__thumb-unavailable">
+          <span>!</span>
+        </div>
       </div>
 
       <h3 class="remove-modal__title">Remove item?</h3>
       <p class="remove-modal__text">
         <strong>{{ target.name }}</strong>
-        @if (target.size && target.size !== 'One Size') {
+        @if (!target.unavailable && target.size && target.size !== 'One Size') {
           <span> · {{ target.size }}</span>
         }
         <br />
@@ -192,9 +215,7 @@
   </div>
 }
 
-<!-- ============================================================
-     TOAST
-     ============================================================ -->
+<!-- Toast -->
 @if (toastMessage()) {
   <div class="cart-toast" [class.cart-toast--error]="toastKind() === 'error'" role="status">
     <span class="cart-toast__icon">

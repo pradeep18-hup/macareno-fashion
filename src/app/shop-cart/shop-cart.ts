@@ -16,7 +16,8 @@ interface CartItemView {
   size: string;
   qty: number;
   stock: number;
-  soldOut: boolean;   // 👈 NEW
+  soldOut: boolean;
+  unavailable: boolean;
 }
 
 @Component({
@@ -38,11 +39,9 @@ export class ShopCartComponent implements OnInit {
 
   readonly minOrderQty = 5;
 
-  /** Modal state for "Remove item?" */
   readonly showRemoveConfirm = signal(false);
   readonly removeTarget = signal<CartItemView | null>(null);
 
-  /** Toast feedback */
   readonly toastMessage = signal('');
   readonly toastKind = signal<'success' | 'error'>('success');
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -66,7 +65,7 @@ export class ShopCartComponent implements OnInit {
         const requests: Observable<CartItemView>[] = items.map(item =>
           this.productService.getById(item.productId).pipe(
             map((p: ProductResponse) => this.enrich(item, p)),
-            catchError(() => of(this.fallback(item)))
+            catchError(() => of(this.unavailableFallback(item)))
           )
         );
 
@@ -98,22 +97,38 @@ export class ShopCartComponent implements OnInit {
       : undefined;
 
     const stock = this.stockForSize(p, item.size);
-
-    // 👇 Detect sold-out via the flag on ProductResponse
     const soldOutSizes: string[] = (p as any).soldOutSizes || [];
     const soldOut = soldOutSizes.includes(item.size);
+    const archived = !!(p as any).archivedAt;
 
     return {
       id: item.id,
       productId: item.productId,
-      name: p.dressName,
-      image,
+      name: p.dressName,                        // 👈 keep real product name
+      image: archived ? '' : image,             // 👈 blank when archived
       price: p.price,
       offerPrice: selling,
       size: item.size,
       qty: item.quantity,
-      stock,
-      soldOut
+      stock: archived ? 0 : stock,
+      soldOut: soldOut || archived,
+      unavailable: archived
+    };
+  }
+
+  private unavailableFallback(item: ApiCartItem): CartItemView {
+    return {
+      id: item.id,
+      productId: item.productId,
+      name: `Product #${item.productId}`,
+      image: '',
+      price: 0,
+      offerPrice: undefined,
+      size: item.size,
+      qty: item.quantity,
+      stock: 0,
+      soldOut: true,
+      unavailable: true
     };
   }
 
@@ -136,22 +151,6 @@ export class ShopCartComponent implements OnInit {
     );
   }
 
-  private fallback(item: ApiCartItem): CartItemView {
-    return {
-      id: item.id,
-      productId: item.productId,
-      name: `Product #${item.productId}`,
-      image: 'assets/placeholder-product.svg',
-      price: 0,
-      offerPrice: undefined,
-      size: item.size,
-      qty: item.quantity,
-      stock: 99,
-      soldOut: false
-    };
-  }
-
-  // ---------- Display helpers ----------
   hasOffer(item: CartItemView): boolean {
     return item.offerPrice !== undefined && item.offerPrice < item.price;
   }
@@ -165,27 +164,31 @@ export class ShopCartComponent implements OnInit {
   }
 
   get totalCount(): number {
-    return this.cartItems().reduce((s, i) => s + i.qty, 0);
+    return this.cartItems()
+      .filter(i => !i.unavailable)
+      .reduce((s, i) => s + i.qty, 0);
   }
 
   get originalTotal(): number {
-    return this.cartItems().reduce((s, i) => s + i.price * i.qty, 0);
+    return this.cartItems()
+      .filter(i => !i.unavailable)
+      .reduce((s, i) => s + i.price * i.qty, 0);
   }
 
   get payableTotal(): number {
-    return this.cartItems().reduce((s, i) => s + this.unitPrice(i) * i.qty, 0);
+    return this.cartItems()
+      .filter(i => !i.unavailable)
+      .reduce((s, i) => s + this.unitPrice(i) * i.qty, 0);
   }
 
   get savings(): number {
     return this.originalTotal - this.payableTotal;
   }
 
-  // 👇 NEW — any sold-out item blocks checkout
   get hasSoldOutItem(): boolean {
     return this.cartItems().some(i => i.soldOut);
   }
 
-  // 👇 Minimum requirement now ALSO requires no sold-out items
   get meetsMinimum(): boolean {
     return this.totalCount >= this.minOrderQty && !this.hasSoldOutItem;
   }
@@ -195,7 +198,7 @@ export class ShopCartComponent implements OnInit {
   }
 
   canIncrease(item: CartItemView): boolean {
-    if (item.soldOut) return false;   // 👈 can't increase a sold-out item
+    if (item.soldOut || item.unavailable) return false;
     return item.qty < item.stock;
   }
 
@@ -203,7 +206,6 @@ export class ShopCartComponent implements OnInit {
     return item.id;
   }
 
-  // ---------- Quantity actions ----------
   increase(item: CartItemView): void {
     if (!this.canIncrease(item)) return;
     const newQty = item.qty + 1;
@@ -222,7 +224,6 @@ export class ShopCartComponent implements OnInit {
     });
   }
 
-  // ---------- Remove flow ----------
   openRemoveConfirm(item: CartItemView): void {
     this.removeTarget.set(item);
     this.showRemoveConfirm.set(true);
@@ -243,7 +244,7 @@ export class ShopCartComponent implements OnInit {
     this.cartService.remove(item.id).subscribe({
       next: () => {
         this.loadCart(false);
-        this.showToast(`Removed "${item.name}" from your cart.`, 'success');
+        this.showToast('Removed from your cart.', 'success');
       },
       error: (err) => {
         this.showToast(err?.error?.error || 'Failed to remove item.', 'error');
@@ -251,7 +252,6 @@ export class ShopCartComponent implements OnInit {
     });
   }
 
-  // ---------- Toast ----------
   private showToast(message: string, kind: 'success' | 'error' = 'success'): void {
     this.toastMessage.set(message);
     this.toastKind.set(kind);
@@ -259,10 +259,9 @@ export class ShopCartComponent implements OnInit {
     this.toastTimer = setTimeout(() => this.toastMessage.set(''), 3000);
   }
 
-  // ---------- Checkout ----------
   goToCheckout(): void {
     if (this.hasSoldOutItem) {
-      this.showToast('Remove sold-out items to continue.', 'error');
+      this.showToast('Remove unavailable items to continue.', 'error');
       return;
     }
     if (!this.meetsMinimum) return;
