@@ -20,6 +20,7 @@ export interface Product {
   highlights: string[];
   sizes: string[];
   sizeStock: Record<string, number>;
+  soldOutSizes: string[];                    // 👈 NEW
   deliveryCharge: number;
   deliveryDays: number;
 }
@@ -38,6 +39,7 @@ const EMPTY_PRODUCT: Product = {
   highlights: [],
   sizes: [],
   sizeStock: {},
+  soldOutSizes: [],                          // 👈 NEW
   deliveryCharge: 0,
   deliveryDays: 5
 };
@@ -93,6 +95,16 @@ export class ProductDetailComponent implements OnInit {
     return this.product().sizeStock[size] ?? 0;
   });
 
+  /** True if ALL sizes are sold out (whole product unavailable). */
+  isFullySoldOut = computed<boolean>(() => {
+    const p = this.product();
+    if (!p.sizes.length) return false;
+    // Every size is either sold-out or has 0 stock
+    return p.sizes.every(size =>
+      p.soldOutSizes.includes(size) || (p.sizeStock[size] ?? 0) <= 0
+    );
+  });
+
   /**
    * Max you can ADD NOW = total stock − what's already in the cart.
    */
@@ -102,12 +114,14 @@ export class ProductDetailComponent implements OnInit {
 
     // "One Size" product
     if (p.sizes.length === 1 && p.sizes[0] === 'One Size') {
+      if (p.soldOutSizes.includes('One Size')) return 0;
       const totalStock = p.sizeStock['One Size'] ?? 99;
       return Math.max(0, totalStock - this.alreadyInCart());
     }
 
     // Multi-size
     if (!this.selectedSize()) return 0;
+    if (this.isSizeSoldOut(this.selectedSize()!)) return 0;
     const totalStock = this.selectedSizeStock();
     return Math.max(0, totalStock - this.alreadyInCart());
   });
@@ -141,8 +155,6 @@ export class ProductDetailComponent implements OnInit {
 
         this.loading.set(false);
         window.scrollTo({ top: 0, behavior: 'auto' });
-
-        // Load cart to compute remaining addable qty
         this.refreshCartCount();
       },
       error: (err: any) => {
@@ -166,14 +178,12 @@ export class ProductDetailComponent implements OnInit {
 
     const size = this.selectedSize();
 
-    // One Size
     if (p.sizes.length === 1 && p.sizes[0] === 'One Size') {
       const match = items.find(i => i.productId === p.id);
       this.alreadyInCart.set(match ? match.quantity : 0);
       return;
     }
 
-    // Multi-size
     if (!size) { this.alreadyInCart.set(0); return; }
     const match = items.find(i => i.productId === p.id && i.size === size);
     this.alreadyInCart.set(match ? match.quantity : 0);
@@ -190,7 +200,7 @@ export class ProductDetailComponent implements OnInit {
     const sizeStock: Record<string, number> = {};
     rawSizes.forEach(s => {
       sizeStock[s.size] =
-        s.quantity ?? s.stock ?? s.availableQty ?? s.available ?? s.qty ?? s.count ?? 0;
+        s.quantity ?? s.qty ?? s.stock ?? s.availableQty ?? s.available ?? s.count ?? 0;
     });
 
     return {
@@ -207,6 +217,7 @@ export class ProductDetailComponent implements OnInit {
       highlights: [],
       sizes: sizeLabels,
       sizeStock,
+      soldOutSizes: (p as any).soldOutSizes || [],   // 👈 NEW
       deliveryCharge: 0,
       deliveryDays: 5
     };
@@ -214,7 +225,22 @@ export class ProductDetailComponent implements OnInit {
 
   setActiveImage(i: number): void { this.activeImageIndex.set(i); }
 
+  // ---------- Sold-out detection ----------
+  /** True if the given size is currently flagged as sold out by the backend. */
+  isSizeSoldOut(size: string): boolean {
+    return this.product().soldOutSizes.includes(size);
+  }
+
+  /** True if the currently selected size is sold out. */
+  get selectedSizeSoldOut(): boolean {
+    const size = this.selectedSize();
+    return size ? this.isSizeSoldOut(size) : false;
+  }
+
   selectSize(size: string): void {
+    // 👇 block sold-out sizes
+    if (this.isSizeSoldOut(size)) return;
+
     const stock = this.product().sizeStock[size] ?? 0;
     if (stock <= 0) return;
 
@@ -269,6 +295,11 @@ export class ProductDetailComponent implements OnInit {
       return 'Please select a size first.';
     }
 
+    // 👇 sold-out guard
+    if (this.selectedSize() && this.isSizeSoldOut(this.selectedSize()!)) {
+      return 'This size is sold out. Please choose another size.';
+    }
+
     const max = this.maxQuantity();
 
     if (max <= 0) {
@@ -297,7 +328,7 @@ export class ProductDetailComponent implements OnInit {
       next: () => {
         this.addingToCart.set(false);
         this.showToast(`Added ${this.quantity()} × ${p.name} (${size}) to cart ✓`);
-        this.refreshCartCount();   // recompute remaining
+        this.refreshCartCount();
       },
       error: (err) => {
         this.addingToCart.set(false);

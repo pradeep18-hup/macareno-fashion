@@ -684,3 +684,63 @@
     padding: 0.75rem 1.1rem;
   }
 }
+/* ============================================================
+   SOLD OUT — full-product badge on image
+   ============================================================ */
+.pd-sold-out-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 0.4rem 0.9rem;
+  background: rgba(23, 19, 15, 0.85);
+  color: #fff;
+  font-family: var(--font-display, serif);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  z-index: 3;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+
+/* ============================================================
+   SOLD OUT — individual size chip
+   ============================================================ */
+.pd-size-btn.sold-out {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #fafaf9;
+  border-style: dashed;
+  border-color: #e5e5e5;
+}
+
+.pd-size-btn.sold-out .pd-size-label {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  color: #9b9b9b;
+}
+
+.pd-size-btn.sold-out:hover {
+  transform: none;
+  background: #fafaf9;
+  border-color: #e5e5e5;
+}
+
+/* The "SOLD" tag inside the chip */
+.pd-size-stock--sold {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #b91c1c;
+  opacity: 1;
+}
+
+/* ============================================================
+   Danger stock warning
+   ============================================================ */
+.pd-stock-warn--danger {
+  color: #b91c1c;
+  font-weight: 600;
+}

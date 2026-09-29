@@ -17,12 +17,19 @@
          *ngIf="!loading() && !loadError() && cartItems().length; else emptyCart">
 
   <div class="cart-list">
-    <div class="cart-row" *ngFor="let item of cartItems(); trackBy: trackByItemId">
+    <div class="cart-row"
+         [class.cart-row--sold-out]="item.soldOut"
+         *ngFor="let item of cartItems(); trackBy: trackByItemId">
 
       <img class="cart-row__img" [src]="item.image" [alt]="item.name" />
 
       <div class="cart-row__info">
         <p class="cart-row__name">{{ item.name }}</p>
+
+        <!-- 👇 Sold-out tag -->
+        <p class="cart-row__sold-out-tag" *ngIf="item.soldOut">
+          Sold Out — remove to proceed
+        </p>
 
         <p class="cart-row__size" *ngIf="item.size && item.size !== 'One Size'">
           Size: <strong>{{ item.size }}</strong>
@@ -38,18 +45,20 @@
 
         <div class="cart-row__qty">
           <button class="qty-btn" (click)="decrease(item)"
-                  [disabled]="item.qty <= 1"
+                  [disabled]="item.qty <= 1 || item.soldOut"
                   aria-label="Decrease quantity">–</button>
           <span class="qty-value">{{ item.qty }}</span>
           <button class="qty-btn" (click)="increase(item)"
                   [disabled]="!canIncrease(item)"
-                  [attr.title]="!canIncrease(item) ? ('Only ' + item.stock + ' in stock') : null"
+                  [attr.title]="item.soldOut
+                    ? 'This item is sold out'
+                    : (!canIncrease(item) ? ('Only ' + item.stock + ' in stock') : null)"
                   aria-label="Increase quantity">+</button>
         </div>
 
         <!-- Max-stock hint -->
         <p class="cart-row__stock-warn"
-           *ngIf="item.stock < 99 && item.qty >= item.stock">
+           *ngIf="!item.soldOut && item.stock < 99 && item.qty >= item.stock">
           Max stock reached ({{ item.stock }})
         </p>
 
@@ -94,8 +103,26 @@
       You will save ₹{{ savings | number }} on this order
     </p>
 
-    <!-- Minimum order notice -->
-    <div class="cart-min-notice" [class.cart-min-notice--ok]="meetsMinimum">
+    <!-- 👇 Sold-out notice (highest priority) -->
+    <div class="cart-min-notice"
+         *ngIf="hasSoldOutItem"
+         style="background:#fef2f2;border-color:#fecaca;color:#b91c1c;">
+      <span class="cart-min-notice__icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6.5" />
+          <path d="M8 5v3.5M8 11h.01" />
+        </svg>
+      </span>
+      <span class="cart-min-notice__text">
+        <strong>Some items are sold out.</strong> Remove them to proceed.
+      </span>
+    </div>
+
+    <!-- Minimum order notice (only when no sold-out items) -->
+    <div class="cart-min-notice"
+         *ngIf="!hasSoldOutItem"
+         [class.cart-min-notice--ok]="meetsMinimum">
       <span class="cart-min-notice__icon">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">

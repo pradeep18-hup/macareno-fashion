@@ -615,3 +615,51 @@
 .favorite-btn--active {
   background: rgba(107, 31, 42, 0.08);
 }
+/* ============================================================
+   SOLD OUT — home card overlay
+   ============================================================ */
+.product-card--sold-out {
+  position: relative;
+}
+
+.product-card--sold-out .card-image-wrapper img {
+  filter: grayscale(60%) brightness(0.9);
+}
+
+.product-card--sold-out:hover .card-image-wrapper img {
+  transform: none;
+}
+
+.sold-out-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 19, 15, 0.42);
+  color: #fff;
+  font-family: var(--font-display, serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.sold-out-overlay span {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+  background: rgba(23, 19, 15, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 600px) {
+  .sold-out-overlay {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+  }
+  .sold-out-overlay span {
+    padding: 0.25rem 0.6rem;
+  }
+}

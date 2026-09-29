@@ -623,3 +623,28 @@ body {
     padding: 0.7rem 1rem;
   }
 }
+/* ============================================================
+   SOLD OUT — cart row
+   ============================================================ */
+.cart-row--sold-out {
+  background: #fff5f5;
+}
+
+.cart-row--sold-out:hover {
+  background: #fff0f0;
+}
+
+.cart-row__sold-out-tag {
+  display: inline-block;
+  margin: 0.25rem 0 0.6rem;
+  padding: 0.25rem 0.7rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

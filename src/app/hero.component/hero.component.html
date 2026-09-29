@@ -78,6 +78,7 @@
       <div
         class="product-card"
         *ngFor="let product of filteredProducts(); trackBy: trackById"
+        [class.product-card--sold-out]="isSoldOut(product)"
         (click)="openProduct(product)"
         role="button"
         tabindex="0"
@@ -85,6 +86,11 @@
       >
         <div class="card-image-wrapper">
           <img [src]="product.image" [alt]="product.name" loading="lazy" />
+
+          <!-- 👇 Sold-out overlay -->
+          <div class="sold-out-overlay" *ngIf="isSoldOut(product)">
+            <span>Sold Out</span>
+          </div>
 
           <button
             class="favorite-btn"

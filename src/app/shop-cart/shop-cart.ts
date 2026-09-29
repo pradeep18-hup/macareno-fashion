@@ -16,6 +16,7 @@ interface CartItemView {
   size: string;
   qty: number;
   stock: number;
+  soldOut: boolean;   // 👈 NEW
 }
 
 @Component({
@@ -37,11 +38,11 @@ export class ShopCartComponent implements OnInit {
 
   readonly minOrderQty = 5;
 
-  /** 👇 Modal state for "Remove item?" */
+  /** Modal state for "Remove item?" */
   readonly showRemoveConfirm = signal(false);
   readonly removeTarget = signal<CartItemView | null>(null);
 
-  /** 👇 Toast feedback */
+  /** Toast feedback */
   readonly toastMessage = signal('');
   readonly toastKind = signal<'success' | 'error'>('success');
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -98,6 +99,10 @@ export class ShopCartComponent implements OnInit {
 
     const stock = this.stockForSize(p, item.size);
 
+    // 👇 Detect sold-out via the flag on ProductResponse
+    const soldOutSizes: string[] = (p as any).soldOutSizes || [];
+    const soldOut = soldOutSizes.includes(item.size);
+
     return {
       id: item.id,
       productId: item.productId,
@@ -107,7 +112,8 @@ export class ShopCartComponent implements OnInit {
       offerPrice: selling,
       size: item.size,
       qty: item.quantity,
-      stock
+      stock,
+      soldOut
     };
   }
 
@@ -115,16 +121,16 @@ export class ShopCartComponent implements OnInit {
     const sizes: any[] = (p as any).sizes || [];
     if (!sizes.length) return 99;
     if (sizes.length === 1 && sizes[0].size === 'One Size') {
-      return sizes[0].quantity ?? sizes[0].stock ?? 99;
+      return sizes[0].quantity ?? sizes[0].qty ?? sizes[0].stock ?? 99;
     }
     const match = sizes.find(s => s.size === size);
     if (!match) return 0;
     return (
       match.quantity ??
+      match.qty ??
       match.stock ??
       match.availableQty ??
       match.available ??
-      match.qty ??
       match.count ??
       0
     );
@@ -140,7 +146,8 @@ export class ShopCartComponent implements OnInit {
       offerPrice: undefined,
       size: item.size,
       qty: item.quantity,
-      stock: 99
+      stock: 99,
+      soldOut: false
     };
   }
 
@@ -173,8 +180,14 @@ export class ShopCartComponent implements OnInit {
     return this.originalTotal - this.payableTotal;
   }
 
+  // 👇 NEW — any sold-out item blocks checkout
+  get hasSoldOutItem(): boolean {
+    return this.cartItems().some(i => i.soldOut);
+  }
+
+  // 👇 Minimum requirement now ALSO requires no sold-out items
   get meetsMinimum(): boolean {
-    return this.totalCount >= this.minOrderQty;
+    return this.totalCount >= this.minOrderQty && !this.hasSoldOutItem;
   }
 
   get itemsNeeded(): number {
@@ -182,6 +195,7 @@ export class ShopCartComponent implements OnInit {
   }
 
   canIncrease(item: CartItemView): boolean {
+    if (item.soldOut) return false;   // 👈 can't increase a sold-out item
     return item.qty < item.stock;
   }
 
@@ -208,8 +222,7 @@ export class ShopCartComponent implements OnInit {
     });
   }
 
-  // ---------- Remove flow (custom modal) ----------
-  /** Called when user clicks REMOVE on a row — opens the confirm modal. */
+  // ---------- Remove flow ----------
   openRemoveConfirm(item: CartItemView): void {
     this.removeTarget.set(item);
     this.showRemoveConfirm.set(true);
@@ -220,7 +233,6 @@ export class ShopCartComponent implements OnInit {
     this.removeTarget.set(null);
   }
 
-  /** Called when user confirms removal in the modal. */
   confirmRemove(): void {
     const item = this.removeTarget();
     if (!item) return;
@@ -249,6 +261,10 @@ export class ShopCartComponent implements OnInit {
 
   // ---------- Checkout ----------
   goToCheckout(): void {
+    if (this.hasSoldOutItem) {
+      this.showToast('Remove sold-out items to continue.', 'error');
+      return;
+    }
     if (!this.meetsMinimum) return;
     this.router.navigate(['/checkout'], {
       queryParams: { mode: 'cart' }

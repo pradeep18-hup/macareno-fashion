@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PaymentService, VerifyPaymentRequest } from '../services/payment.service';
+import { CartService, CartItem as ApiCartItem } from '../services/cart.service';
+import { ProductService, ProductResponse } from '../services/product.service';
+import { forkJoin, of, Observable } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 declare var Razorpay: any;
 
@@ -16,6 +20,8 @@ declare var Razorpay: any;
 export class Checkout implements OnInit {
 
   private paymentService = inject(PaymentService);
+  private cartService = inject(CartService);
+  private productService = inject(ProductService);
   private route = inject(ActivatedRoute);
   router = inject(Router);
 
@@ -67,6 +73,18 @@ export class Checkout implements OnInit {
       return;
     }
 
+    // 👇 NEW — cart mode: check for sold-out items before proceeding
+    if (this.mode === 'cart') {
+      this.validateCartStock(() => this.proceedWithSubmit());
+      return;
+    }
+
+    // Buy-now mode: single-item stock is checked by the backend on place
+    this.proceedWithSubmit();
+  }
+
+  /** Runs the actual payment/order flow after validation. */
+  private proceedWithSubmit(): void {
     // ✅ TRIAL MODE — save order without payment
     if (this.trialMode()) {
       this.placeTrialOrder();
@@ -75,6 +93,74 @@ export class Checkout implements OnInit {
 
     // ✅ REAL RAZORPAY FLOW
     this.startRazorpayPayment();
+  }
+
+  // ============================================================
+  // 👇 NEW — Cart sold-out validation
+  // ============================================================
+  /**
+   * Re-fetches the cart and checks each item's product for sold-out sizes.
+   * If any item is sold out, sets the error and does NOT call `onValid`.
+   * Otherwise calls `onValid()` (which proceeds with payment/order).
+   */
+  private validateCartStock(onValid: () => void): void {
+    this.submitting.set(true);
+
+    this.cartService.getCart().pipe(
+      switchMap((items: ApiCartItem[]) => {
+        if (!items || items.length === 0) {
+          return of<{ item: ApiCartItem; product: ProductResponse | null }[]>([]);
+        }
+        const requests: Observable<{ item: ApiCartItem; product: ProductResponse | null }>[] =
+          items.map(item =>
+            this.productService.getById(item.productId).pipe(
+              map(p => ({ item, product: p as ProductResponse })),
+              catchError(() => of({ item, product: null }))
+            )
+          );
+        return forkJoin(requests);
+      })
+    ).subscribe({
+      next: (list) => {
+        const soldOut: string[] = [];
+
+        list.forEach(({ item, product }) => {
+          if (!product) return;
+
+          const soldOutSizes: string[] = (product as any).soldOutSizes || [];
+          if (soldOutSizes.includes(item.size)) {
+            soldOut.push(product.dressName);
+            return;
+          }
+
+          // Also treat 0 stock as sold out (defense in depth)
+          const sizes: any[] = (product as any).sizes || [];
+          const match = sizes.find(s => s.size === item.size);
+          const qty =
+            match?.quantity ?? match?.qty ?? match?.stock ?? 0;
+          if (qty <= 0) {
+            soldOut.push(product.dressName);
+          }
+        });
+
+        if (soldOut.length > 0) {
+          this.submitting.set(false);
+          this.error.set(
+            'Some items in your cart are sold out: ' +
+            soldOut.join(', ') +
+            '. Please remove them and try again.'
+          );
+          return;
+        }
+
+        // All good — proceed with payment
+        onValid();
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        this.error.set(err?.error?.error || 'Failed to verify cart. Please try again.');
+      }
+    });
   }
 
   // ---------- Trial: no payment ----------
@@ -116,8 +202,7 @@ export class Checkout implements OnInit {
 
   // ---------- Razorpay: create order ----------
   private startRazorpayPayment(): void {
-    // Send a placeholder amount; backend computes from cart/buy-now if needed
-    const amount = 100;   // backend recomputes for cart; for buy-now we can pass real total later
+    const amount = 100;   // backend recomputes for cart
 
     this.submitting.set(true);
 

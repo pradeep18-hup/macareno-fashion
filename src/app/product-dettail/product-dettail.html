@@ -19,6 +19,9 @@
             [src]="product().images[activeImageIndex()] || 'assets/placeholder-product.svg'"
             [alt]="product().name" />
 
+          <!-- 👇 Whole-product sold-out badge -->
+          <div class="pd-sold-out-badge" *ngIf="isFullySoldOut()">Sold Out</div>
+
           <button
             class="pd-favorite"
             type="button"
@@ -73,24 +76,47 @@
         <!-- Sizes -->
         <div class="pd-size-block"
              *ngIf="product().sizes.length && product().sizes[0] !== 'One Size'">
-          <p class="pd-block-label">Select Size</p>
+          <p class="pd-block-label">
+            Select Size
+            <span class="pd-stock-hint pd-stock-hint--danger"
+                  *ngIf="isFullySoldOut()">
+              · currently unavailable
+            </span>
+          </p>
+
           <div class="pd-size-row">
             <button
               class="pd-size-btn"
               *ngFor="let size of product().sizes"
-              [class.active]="selectedSize() === size"
-              [class.out-of-stock]="stockFor(size) <= 0"
-              [disabled]="stockFor(size) <= 0"
+              [class.active]="selectedSize() === size && !isSizeSoldOut(size)"
+              [class.out-of-stock]="stockFor(size) <= 0 && !isSizeSoldOut(size)"
+              [class.sold-out]="isSizeSoldOut(size)"
+              [disabled]="isSizeSoldOut(size) || stockFor(size) <= 0"
+              [attr.title]="isSizeSoldOut(size) ? 'This size is sold out' : null"
               (click)="selectSize(size)"
             >
               <span class="pd-size-label">{{ size }}</span>
-              <span class="pd-size-stock">{{ stockFor(size) }}</span>
+
+              <!-- Stock count when available, "SOLD" when flagged -->
+              <span class="pd-size-stock" *ngIf="!isSizeSoldOut(size)">
+                {{ stockFor(size) }}
+              </span>
+              <span class="pd-size-stock pd-size-stock--sold"
+                    *ngIf="isSizeSoldOut(size)">
+                SOLD
+              </span>
             </button>
           </div>
 
           <p class="pd-stock-warn"
-             *ngIf="selectedSize() && selectedSizeStock() > 0 && selectedSizeStock() <= 3">
+             *ngIf="selectedSize() && !isSizeSoldOut(selectedSize()!) && selectedSizeStock() > 0 && selectedSizeStock() <= 3">
             Only {{ selectedSizeStock() }} left in this size
+          </p>
+
+          <!-- 👇 Warning if the user tries to pick a sold-out size -->
+          <p class="pd-stock-warn pd-stock-warn--danger"
+             *ngIf="selectedSize() && isSizeSoldOut(selectedSize()!)">
+            This size is sold out. Please choose another size.
           </p>
         </div>
 
@@ -125,7 +151,9 @@
                   [disabled]="addingToCart() || maxQuantity() <= 0">
             {{ addingToCart()
                ? 'Adding…'
-               : (maxQuantity() <= 0 ? 'Max quantity reached' : 'Add to Cart') }}
+               : (isFullySoldOut()
+                  ? 'Sold Out'
+                  : (maxQuantity() <= 0 ? 'Max quantity reached' : 'Add to Cart')) }}
           </button>
         </div>
 

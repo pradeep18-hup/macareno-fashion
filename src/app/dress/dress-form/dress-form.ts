@@ -33,7 +33,7 @@ export class DressForm implements OnInit, OnDestroy {
 
   private fb = inject(FormBuilder);
   private productService = inject(ProductService);
-  private cdr = inject(ChangeDetectorRef);   // ✅ ADDED
+  private cdr = inject(ChangeDetectorRef);
 
   // Guards & cache
   private dressTypesLoaded = false;
@@ -88,7 +88,7 @@ export class DressForm implements OnInit, OnDestroy {
     this.productService.getDressTypes().subscribe({
       next: (list: DressType[]) => {
         this.dressTypes = list;
-        this.cdr.markForCheck();       // ✅ force view update
+        this.cdr.markForCheck();
       },
       error: () => this.notify('error', 'Failed to load dress types.')
     });
@@ -170,19 +170,18 @@ export class DressForm implements OnInit, OnDestroy {
     return 0;
   }
 
-  // ============== Sizes — loaded from backend (with cache + view refresh) ==============
+  // ============== Sizes ==============
   onSizeTypeChange(type: string): void {
     this.selectedSizes = [];
     this.availableSizes = [];
-    this.cdr.markForCheck();             // ✅ update immediately
+    this.cdr.markForCheck();
 
     if (!type) return;
 
-    // Cached → instant
     const cached = this.sizeCache.get(type);
     if (cached) {
       this.availableSizes = cached;
-      this.cdr.markForCheck();           // ✅ update with cached list
+      this.cdr.markForCheck();
       return;
     }
 
@@ -191,7 +190,7 @@ export class DressForm implements OnInit, OnDestroy {
         const labels = list.map((s: SizeOption) => s.label);
         this.sizeCache.set(type, labels);
         this.availableSizes = labels;
-        this.cdr.markForCheck();         // ✅ force view update after HTTP
+        this.cdr.markForCheck();
       },
       error: () => {
         this.notify('error', `Failed to load ${type} sizes.`);
@@ -316,7 +315,7 @@ export class DressForm implements OnInit, OnDestroy {
     this.productService.createProduct(formData).subscribe({
       next: () => {
         this.submitting = false;
-        this.notify('success', 'Product added successfully.');
+        this.notify('success', '✓ Product added successfully.');
         this.resetForm();
         this.cdr.markForCheck();
       },
@@ -339,12 +338,14 @@ export class DressForm implements OnInit, OnDestroy {
 
   // ============== Toasts ==============
   private notify(type: 'success' | 'error', message: string): void {
-    const t = { type, message };
-    this.toasts.push(t);
+    const t: Toast = { type, message };
+    this.toasts = [...this.toasts, t];
+    this.cdr.markForCheck();
+
     setTimeout(() => {
       this.toasts = this.toasts.filter(x => x !== t);
       this.cdr.markForCheck();
-    }, 3000);
+    }, 3500);
   }
 
   dismissToast(t: Toast): void {

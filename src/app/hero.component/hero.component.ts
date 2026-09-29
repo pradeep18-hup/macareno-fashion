@@ -28,6 +28,8 @@ export interface Product {
   deliveryDays: number;
   codAvailable: boolean;
   returnPolicyDays: number;
+  soldOutSizes: string[];
+  totalQty: number;
 }
 
 @Component({
@@ -43,7 +45,6 @@ export class HeroComponent implements OnInit {
   private likesService = inject(LikesService);
   private router = inject(Router);
 
-  // ---------- UI state ----------
   categories = signal<string[]>(['All']);
   activeCategory = signal('All');
 
@@ -51,14 +52,12 @@ export class HeroComponent implements OnInit {
   loading = signal(true);
   loadError = signal('');
 
-  // ---------- Lifecycle ----------
   ngOnInit(): void {
     this.likesService.loadLikes();
     this.loadDressTypes();
     this.loadProducts();
   }
 
-  // ---------- Load dress types ----------
   private loadDressTypes(): void {
     this.productService.getDressTypes().subscribe({
       next: (list: DressType[]) => {
@@ -71,7 +70,6 @@ export class HeroComponent implements OnInit {
     });
   }
 
-  // ---------- Load products ----------
   private loadProducts(): void {
     this.loading.set(true);
     this.loadError.set('');
@@ -96,7 +94,6 @@ export class HeroComponent implements OnInit {
     this.likesService.loadLikes();
   }
 
-  // ---------- Map backend → UI ----------
   private mapToUiProduct(p: ProductResponse): Product {
     const images = (p.photoUrls || []).map(u => this.productService.imageUrl(u));
     const firstImage = images[0] || 'assets/placeholder-product.svg';
@@ -121,11 +118,12 @@ export class HeroComponent implements OnInit {
       deliveryCharge: 0,
       deliveryDays: 4,
       codAvailable: true,
-      returnPolicyDays: 14
+      returnPolicyDays: 14,
+      soldOutSizes: (p as any).soldOutSizes || [],
+      totalQty: p.totalQty ?? 0
     };
   }
 
-  // ---------- Like (backend-backed) ----------
   isLiked(productId: number): boolean {
     return this.likesService.isLiked(productId);
   }
@@ -135,19 +133,25 @@ export class HeroComponent implements OnInit {
     event.preventDefault();
 
     this.likesService.toggle(product.id).subscribe({
-      next: () => { /* reactive signal updates the UI automatically */ },
+      next: () => { /* reactive signal updates the UI */ },
       error: (err) => {
         console.error('Like toggle failed', err);
       }
     });
   }
 
-  // ---------- 👇 ADDED — used by *ngFor trackBy ----------
+  /**
+   * 👇 Sold out ONLY when total stock across all sizes is 0.
+   * If even one size is available, the card stays normal.
+   */
+  isSoldOut(product: Product): boolean {
+    return product.totalQty === 0;
+  }
+
   trackById(_: number, product: Product): number {
     return product.id;
   }
 
-  // ---------- UI events ----------
   selectCategory(category: string): void {
     this.activeCategory.set(category);
   }
@@ -165,7 +169,6 @@ export class HeroComponent implements OnInit {
     this.router.navigate(['/product-detail', product.id]);
   }
 
-  // ---------- Computed ----------
   filteredProducts = computed(() => {
     const category = this.activeCategory();
     return this.products().filter(p =>

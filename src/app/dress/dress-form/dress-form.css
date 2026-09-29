@@ -409,3 +409,107 @@
   .photo-item,
   .photo-add { width: 88px; height: 88px; }
 }
+
+/* ==========================================================================
+   TOASTS — bottom-center pill, accent-tinted
+   ========================================================================== */
+.pr-toasts {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column-reverse;   /* newest on top of stack */
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 4000;
+  pointer-events: none;
+  max-width: calc(100vw - 2rem);
+}
+
+.pr-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  padding: 0.85rem 1.2rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  line-height: 1.35;
+  white-space: nowrap;
+
+  box-shadow: 0 12px 32px -12px rgba(23, 19, 15, 0.22);
+  pointer-events: auto;
+  cursor: pointer;
+
+  animation: toast-slide-up 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes toast-slide-up {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ✅ Success — accent-tinted */
+.pr-toast--success {
+  background: #fdf2f4;
+  color: var(--color-accent, #6b1f2a);
+  border-color: var(--color-accent-soft, #ead9d2);
+}
+
+/* ❌ Error — soft red */
+.pr-toast--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.pr-toast__icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+@media (max-width: 480px) {
+  .pr-toasts {
+    bottom: 16px;
+  }
+
+  .pr-toast {
+    font-size: 0.82rem;
+    padding: 0.7rem 1rem;
+    white-space: normal;
+    max-width: calc(100vw - 2rem);
+    text-align: center;
+  }
+}
+
+.pr-toasts {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  z-index: 4000;
+  pointer-events: none;
+  max-width: calc(100vw - 2rem);
+}
+
+.pr-toast {
+  /* same as above, plus: */
+  animation: toast-slide-up 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes toast-slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
