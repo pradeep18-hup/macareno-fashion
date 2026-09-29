@@ -63,20 +63,7 @@
           <td>{{ product.totalQty }}</td>
           <td class="actions">
             <button type="button" class="btn btn--ghost" (click)="openEdit(product)">Edit</button>
-
-            <ng-container *ngIf="pendingDeleteId() !== product.id; else confirmBlock">
-              <button type="button" class="btn btn--danger-ghost" (click)="requestDelete(product.id)">Delete</button>
-            </ng-container>
-            <ng-template #confirmBlock>
-              <span class="confirm-delete">
-                Sure?
-                <button type="button" class="btn btn--danger" [disabled]="deletingId() === product.id"
-                        (click)="confirmDelete(product.id)">
-                  {{ deletingId() === product.id ? 'Deleting…' : 'Yes' }}
-                </button>
-                <button type="button" class="btn btn--ghost" (click)="cancelDelete()">No</button>
-              </span>
-            </ng-template>
+            <button type="button" class="btn btn--danger-ghost" (click)="requestDelete(product.id)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -174,18 +161,23 @@
       </div>
 
       <div class="form-group full">
-        <label>Photos (optional — new photo add panna mattum)</label>
+        <label>Photos (max {{ maxPhotos }})</label>
 
         <div class="photo-grid">
-          <div class="photo-item" *ngFor="let url of editingProduct.photoUrls">
+          <!-- existing photos (removable) -->
+          <div class="photo-item" *ngFor="let url of existingPhotos">
             <img [src]="imageUrl(url)" alt="current photo" />
+            <button type="button" class="photo-remove" (click)="removeExistingPhoto(url)" aria-label="Remove photo">×</button>
           </div>
+
+          <!-- newly added photos -->
           <div class="photo-item" *ngFor="let p of newPhotos; let i = index">
             <img [src]="p.url" [alt]="p.file.name" />
-            <button type="button" class="photo-remove" (click)="removeNewPhoto(i)" aria-label="Remove">×</button>
+            <button type="button" class="photo-remove" (click)="removeNewPhoto(i)" aria-label="Remove photo">×</button>
           </div>
+
           <input #photoInput type="file" accept="image/*" multiple hidden (change)="onPhotosSelected($event)" />
-          <button type="button" class="photo-add" *ngIf="newPhotos.length < maxPhotos" (click)="photoInput.click()">
+          <button type="button" class="photo-add" *ngIf="totalPhotos < maxPhotos" (click)="photoInput.click()">
             <span>+ Add photo</span>
           </button>
         </div>
@@ -199,6 +191,26 @@
         </button>
       </footer>
     </form>
+  </div>
+</div>
+
+<!-- ============ Delete confirm modal ============ -->
+<div class="modal-backdrop" *ngIf="pendingDeleteProduct as dp" (click)="cancelDelete()">
+  <div class="modal modal--confirm" (click)="$event.stopPropagation()">
+    <header class="modal__header">
+      <h3>Delete product?</h3>
+      <button type="button" class="modal__close" (click)="cancelDelete()"
+              [disabled]="deletingId() !== null" aria-label="Close">✕</button>
+    </header>
+    <div class="modal__body">
+      <p>Are you sure you want to delete <strong>{{ dp.dressName }}</strong>? This action cannot be undone.</p>
+    </div>
+    <footer class="modal__footer modal__footer--pad">
+      <button type="button" class="btn btn--ghost" (click)="cancelDelete()" [disabled]="deletingId() !== null">Cancel</button>
+      <button type="button" class="btn btn--danger" [disabled]="deletingId() !== null" (click)="confirmDelete(dp.id)">
+        {{ deletingId() === dp.id ? 'Deleting…' : 'Yes, delete' }}
+      </button>
+    </footer>
   </div>
 </div>
 

@@ -583,6 +583,12 @@
   color: #9ca3af;
   margin-left: 2px;
 }
+/* ===== Add these at the END of product-list.css ===== */
+
+/* Delete confirm modal */
+.modal--confirm { max-width: 400px; }
+.modal__footer--pad { padding: 1rem 1.5rem 1.25rem; border-top: none; }
+.modal__close:disabled { opacity: 0.5; cursor: not-allowed; }
 /* Mobile: single column */
 @media (max-width: 640px) {
   .form-grid { grid-template-columns: 1fr; }

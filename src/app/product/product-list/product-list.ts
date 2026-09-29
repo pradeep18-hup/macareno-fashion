@@ -63,13 +63,20 @@ export class ProductListComponent implements OnInit {
   pendingDeleteId = signal<number | null>(null);
   deletingId = signal<number | null>(null);
 
+  get pendingDeleteProduct(): ProductResponse | undefined {
+    const id = this.pendingDeleteId();
+    return id === null ? undefined : this.products().find((p) => p.id === id);
+  }
+
   // Edit modal
   editingProduct: ProductResponse | null = null;
   editForm!: FormGroup;
   dressTypes: DressType[] = [];
   availableSizes: string[] = [];
   selectedSizes: SizeQty[] = [];
-  newPhotos: NewPhoto[] = [];
+  existingPhotos: string[] = [];   // photos already saved on the server (still kept)
+  removedPhotos: string[] = [];    // existing photos the user removed
+  newPhotos: NewPhoto[] = [];      // newly picked files
   photoError = '';
   submitAttempted = false;
   saving = false;
@@ -161,6 +168,8 @@ export class ProductListComponent implements OnInit {
     this.submitAttempted = false;
     this.photoError = '';
     this.newPhotos = [];
+    this.existingPhotos = [...(product.photoUrls ?? [])];
+    this.removedPhotos = [];
 
     this.editForm = this.fb.group({
       dressName: [product.dressName, Validators.required],
@@ -187,6 +196,8 @@ export class ProductListComponent implements OnInit {
   closeEdit(): void {
     this.newPhotos.forEach((p) => URL.revokeObjectURL(p.url));
     this.newPhotos = [];
+    this.existingPhotos = [];
+    this.removedPhotos = [];
     this.editingProduct = null;
     this.saving = false;
     this.modalError = '';
@@ -303,7 +314,17 @@ export class ProductListComponent implements OnInit {
     return price !== null && offer !== null && offer <= price ? this.round2(price - offer) : 0;
   }
 
-  // ================= Photos (optional new photos) =================
+  // ================= Photos (remove existing / add new) =================
+  get totalPhotos(): number {
+    return this.existingPhotos.length + this.newPhotos.length;
+  }
+
+  removeExistingPhoto(url: string): void {
+    this.existingPhotos = this.existingPhotos.filter((u) => u !== url);
+    this.removedPhotos = [...this.removedPhotos, url];
+    this.photoError = '';
+  }
+
   onPhotosSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
@@ -314,8 +335,8 @@ export class ProductListComponent implements OnInit {
       if (file.size > this.maxPhotoSizeMb * 1024 * 1024) {
         this.photoError = `"${file.name}" is larger than ${this.maxPhotoSizeMb} MB.`; continue;
       }
-      if (this.newPhotos.length >= this.maxPhotos) {
-        this.photoError = `You can add up to ${this.maxPhotos} photos.`; break;
+      if (this.totalPhotos >= this.maxPhotos) {
+        this.photoError = `You can have up to ${this.maxPhotos} photos.`; break;
       }
       this.newPhotos = [...this.newPhotos, { file, url: URL.createObjectURL(file) }];
     }
@@ -325,6 +346,7 @@ export class ProductListComponent implements OnInit {
   removeNewPhoto(i: number): void {
     URL.revokeObjectURL(this.newPhotos[i].url);
     this.newPhotos = this.newPhotos.filter((_, idx) => idx !== i);
+    this.photoError = '';
   }
 
   // ================= Save =================
@@ -333,11 +355,16 @@ export class ProductListComponent implements OnInit {
     this.submitAttempted = true;
     this.editForm.markAllAsTouched();
 
+    if (this.totalPhotos === 0) {
+      this.photoError = 'At least one photo is required.';
+    }
+
     if (
       this.editForm.invalid ||
       this.offerExceedsPrice ||
       this.selectedSizes.length === 0 ||
-      this.hasInvalidSizeQty
+      this.hasInvalidSizeQty ||
+      this.totalPhotos === 0
     ) {
       this.modalError = 'Please fix the form errors and try again.';
       return;
@@ -358,6 +385,7 @@ export class ProductListComponent implements OnInit {
       fd.append('sizeLabels', s.size);
       fd.append('sizeQty', String(s.qty));
     });
+    this.removedPhotos.forEach((u) => fd.append('removedPhotos', u));
     this.newPhotos.forEach((p) => fd.append('photos', p.file, p.file.name));
 
     this.saving = true;
@@ -384,7 +412,11 @@ export class ProductListComponent implements OnInit {
 
   // ================= Delete =================
   requestDelete(id: number): void { this.pendingDeleteId.set(id); }
-  cancelDelete(): void { this.pendingDeleteId.set(null); }
+
+  cancelDelete(): void {
+    if (this.deletingId() !== null) return; // deleting nadakkum bodhu close panna koodathu
+    this.pendingDeleteId.set(null);
+  }
 
   confirmDelete(id: number): void {
     this.deletingId.set(id);
@@ -397,7 +429,8 @@ export class ProductListComponent implements OnInit {
       },
       error: (err) => {
         this.deletingId.set(null);
-        this.errorMessage.set(`Could not delete (status ${err?.status ?? '?'}).`);
+        this.pendingDeleteId.set(null);
+        this.notify('error', `Could not delete (status ${err?.status ?? '?'}).`);
       },
     });
   }
