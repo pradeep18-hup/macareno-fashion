@@ -3,17 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Order } from './order.service';
 
-export interface CreatePaymentResponse {
-  key: string;
-  razorpayOrderId: string;
-  amount: number;      // paise
-  currency: string;
+export interface CreateCashfreeOrderResponse {
+  paymentSessionId: string;   // 👈 returned by Cashfree create-order
+  orderId: string;            // Cashfree's internal order id
 }
 
 export interface VerifyPaymentRequest {
-  razorpayOrderId: string;
-  razorpayPaymentId: string;
-  razorpaySignature: string;
+  cashfreeOrderId: string;    // 👈 Cashfree order id (not razorpay)
 
   // Address
   fullName: string;
@@ -36,12 +32,17 @@ export class PaymentService {
   private readonly api = 'http://localhost:8080/api/payments';
   private http = inject(HttpClient);
 
-  createOrder(amount: number): Observable<CreatePaymentResponse> {
-    return this.http.post<CreatePaymentResponse>(`${this.api}/create-order`, { amount });
+  /** Creates a Cashfree order and returns the payment session id */
+  createCashfreeOrder(amount: number): Observable<CreateCashfreeOrderResponse> {
+    return this.http.post<CreateCashfreeOrderResponse>(
+      `${this.api}/cashfree/create-order`,
+      { amount }
+    );
   }
 
+  /** Verifies payment with backend and places the order */
   verify(payload: VerifyPaymentRequest): Observable<Order> {
-    return this.http.post<Order>(`${this.api}/verify`, payload);
+    return this.http.post<Order>(`${this.api}/cashfree/verify`, payload);
   }
 
   /** Trial — save order without payment (dev only) */

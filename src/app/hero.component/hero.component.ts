@@ -97,8 +97,9 @@ export class HeroComponent implements OnInit {
   private mapToUiProduct(p: ProductResponse): Product {
     const images = (p.photoUrls || []).map(u => this.productService.imageUrl(u));
     const firstImage = images[0] || 'assets/placeholder-product.svg';
-    const mrp = p.price;
-    const sellingPrice = (p.offerPrice && p.offerPrice > 0) ? p.offerPrice : p.price;
+    const mrp = Number(p.price) || 0;
+    const offer = Number(p.offerPrice) || 0;
+    const sellingPrice = offer > 0 ? offer : mrp;
 
     return {
       id: p.id,
@@ -140,10 +141,7 @@ export class HeroComponent implements OnInit {
     });
   }
 
-  /**
-   * 👇 Sold out ONLY when total stock across all sizes is 0.
-   * If even one size is available, the card stays normal.
-   */
+  /** Sold out ONLY when total stock across all sizes is 0. */
   isSoldOut(product: Product): boolean {
     return product.totalQty === 0;
   }
@@ -156,8 +154,12 @@ export class HeroComponent implements OnInit {
     this.activeCategory.set(category);
   }
 
+  /** 👇 FIXED: shows decimals (₹13.5) instead of rounding to ₹13 */
   formatPrice(price: number): string {
-    return '₹' + price.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    return '₹' + price.toLocaleString('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
   }
 
   getDiscount(product: Product): number {

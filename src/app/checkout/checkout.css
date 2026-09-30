@@ -152,8 +152,8 @@
   box-shadow: 0 0 0 3px rgba(107, 31, 42, 0.08);
 }
 
-/* ---------- Razorpay card ---------- */
-.co-pay-razor {
+/* ---------- Cashfree card ---------- */
+.co-pay-cashfree {
   position: relative;
   display: flex;
   align-items: center;
@@ -165,7 +165,7 @@
   margin-bottom: 1rem;
 }
 
-.co-pay-razor__icon {
+.co-pay-cashfree__icon {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -176,27 +176,27 @@
   flex-shrink: 0;
 }
 
-.co-pay-razor__icon svg { width: 20px; height: 20px; }
+.co-pay-cashfree__icon svg { width: 20px; height: 20px; }
 
-.co-pay-razor__body {
+.co-pay-cashfree__body {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
-.co-pay-razor__name {
+.co-pay-cashfree__name {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-ink);
 }
 
-.co-pay-razor__note {
+.co-pay-cashfree__note {
   font-size: 0.78rem;
   color: var(--color-ink-soft);
 }
 
-.co-pay-razor__badge {
+.co-pay-cashfree__badge {
   position: absolute;
   top: -9px;
   right: 12px;

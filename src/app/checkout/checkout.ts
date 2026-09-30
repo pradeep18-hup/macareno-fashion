@@ -8,7 +8,8 @@ import { ProductService, ProductResponse } from '../services/product.service';
 import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-declare var Razorpay: any;
+// 👇 Cashfree SDK — loaded via script tag in index.html
+declare var Cashfree: any;
 
 @Component({
   selector: 'app-checkout',
@@ -39,8 +40,8 @@ export class Checkout implements OnInit {
     pincode: ''
   };
 
-  // ✅ Toggle this to false when Razorpay is live
-  trialMode = signal(true);
+  // ✅ Cashfree payment is now live — trial mode off
+  trialMode = signal(false);
 
   submitting = signal(false);
   error = signal('');
@@ -73,7 +74,7 @@ export class Checkout implements OnInit {
       return;
     }
 
-    // 👇 NEW — cart mode: check for sold-out items before proceeding
+    // Cart mode: check for sold-out items before proceeding
     if (this.mode === 'cart') {
       this.validateCartStock(() => this.proceedWithSubmit());
       return;
@@ -85,24 +86,18 @@ export class Checkout implements OnInit {
 
   /** Runs the actual payment/order flow after validation. */
   private proceedWithSubmit(): void {
-    // ✅ TRIAL MODE — save order without payment
     if (this.trialMode()) {
       this.placeTrialOrder();
       return;
     }
 
-    // ✅ REAL RAZORPAY FLOW
-    this.startRazorpayPayment();
+    // 👇 Cashfree flow
+    this.startCashfreePayment();
   }
 
   // ============================================================
-  // 👇 NEW — Cart sold-out validation
+  // Cart sold-out validation
   // ============================================================
-  /**
-   * Re-fetches the cart and checks each item's product for sold-out sizes.
-   * If any item is sold out, sets the error and does NOT call `onValid`.
-   * Otherwise calls `onValid()` (which proceeds with payment/order).
-   */
   private validateCartStock(onValid: () => void): void {
     this.submitting.set(true);
 
@@ -133,11 +128,9 @@ export class Checkout implements OnInit {
             return;
           }
 
-          // Also treat 0 stock as sold out (defense in depth)
           const sizes: any[] = (product as any).sizes || [];
           const match = sizes.find(s => s.size === item.size);
-          const qty =
-            match?.quantity ?? match?.qty ?? match?.stock ?? 0;
+          const qty = match?.quantity ?? match?.qty ?? match?.stock ?? 0;
           if (qty <= 0) {
             soldOut.push(product.dressName);
           }
@@ -153,7 +146,6 @@ export class Checkout implements OnInit {
           return;
         }
 
-        // All good — proceed with payment
         onValid();
       },
       error: (err) => {
@@ -166,17 +158,13 @@ export class Checkout implements OnInit {
   // ---------- Trial: no payment ----------
   private placeTrialOrder(): void {
     const payload: VerifyPaymentRequest = {
-      razorpayOrderId: 'TRIAL',
-      razorpayPaymentId: 'TRIAL',
-      razorpaySignature: 'TRIAL',
-
+      cashfreeOrderId: 'TRIAL',
       fullName: this.form.fullName.trim(),
       phoneNumber: this.form.phoneNumber.trim(),
       addressLine: this.form.addressLine.trim(),
       city: this.form.city.trim(),
       state: this.form.state.trim(),
       pincode: this.form.pincode.trim(),
-
       mode: this.mode
     };
 
@@ -189,9 +177,10 @@ export class Checkout implements OnInit {
     this.submitting.set(true);
 
     this.paymentService.trialPlaceOrder(payload).subscribe({
-      next: (order) => {
+      next: () => {
         this.submitting.set(false);
-        this.router.navigate(['/order-success', order.id]);
+        // 👇 Redirect to My Orders
+        this.router.navigate(['/my-orders']);
       },
       error: (err) => {
         this.submitting.set(false);
@@ -200,14 +189,16 @@ export class Checkout implements OnInit {
     });
   }
 
-  // ---------- Razorpay: create order ----------
-  private startRazorpayPayment(): void {
-    const amount = 100;   // backend recomputes for cart
+  // ============================================================
+  // CASHFREE: create order + open checkout
+  // ============================================================
+  private startCashfreePayment(): void {
+    const amount = 100; // backend recomputes for cart mode
 
     this.submitting.set(true);
 
-    this.paymentService.createOrder(amount).subscribe({
-      next: (res) => this.openRazorpayModal(res),
+    this.paymentService.createCashfreeOrder(amount).subscribe({
+      next: (res) => this.openCashfreeCheckout(res),
       error: (err) => {
         this.submitting.set(false);
         this.error.set(err?.error?.error || 'Failed to initiate payment.');
@@ -215,50 +206,43 @@ export class Checkout implements OnInit {
     });
   }
 
-  // ---------- Razorpay: show modal ----------
-  private openRazorpayModal(res: { key: string; razorpayOrderId: string; amount: number; currency: string }): void {
-    if (typeof Razorpay === 'undefined') {
+  /** Opens the Cashfree checkout with the payment session id */
+  private openCashfreeCheckout(res: { paymentSessionId: string; orderId: string }): void {
+    if (typeof Cashfree === 'undefined') {
       this.submitting.set(false);
-      this.error.set('Razorpay SDK not loaded. Check index.html.');
+      this.error.set('Cashfree SDK not loaded. Check index.html.');
       return;
     }
 
-    const options = {
-      key: res.key,
-      amount: res.amount,
-      currency: res.currency,
-      name: 'Macarena',
-      description: this.mode === 'buy-now' ? 'Buy Now' : 'Cart Checkout',
-      order_id: res.razorpayOrderId,
-      prefill: {
-        name: this.form.fullName,
-        contact: this.form.phoneNumber
-      },
-      theme: { color: '#6b1f2a' },
-      handler: (response: any) => this.verifyAndPlaceOrder(response, res.razorpayOrderId),
-      modal: {
-        ondismiss: () => this.submitting.set(false)
-      }
-    };
+    const cashfree = Cashfree({
+      mode: 'production' // 👈 LIVE — real money
+    });
 
-    const rzp = new Razorpay(options);
-    rzp.open();
+    cashfree.checkout({
+      paymentSessionId: res.paymentSessionId,
+      redirectTarget: '_modal',
+    }).then((result: any) => {
+      if (result?.error) {
+        this.submitting.set(false);
+        this.error.set(result.error.message || 'Payment failed.');
+        return;
+      }
+
+      // Ask backend to verify the payment
+      this.verifyAndPlaceOrder(res.orderId);
+    });
   }
 
-  // ---------- Razorpay: verify + place order ----------
-  private verifyAndPlaceOrder(rzpResponse: any, razorpayOrderId: string): void {
+  // ---------- Cashfree: verify + place order ----------
+  private verifyAndPlaceOrder(cashfreeOrderId: string): void {
     const payload: VerifyPaymentRequest = {
-      razorpayOrderId: razorpayOrderId,
-      razorpayPaymentId: rzpResponse.razorpay_payment_id,
-      razorpaySignature: rzpResponse.razorpay_signature,
-
+      cashfreeOrderId: cashfreeOrderId,
       fullName: this.form.fullName.trim(),
       phoneNumber: this.form.phoneNumber.trim(),
       addressLine: this.form.addressLine.trim(),
       city: this.form.city.trim(),
       state: this.form.state.trim(),
       pincode: this.form.pincode.trim(),
-
       mode: this.mode
     };
 
@@ -269,9 +253,10 @@ export class Checkout implements OnInit {
     }
 
     this.paymentService.verify(payload).subscribe({
-      next: (order) => {
+      next: () => {
         this.submitting.set(false);
-        this.router.navigate(['/order-success', order.id]);
+        // 👇 Redirect to My Orders after successful payment
+        this.router.navigate(['/my-orders']);
       },
       error: (err) => {
         this.submitting.set(false);
