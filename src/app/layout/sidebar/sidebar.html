@@ -9,9 +9,9 @@
 
   <!-- ============ BRAND ============ -->
   <div class="sidebar-brand" routerLink="/">
-   <div class="brand-mark" aria-hidden="true">
-  <img src="assets/logo2.png" alt="Macarena logo" />
-</div>
+    <div class="brand-mark" aria-hidden="true">
+      <img src="assets/logo2.png" alt="Macarena logo" />
+    </div>
 
     <div class="brand-copy">
       <span class="brand-name">Macarena</span>
@@ -53,7 +53,7 @@
       </span>
     </a>
 
-    <!-- ✅ Back to public site -->
+    <!-- Back to public site -->
     <button type="button" class="nav-item nav-item--home" (click)="goHome()">
       <span class="nav-icon" aria-hidden="true">
         <i class="bi bi-house"></i>
@@ -88,7 +88,7 @@
           {{ adminEmail || 'Signed in' }}
         </span>
       </div>
-      <button class="footer-action" type="button" aria-label="Sign out" (click)="logout()">
+      <button class="footer-action" type="button" aria-label="Sign out" (click)="openLogoutConfirm()">
         <svg viewBox="0 0 20 20">
           <path d="M12 4 H 5 a 1 1 0 0 0 -1 1 v 10 a 1 1 0 0 0 1 1 h 7"
                 fill="none" stroke="currentColor" stroke-width="1.5"
@@ -102,3 +102,26 @@
   </div>
 
 </aside>
+
+<!-- ============ Logout confirm popup (outside <aside>) ============ -->
+<div class="logout-backdrop" *ngIf="showLogoutConfirm" (click)="cancelLogout()">
+  <div class="logout-modal" role="dialog" aria-modal="true" aria-labelledby="logout-title"
+       (click)="$event.stopPropagation()">
+    <div class="logout-icon" aria-hidden="true">
+      <svg viewBox="0 0 20 20">
+        <path d="M12 4 H 5 a 1 1 0 0 0 -1 1 v 10 a 1 1 0 0 0 1 1 h 7"
+              fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M14 7 l 3 3 l -3 3 M 17 10 H 9"
+              fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3 id="logout-title">Sign out?</h3>
+    <p>Are you sure you want to sign out of the admin panel?</p>
+    <div class="logout-actions">
+      <button type="button" class="logout-btn logout-btn--ghost" (click)="cancelLogout()">Cancel</button>
+      <button type="button" class="logout-btn logout-btn--primary" (click)="confirmLogout()">Yes, sign out</button>
+    </div>
+  </div>
+</div>

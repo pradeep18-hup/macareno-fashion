@@ -28,6 +28,8 @@ import { authGuard } from './guards/auth.guard';
 import { ProductListComponent } from './product/product-list/product-list';
 import { ForgotPassword } from './auth/forgot-password/forgot-password';
 
+
+
 export const routes: Routes = [
   // ---------- Auth (no layout) ----------
   { path: 'login', component: Login },
@@ -71,6 +73,7 @@ export const routes: Routes = [
       { path: 'courier',                 component: CourierForm },
       { path: 'deliver-charge-settings', component: DeliveryChargeForm },
       {path:'product-list',component:ProductListComponent},
+
     ]
   },
 

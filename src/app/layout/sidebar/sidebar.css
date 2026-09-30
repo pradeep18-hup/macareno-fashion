@@ -357,6 +357,7 @@
   place-items: center;
   padding: 0;
   border-radius: var(--radius-sm);
+  cursor: pointer;
   transition: color var(--dur) var(--ease),
               background var(--dur) var(--ease);
 }
@@ -448,4 +449,99 @@
     border-top: none;
   }
   .nav-item--home:hover::after { display: none; }
+}
+
+/* ==========================================================================
+   Logout confirm popup
+   (outside the media query, so it works on desktop and mobile)
+   ========================================================================== */
+.logout-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 19, 15, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1000;
+  animation: logoutFade 0.2s ease;
+}
+
+.logout-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: 28px 26px 22px;
+  text-align: center;
+  animation: logoutPop 0.25s var(--ease);
+}
+
+.logout-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+.logout-icon svg { width: 24px; height: 24px; }
+
+.logout-modal h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.logout-modal p {
+  margin: 0 0 22px;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+}
+
+.logout-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.logout-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease),
+              border-color var(--dur) var(--ease),
+              opacity var(--dur) var(--ease);
+}
+
+.logout-btn--ghost {
+  background: transparent;
+  border-color: var(--color-line);
+  color: var(--color-ink);
+}
+.logout-btn--ghost:hover { border-color: var(--color-accent); }
+
+.logout-btn--primary {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+.logout-btn--primary:hover { opacity: 0.9; }
+
+@keyframes logoutFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes logoutPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }

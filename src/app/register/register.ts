@@ -89,7 +89,7 @@ export class Register {
       next: (res) => {
         this.loading.set(false);
         console.log('Registered:', res);
-        this.router.navigate(['/']);
+        this.router.navigate(['login']);
       },
       error: (err) => {
         this.loading.set(false);

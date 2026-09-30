@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 export interface CartItem {
   id: number;
@@ -15,7 +16,7 @@ export interface CartItem {
 @Injectable({ providedIn: 'root' })
 export class CartService {
 
-  private readonly api = 'http://localhost:8080/api/cart';
+  private readonly api = `${environment.apiUrl}${environment.endpoints.cart}`;
   private http = inject(HttpClient);
   private authService = inject(AuthService);
 

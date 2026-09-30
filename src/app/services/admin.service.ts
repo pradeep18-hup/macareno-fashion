@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface AdminRequest {
   name: string;
@@ -20,7 +21,7 @@ export interface AdminResponse {
 @Injectable({ providedIn: 'root' })
 export class AdminService {
 
-  private readonly api = 'http://localhost:8080/api/admins';
+  private readonly api = `${environment.apiUrl}${environment.endpoints.admins}`;
   private http = inject(HttpClient);
 
   getAll(): Observable<AdminResponse[]> {

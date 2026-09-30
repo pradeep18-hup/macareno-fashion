@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -22,6 +22,7 @@ export class Sidebar implements OnInit {
   private router = inject(Router);
 
   isCollapsed = false;
+  showLogoutConfirm = false;
 
   // Live admin info from localStorage (populated at login)
   adminName = '';
@@ -41,11 +42,24 @@ export class Sidebar implements OnInit {
     this.isCollapsed = !this.isCollapsed;
   }
 
-  logout(): void {
-    if (!confirm('Sign out of the admin panel?')) return;
+  // ---------- Logout popup ----------
+  openLogoutConfirm(): void {
+    this.showLogoutConfirm = true;
+  }
 
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.showLogoutConfirm = false;
   }
 
   goHome(): void {
@@ -56,7 +70,7 @@ export class Sidebar implements OnInit {
     { label: 'Admin',        icon: 'bi bi-person-badge',  route: '/admin' },
     { label: 'Add Product',  icon: 'bi bi-plus-circle',   route: '/admin/dress-form' },
     { label: 'Product Type', icon: 'bi bi-tags',          route: '/admin/dress-type' },
-      { label: 'Product List', icon: 'bi bi-tags',          route: '/admin/product-list' },
+    { label: 'Product List', icon: 'bi bi-tags',          route: '/admin/product-list' },
     { label: 'Sizes',        icon: 'bi bi-grid-3x3-gap',  route: '/admin/size' },
     { label: 'Customer',     icon: 'bi bi-people',        route: '/admin/customer-list' },
     { label: 'Orders',       icon: 'bi bi-bag-check',     route: '/admin/orders' },

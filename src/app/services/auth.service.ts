@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -19,9 +20,9 @@ export interface LoginResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly api = 'http://localhost:8080/api/auth';
-  private readonly TOKEN_KEY = 'macarena_token';
-  private readonly USER_KEY  = 'macarena_user';
+  private readonly api = `${environment.apiUrl}${environment.endpoints.auth}`;
+  private readonly TOKEN_KEY = environment.storageKeys.token;
+  private readonly USER_KEY  = environment.storageKeys.user;
 
   private http = inject(HttpClient);
 
