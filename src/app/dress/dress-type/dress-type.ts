@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment.service';
+import { environment } from '../../../environments/environment';
 
 // ---------- Models ----------
 export interface DressType {

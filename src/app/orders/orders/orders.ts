@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment.service';
+import { environment } from '../../../environments/environment';
 
 export type OrderStatus = 'new' | 'packed' | 'dispatched' | 'delivered' | 'cancelled' | 'returned';
 export type OrderTab = 'recent' | OrderStatus;
