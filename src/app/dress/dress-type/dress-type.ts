@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment.service';
 
 // ---------- Models ----------
 export interface DressType {
@@ -19,7 +20,7 @@ export interface Toast {
 @Injectable({ providedIn: 'root' })
 export class DressTypeService {
 
-  private readonly api = 'http://localhost:8080/api/dress-types';
+  private readonly api = `${environment.apiUrl}/dress-types`;
   private http = inject(HttpClient);
 
   private typesSubject = new BehaviorSubject<DressType[]>([]);

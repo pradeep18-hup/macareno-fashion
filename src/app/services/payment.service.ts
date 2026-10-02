@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Order } from './order.service';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment.service';
 
 export interface CreateCashfreeOrderResponse {
   paymentSessionId: string;   // 👈 returned by Cashfree create-order

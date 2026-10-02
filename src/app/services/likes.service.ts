@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of, map } from 'rxjs';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment.service';
 
 export interface LikedProductDetails {
   productId: number;

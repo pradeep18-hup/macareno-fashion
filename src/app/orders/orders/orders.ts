@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment.service';
 
 export type OrderStatus = 'new' | 'packed' | 'dispatched' | 'delivered' | 'cancelled' | 'returned';
 export type OrderTab = 'recent' | OrderStatus;
@@ -51,7 +52,7 @@ const HOUR = 3600000;
 export class Orders implements OnInit {
 
   private http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api/orders';
+  private readonly api = `${environment.apiUrl}/orders`;
 
   // ✅ Real data (loaded from API) — now a signal so change detection fires reliably
   orders = signal<Order[]>([]);

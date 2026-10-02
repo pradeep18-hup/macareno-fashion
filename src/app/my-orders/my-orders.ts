@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment.service';
 
 interface OrderItem {
   productId: number;
@@ -39,8 +40,8 @@ interface Order {
 export class MyOrders implements OnInit {
 
   private http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api/orders';
-  private readonly base = 'http://localhost:8080';
+  private readonly api = `${environment.apiUrl}/orders`;
+  private readonly base = `${environment.baseUrl}`;
 
   orders = signal<Order[]>([]);
   loading = signal(true);

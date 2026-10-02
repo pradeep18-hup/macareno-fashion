@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment.service';
 
 interface Profile {
   id: number;
@@ -36,8 +37,8 @@ export class UserProfile implements OnInit {
 
   private get apiBase(): string {
     return this.userType === 'admin'
-      ? 'http://localhost:8080/api/admin-profile'
-      : 'http://localhost:8080/api/profile';
+      ? `${environment.apiUrl}/admin-profile`
+      : `${environment.apiUrl}/profile`;
   }
 
   activeTab: ProfileTab = 'profile';
