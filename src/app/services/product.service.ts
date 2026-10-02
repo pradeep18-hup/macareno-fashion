@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
 export interface ProductSizeDto {
   size: string;
@@ -50,7 +51,7 @@ export interface SizeOption {
 @Injectable({ providedIn: 'root' })
 export class ProductService {
 
-  private readonly base = 'http://localhost:8080';
+  private readonly base = `${environment.baseUrl}`;
   private readonly productsApi = `${this.base}/api/products`;
   private readonly dressTypesApi = `${this.base}/api/dress-types`;
   private readonly sizesApi = `${this.base}/api/sizes`;

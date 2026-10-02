@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Order } from './order.service';
+import { environment } from '../../environments/environment.development';
 
 export interface CreateCashfreeOrderResponse {
   paymentSessionId: string;   // 👈 returned by Cashfree create-order
@@ -29,7 +30,7 @@ export interface VerifyPaymentRequest {
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
 
-  private readonly api = 'http://localhost:8080/api/payments';
+  private readonly api = `${environment.apiUrl}/payments`;
   private http = inject(HttpClient);
 
   /** Creates a Cashfree order and returns the payment session id */

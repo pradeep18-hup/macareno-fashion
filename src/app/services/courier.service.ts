@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
 export interface Courier {
   id: number;
@@ -15,7 +16,7 @@ export interface CourierPayload {
 
 @Injectable({ providedIn: 'root' })
 export class CourierService {
-  private readonly api = 'http://localhost:8080/api/couriers';
+  private readonly api = `${environment.apiUrl}/couriers`;
   private http = inject(HttpClient);
 
   getAll(): Observable<Courier[]> {

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
 export interface SizeOption {
   id: number;
@@ -12,7 +13,7 @@ export interface SizeOption {
 @Injectable({ providedIn: 'root' })
 export class SizeService {
 
-  private readonly api = 'http://localhost:8080/api/sizes';
+  private readonly api = `${environment.apiUrl}/sizes`;
   private http = inject(HttpClient);
 
   getAll(): Observable<SizeOption[]> {

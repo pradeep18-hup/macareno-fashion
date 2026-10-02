@@ -74,7 +74,7 @@ export class Sidebar implements OnInit {
     { label: 'Sizes',        icon: 'bi bi-grid-3x3-gap',  route: '/admin/size' },
     { label: 'Customer',     icon: 'bi bi-people',        route: '/admin/customer-list' },
     { label: 'Orders',       icon: 'bi bi-bag-check',     route: '/admin/orders' },
-    { label: 'Courier',      icon: 'bi bi-truck',         route: '/admin/courier' },
-    { label: 'Order Amount', icon: 'bi bi-credit-card',   route: '/admin/deliver-charge-settings' },
+    // { label: 'Courier',      icon: 'bi bi-truck',         route: '/admin/courier' },
+    // { label: 'Order Amount', icon: 'bi bi-credit-card',   route: '/admin/deliver-charge-settings' },
   ];
 }

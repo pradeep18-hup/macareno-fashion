@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of, map } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment.development';
 
 export interface LikedProductDetails {
   productId: number;
@@ -16,7 +17,7 @@ export class LikesService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
 
-  private readonly api = 'http://localhost:8080/api/likes';
+  private readonly api = `${environment.apiUrl}/likes`;
 
   private readonly likedIds = signal<Set<number>>(new Set());
 

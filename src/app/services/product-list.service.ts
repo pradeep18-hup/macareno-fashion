@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product,ProductUpdateRequest } from '../model/product.mdodel';
+import { environment } from '../../environments/environment.development';
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private http = inject(HttpClient);

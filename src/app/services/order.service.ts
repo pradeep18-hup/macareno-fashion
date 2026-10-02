@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
 export interface OrderItem {
   productId: number;
@@ -41,7 +42,7 @@ export interface CheckoutRequest {
 @Injectable({ providedIn: 'root' })
 export class OrderService {
 
-  private readonly api = 'http://localhost:8080/api/orders';
+  private readonly api = `${environment.apiUrl}/orders`;
   private http = inject(HttpClient);
 
   list(): Observable<Order[]> {
