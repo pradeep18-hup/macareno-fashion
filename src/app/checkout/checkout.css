@@ -6,6 +6,14 @@
   display: block;
   background: var(--color-bg);
 }
+.co-field {
+    min-width: 0;
+}
+
+.co-field input {
+    width: 100%;
+    box-sizing: border-box;
+}
 
 .checkout-page {
   max-width: 720px;
