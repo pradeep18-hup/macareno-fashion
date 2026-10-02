@@ -32,7 +32,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="/assets/logo2.png">
 
   <!-- Structured data: Organization + WebSite -->
   <script type="application/ld+json">
@@ -57,6 +57,12 @@
       }
     ]
   }
+
+  {
+  "rewrites": [
+    { "source": "/((?!sitemap.xml|robots.txt|assets/).*)", "destination": "/index.html" }
+  ]
+}
   </script>
 
   <!-- Cashfree SDK -->
