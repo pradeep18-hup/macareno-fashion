@@ -671,7 +671,211 @@
   max-width: calc(100vw - 2rem);
   text-align: center;
 }
+/* ====== Paste at the END of product-dettail.css ====== */
 
+/* ---------- Back button ---------- */
+.pd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.2rem;
+  padding: 0.5rem 1rem 0.5rem 0.6rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.pd-back svg { width: 18px; height: 18px; }
+.pd-back:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+/* ---------- Related products ---------- */
+.pd-related {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.pd-related__title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0 0 1.4rem;
+  color: var(--color-ink);
+}
+
+.pd-related__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.2rem;
+}
+
+.pd-rcard {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 16px -8px rgba(23, 19, 15, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pd-rcard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -10px rgba(23, 19, 15, 0.25);
+}
+
+.pd-rcard__img {
+  aspect-ratio: 4 / 5;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+/* ====== Paste at the very END of product-dettail.css ======
+   (munnaadi paste panna "ADD2" block (pd-cta-row--split, pd-btn--half,
+   pd-btn--outline) irundha adhai delete pannittu idhai podunga) */
+
+/* Two buttons, 50 / 50, one line */
+.pd-cta-row.pd-cta-row--split {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.9rem;
+}
+
+.pd-cta-row .pd-btn.pd-btn--half {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  height: 54px;
+  padding: 0 1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* LEFT: Add to cart — white, thin border */
+.pd-btn--cart {
+  background: #fff;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+.pd-btn--cart:hover:not(:disabled) {
+  border-color: var(--color-ink);
+  background: #fff;
+}
+
+/* RIGHT: Back — filled (like the "Buy" button) */
+.pd-btn--back {
+  background: var(--color-accent);
+  color: #fff;
+  border: 1px solid var(--color-accent);
+}
+.pd-btn--back:hover:not(:disabled) {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent-light);
+}
+
+@media (max-width: 480px) {
+  .pd-cta-row.pd-cta-row--split { flex-direction: row; gap: 0.6rem; }
+  .pd-cta-row .pd-btn.pd-btn--half {
+    min-width: 0;
+    height: 50px;
+    padding: 0 0.6rem;
+    font-size: 0.92rem;
+  }
+}
+.pd-rcard__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pd-rcard__body { padding: 0.8rem 0.9rem 1rem; }
+
+.pd-rcard__name {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* ===== Login prompt popup (append to the end of product-dettail.css) ===== */
+.pd-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.pd-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: pd-modal-in 0.18s ease-out;
+}
+
+.pd-modal__icon { font-size: 32px; margin: 0 0 8px; }
+.pd-modal__msg  { font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+.pd-modal__sub  { font-size: 13px; color: #777; margin: 0 0 16px; }
+
+.pd-modal__actions { display: flex; gap: 10px; }
+.pd-modal__actions .pd-btn {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 0.8rem;
+  border-radius: 10px;
+}
+
+@keyframes pd-modal-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.pd-rcard__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.pd-rcard__now { font-weight: 700; color: var(--color-ink); }
+.pd-rcard__mrp {
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.pd-rcard__off { font-size: 0.8rem; font-weight: 600; color: #388e3c; }
+
+.pd-related__more {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+.pd-related__more .pd-btn { min-width: 200px; }
+
+@media (max-width: 480px) {
+  .pd-related__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+}
 @keyframes pd-toast-in {
   from { opacity: 0; transform: translate(-50%, 12px); }
   to   { opacity: 1; transform: translate(-50%, 0); }

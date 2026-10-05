@@ -51,7 +51,69 @@
   margin-bottom: 0.8rem;
   font-weight: 600;
 }
+/* ===== Login prompt popup (append to the END of hero.component.css) ===== */
+.login-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 16px;
+}
 
+.login-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: login-modal-in 0.18s ease-out;
+}
+
+.login-modal__icon { font-size: 32px; margin: 0 0 8px; }
+.login-modal__msg  { font-size: 16px; font-weight: 600; margin: 0 0 6px; color: var(--color-ink); }
+.login-modal__sub  { font-size: 13px; color: var(--color-ink-soft); margin: 0 0 16px; }
+
+.login-modal__actions { display: flex; gap: 10px; }
+
+.login-modal__btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.login-modal__btn--primary {
+  background: var(--color-accent);
+  color: #fff;
+  border: 1px solid var(--color-accent);
+}
+.login-modal__btn--primary:hover {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent-light);
+}
+
+.login-modal__btn--ghost {
+  background: #fff;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+.login-modal__btn--ghost:hover {
+  border-color: var(--color-ink);
+}
+
+@keyframes login-modal-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
 .hero__headline {
   font-size: var(--fs-h1);
   line-height: 1.05;

@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output, input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { CustomerService } from '../services/customer.service';
 
@@ -14,7 +15,7 @@ export interface RegisterDetails {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })

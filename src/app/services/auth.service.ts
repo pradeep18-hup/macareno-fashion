@@ -76,15 +76,36 @@ export class AuthService {
     try { return JSON.parse(raw); } catch { return null; }
   }
 
+  /** Reads the "exp" claim from the JWT. No exp claim = treated as not expired. */
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(
+        atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+      );
+      if (!payload.exp) return false;
+      return Date.now() >= payload.exp * 1000;   // exp is in seconds
+    } catch {
+      return true;                               // cannot decode = invalid
+    }
+  }
+
+  /** True only if a valid, non-expired token exists. Deletes bad tokens. */
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const t = this.getToken();
+    if (!t || t === 'undefined' || t === 'null') return false;
+
+    if (this.isTokenExpired(t)) {
+      this.logout();
+      return false;
+    }
+    return true;
   }
 
   isAdmin(): boolean {
-    return this.getUser()?.userType === 'admin';
+    return this.isLoggedIn() && this.getUser()?.userType === 'admin';
   }
 
   isCustomer(): boolean {
-    return this.getUser()?.userType === 'customer';
+    return this.isLoggedIn() && this.getUser()?.userType === 'customer';
   }
 }

@@ -249,7 +249,7 @@
 
 .orders-table {
   width: 100%;
-  min-width: 1020px;
+  min-width: 1120px; /* wider: extra Products column */
   border-collapse: collapse;
   font-family: var(--font-body);
 }
@@ -671,6 +671,102 @@
   border-bottom: none;
   padding-top: 1rem;
 }
+
+/* ---------- Products popup (NEW) ---------- */
+.product-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.product-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.product-row:last-child { border-bottom: none; }
+
+.product-thumb {
+  width: 72px;
+  height: 90px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.product-info { flex: 1; min-width: 0; }
+
+/* clickable thumbnail */
+.product-thumb-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  flex-shrink: 0;
+  cursor: zoom-in;
+  line-height: 0;
+}
+.product-thumb-btn:hover .product-thumb { border-color: var(--color-accent); }
+
+/* product name link inside order detail */
+.item-link {
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+/* ---------- Full-screen image viewer ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;                      /* above modals (1000) and toast (1100) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  background: rgba(10, 8, 6, 0.92);
+  cursor: zoom-out;
+}
+
+.lightbox-img {
+  /* fill the screen (small images are scaled UP to fit) */
+  width: min(100%, 1000px);
+  height: calc(100vh - 8rem);
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: default;
+}
+
+.lightbox-caption {
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  cursor: default;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.15); }
 
 /* ---------- Timeline ---------- */
 .timeline {

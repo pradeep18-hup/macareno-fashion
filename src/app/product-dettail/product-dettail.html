@@ -19,7 +19,6 @@
             [src]="product().images[activeImageIndex()] || 'assets/placeholder-product.svg'"
             [alt]="product().name" />
 
-          <!-- 👇 Whole-product sold-out badge -->
           <div class="pd-sold-out-badge" *ngIf="isFullySoldOut()">Sold Out</div>
 
           <button
@@ -97,7 +96,6 @@
             >
               <span class="pd-size-label">{{ size }}</span>
 
-              <!-- Stock count when available, "SOLD" when flagged -->
               <span class="pd-size-stock" *ngIf="!isSizeSoldOut(size)">
                 {{ stockFor(size) }}
               </span>
@@ -113,14 +111,13 @@
             Only {{ selectedSizeStock() }} left in this size
           </p>
 
-          <!-- 👇 Warning if the user tries to pick a sold-out size -->
           <p class="pd-stock-warn pd-stock-warn--danger"
              *ngIf="selectedSize() && isSizeSoldOut(selectedSize()!)">
             This size is sold out. Please choose another size.
           </p>
         </div>
 
-        <!-- Quantity — with cart-aware hint -->
+        <!-- Quantity -->
         <div class="pd-qty-block">
           <p class="pd-block-label">
             Quantity
@@ -145,15 +142,19 @@
         </div>
 
         <!-- CTA -->
-        <div class="pd-cta-row">
-          <button class="pd-btn pd-btn--primary pd-btn--full"
+        <div class="pd-cta-row pd-cta-row--split">
+          <button class="pd-btn pd-btn--half pd-btn--cart"
                   (click)="addToCart()"
-                  [disabled]="addingToCart() || maxQuantity() <= 0">
+                  [disabled]="addingToCart() || isFullySoldOut()">
             {{ addingToCart()
                ? 'Adding…'
                : (isFullySoldOut()
                   ? 'Sold Out'
-                  : (maxQuantity() <= 0 ? 'Max quantity reached' : 'Add to Cart')) }}
+                  : ((maxQuantity() <= 0 && alreadyInCart() > 0) ? 'Max quantity reached' : 'Add to Cart')) }}
+          </button>
+
+          <button type="button" class="pd-btn pd-btn--half pd-btn--back" (click)="goBack()">
+            Back
           </button>
         </div>
 
@@ -213,10 +214,57 @@
       </div>
 
     </div>
+
+    <!-- ===== More products (next 10) ===== -->
+    <div class="pd-related" *ngIf="!loading() && !loadError()">
+
+      <ng-container *ngIf="relatedProducts().length">
+        <h2 class="pd-related__title">You may also like</h2>
+
+        <div class="pd-related__grid">
+          <article class="pd-rcard"
+                   *ngFor="let r of relatedProducts()"
+                   (click)="openRelated(r.id)">
+            <div class="pd-rcard__img">
+              <img [src]="r.image" [alt]="r.name" loading="lazy" (error)="onImgError($event)" />
+            </div>
+            <div class="pd-rcard__body">
+              <p class="pd-rcard__name">{{ r.name }}</p>
+              <div class="pd-rcard__price">
+                <span class="pd-rcard__now">{{ formatPrice(r.price) }}</span>
+                <span class="pd-rcard__mrp" *ngIf="r.mrp > r.price">{{ formatPrice(r.mrp) }}</span>
+                <span class="pd-rcard__off" *ngIf="r.discount > 0">{{ r.discount }}% off</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </ng-container>
+
+      <!-- See more: always visible -->
+      <div class="pd-related__more">
+        <button type="button" class="pd-btn pd-btn--secondary" (click)="seeMore()">
+          See more
+        </button>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <!-- Toast notification -->
 <div class="pd-toast" *ngIf="toastMessage()" role="status">
   {{ toastMessage() }}
+</div>
+
+<!-- Login prompt popup -->
+<div class="pd-modal-backdrop" *ngIf="showLoginPrompt()" (click)="closeLoginPrompt()">
+  <div class="pd-modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <p class="pd-modal__icon">🔒</p>
+    <p class="pd-modal__msg">{{ loginPromptMessage() }}</p>
+    <p class="pd-modal__sub">Redirecting to login in 2 seconds…</p>
+    <div class="pd-modal__actions">
+      <button type="button" class="pd-btn pd-btn--cart" (click)="goToLogin()">Login</button>
+      <button type="button" class="pd-btn pd-btn--back" (click)="closeLoginPrompt()">Cancel</button>
+    </div>
+  </div>
 </div>
