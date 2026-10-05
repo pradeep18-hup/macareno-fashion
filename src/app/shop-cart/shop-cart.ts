@@ -39,6 +39,10 @@ export class ShopCartComponent implements OnInit {
 
   readonly minOrderQty = 5;
 
+  // 👇 Fixed charges applied to every order
+  readonly deliveryCharge = 80;
+  readonly packingCharge = 10;
+
   readonly showRemoveConfirm = signal(false);
   readonly removeTarget = signal<CartItemView | null>(null);
 
@@ -104,8 +108,8 @@ export class ShopCartComponent implements OnInit {
     return {
       id: item.id,
       productId: item.productId,
-      name: p.dressName,                        // 👈 keep real product name
-      image: archived ? '' : image,             // 👈 blank when archived
+      name: p.dressName,
+      image: archived ? '' : image,
       price: p.price,
       offerPrice: selling,
       size: item.size,
@@ -179,6 +183,12 @@ export class ShopCartComponent implements OnInit {
     return this.cartItems()
       .filter(i => !i.unavailable)
       .reduce((s, i) => s + this.unitPrice(i) * i.qty, 0);
+  }
+
+  // 👇 Items subtotal + fixed charges
+  get grandTotal(): number {
+    if (this.payableTotal <= 0) return 0;
+    return this.payableTotal + this.deliveryCharge + this.packingCharge;
   }
 
   get savings(): number {

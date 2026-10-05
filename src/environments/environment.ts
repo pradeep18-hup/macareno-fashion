@@ -1,7 +1,7 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8080/api',
-  baseUrl:'http://localhost:8080',
+  production: true,
+  apiUrl: '/api',
+  baseUrl: '',
   endpoints: {
     admins: '/admins',
     auth: '/auth',

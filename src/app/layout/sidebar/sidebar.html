@@ -1,4 +1,9 @@
-<aside class="admin-sidebar" [class.is-collapsed]="isCollapsed">
+<!-- ============================================================
+     SIDEBAR (drawer on mobile, column on desktop)
+     ============================================================ -->
+<aside class="admin-sidebar"
+       [class.is-collapsed]="isCollapsed"
+       [class.mobile-open]="mobileOpen">
 
   <!-- Decorative corner flourish -->
   <svg class="corner-flourish" viewBox="0 0 120 120" aria-hidden="true">
@@ -8,9 +13,9 @@
   </svg>
 
   <!-- ============ BRAND ============ -->
-  <div class="sidebar-brand" routerLink="/">
+  <div class="sidebar-brand" routerLink="/" (click)="closeMobileMenu()">
     <div class="brand-mark" aria-hidden="true">
-<link rel="icon" type="image/png" href="/assets/logo2.png">
+      <img src="assets/logo2.png" alt="Macarena logo">
     </div>
 
     <div class="brand-copy">
@@ -18,13 +23,29 @@
       <span class="brand-sub">Atelier Admin</span>
     </div>
 
-    <button class="collapse-toggle" type="button"
-            (click)="toggle()"
+    <!-- Collapse toggle (desktop only) -->
+    <button class="collapse-toggle"
+            type="button"
+            (click)="toggle(); $event.stopPropagation()"
             [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
       <svg viewBox="0 0 20 20" class="toggle-icon" [class.flip]="isCollapsed">
         <path d="M12 4 L 6 10 L 12 16" fill="none"
               stroke="currentColor" stroke-width="1.6"
               stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- Close button (mobile only) -->
+    <button class="mobile-close"
+            type="button"
+            (click)="closeMobileMenu(); $event.stopPropagation()"
+            aria-label="Close menu">
+      <svg viewBox="0 0 20 20">
+        <path d="M5 5 L 15 15 M 15 5 L 5 15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"/>
       </svg>
     </button>
   </div>
@@ -38,7 +59,8 @@
        routerLinkActive="active"
        [routerLinkActiveOptions]="{ exact: item.route === '/admin' }"
        class="nav-item"
-       [style.--i]="i">
+       [style.--i]="i"
+       (click)="closeMobileMenu()">
 
       <span class="nav-icon" aria-hidden="true">
         <i [class]="item.icon"></i>
@@ -103,7 +125,33 @@
 
 </aside>
 
-<!-- ============ Logout confirm popup (outside <aside>) ============ -->
+<!-- ============================================================
+     SCRIM (dark overlay behind drawer) — sibling AFTER sidebar
+     ============================================================ -->
+<div class="mobile-scrim"
+     [class.show]="mobileOpen"
+     (click)="closeMobileMenu()"
+     aria-hidden="true"></div>
+
+<!-- ============================================================
+     MOBILE TOP BAR (hamburger) — sibling AFTER sidebar
+     hides automatically when drawer is open (via CSS sibling selector)
+     ============================================================ -->
+<header class="mobile-topbar">
+  <button type="button"
+          class="hamburger"
+          (click)="toggleMobileMenu()"
+          aria-label="Open menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <span class="topbar-title">Macarena Admin</span>
+</header>
+
+<!-- ============================================================
+     LOGOUT CONFIRM POPUP
+     ============================================================ -->
 <div class="logout-backdrop" *ngIf="showLogoutConfirm" (click)="cancelLogout()">
   <div class="logout-modal" role="dialog" aria-modal="true" aria-labelledby="logout-title"
        (click)="$event.stopPropagation()">

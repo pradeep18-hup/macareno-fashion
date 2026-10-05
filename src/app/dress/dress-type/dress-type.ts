@@ -1,4 +1,4 @@
-import { Injectable, Component, inject, OnInit } from '@angular/core';
+import { Injectable, Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
@@ -41,9 +41,9 @@ export class DressTypeService {
     return this.http.put<DressType>(`${this.api}/${id}`, { name }).pipe(tap(() => this.loadAll()));
   }
 
-  remove(id: number): Observable<{ message: string; id: number }> {
+  remove(id: number): Observable<void> {
     return this.http
-      .delete<{ message: string; id: number }>(`${this.api}/${id}`)
+      .delete<void>(`${this.api}/${id}`)
       .pipe(tap(() => this.loadAll()));
   }
 }
@@ -59,12 +59,13 @@ export class DressTypeService {
 export class DressType implements OnInit {
 
   private dressTypeService = inject(DressTypeService);
+  private cdr = inject(ChangeDetectorRef);   // 👈 for manual change detection
 
   dressTypes$ = this.dressTypeService.dressTypes$;
 
   toasts: Toast[] = [];
   editingId: number | null = null;
-  pendingDelete: DressType | null = null;   // for custom delete confirm
+  pendingDelete: DressType | null = null;
 
   nameControl = new FormControl('', {
     nonNullable: true,
@@ -127,7 +128,7 @@ export class DressType implements OnInit {
     this.pendingDelete = null;
 
     this.dressTypeService.remove(target.id).subscribe({
-      next: (res) => this.notify('success', res.message || 'Dress type deleted successfully.'),
+      next: () => this.notify('success', 'Dress type deleted successfully.'),
       error: (err) => this.notify('error', err.error?.error || 'Failed to delete.')
     });
   }
@@ -139,15 +140,20 @@ export class DressType implements OnInit {
   // ---------- Toast helpers ----------
   private notify(type: 'success' | 'error', message: string): void {
     const toast: Toast = { type, message };
-    this.toasts.push(toast);
+    // 👇 Reassign array so Angular detects the change
+    this.toasts = [...this.toasts, toast];
+    // 👇 Force change detection so the toast renders immediately
+    this.cdr.detectChanges();
 
     setTimeout(() => {
       this.toasts = this.toasts.filter(t => t !== toast);
+      this.cdr.detectChanges();
     }, 3000);
   }
 
   dismiss(toast: Toast): void {
     this.toasts = this.toasts.filter(t => t !== toast);
+    this.cdr.detectChanges();
   }
 
   trackByToast(index: number, toast: Toast): string {

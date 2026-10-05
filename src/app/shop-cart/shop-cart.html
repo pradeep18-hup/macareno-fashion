@@ -19,7 +19,7 @@
          [class.cart-row--unavailable]="item.unavailable"
          *ngFor="let item of cartItems(); trackBy: trackByItemId">
 
-      <!-- 👇 Image OR "No longer available" text block -->
+      <!-- Image OR "No longer available" text block -->
       <img *ngIf="!item.unavailable && item.image"
            class="cart-row__img"
            [src]="item.image"
@@ -107,16 +107,23 @@
       <span class="savings-value">− ₹{{ savings | number }}</span>
     </div>
 
+    <!-- Delivery Charges -->
     <div class="cart-summary__line">
       <span>Delivery Charges</span>
-      <span class="free-tag">FREE</span>
+      <span>₹{{ deliveryCharge }}</span>
+    </div>
+
+    <!-- Packing Charges -->
+    <div class="cart-summary__line">
+      <span>Packing Charges</span>
+      <span>₹{{ packingCharge }}</span>
     </div>
 
     <div class="cart-summary__divider"></div>
 
     <div class="cart-summary__line cart-summary__line--total">
       <span>Total Amount</span>
-      <span>₹{{ payableTotal | number }}</span>
+      <span>₹{{ grandTotal | number }}</span>
     </div>
 
     <p class="cart-summary__savings-msg" *ngIf="savings > 0">

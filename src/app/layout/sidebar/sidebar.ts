@@ -22,9 +22,12 @@ export class Sidebar implements OnInit {
   private router = inject(Router);
 
   isCollapsed = false;
+
+  /** Mobile drawer state */
+  mobileOpen = false;
+
   showLogoutConfirm = false;
 
-  // Live admin info from localStorage (populated at login)
   adminName = '';
   adminEmail = '';
   adminInitial = '';
@@ -42,6 +45,15 @@ export class Sidebar implements OnInit {
     this.isCollapsed = !this.isCollapsed;
   }
 
+  // ---------- Mobile drawer ----------
+  toggleMobileMenu(): void {
+    this.mobileOpen = !this.mobileOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileOpen = false;
+  }
+
   // ---------- Logout popup ----------
   openLogoutConfirm(): void {
     this.showLogoutConfirm = true;
@@ -53,6 +65,7 @@ export class Sidebar implements OnInit {
 
   confirmLogout(): void {
     this.showLogoutConfirm = false;
+    this.closeMobileMenu();
     this.authService.logout();
     this.router.navigate(['/login']);
   }
@@ -60,9 +73,11 @@ export class Sidebar implements OnInit {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.showLogoutConfirm = false;
+    this.closeMobileMenu();
   }
 
   goHome(): void {
+    this.closeMobileMenu();
     this.router.navigate(['/']);
   }
 

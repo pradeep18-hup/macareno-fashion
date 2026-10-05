@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { PaymentService, VerifyPaymentRequest } from '../services/payment.service';
 import { CartService, CartItem as ApiCartItem } from '../services/cart.service';
 import { ProductService, ProductResponse } from '../services/product.service';
-import { forkJoin, of, Observable } from 'rxjs';
+import { forkJoin, of, Observable, firstValueFrom } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 // 👇 Cashfree SDK — loaded via script tag in index.html
@@ -30,6 +30,10 @@ export class Checkout implements OnInit {
   buyNowProductId: number | null = null;
   buyNowSize = '';
   buyNowQty = 1;
+
+  // 👇 Must match the values in shop-cart.ts
+  readonly deliveryCharge = 80;
+  readonly packingCharge = 10;
 
   form = {
     fullName: '',
@@ -80,18 +84,14 @@ export class Checkout implements OnInit {
       return;
     }
 
-    // Buy-now mode: single-item stock is checked by the backend on place
     this.proceedWithSubmit();
   }
 
-  /** Runs the actual payment/order flow after validation. */
   private proceedWithSubmit(): void {
     if (this.trialMode()) {
       this.placeTrialOrder();
       return;
     }
-
-    // 👇 Cashfree flow
     this.startCashfreePayment();
   }
 
@@ -179,7 +179,6 @@ export class Checkout implements OnInit {
     this.paymentService.trialPlaceOrder(payload).subscribe({
       next: () => {
         this.submitting.set(false);
-        // 👇 Redirect to My Orders
         this.router.navigate(['/my-orders']);
       },
       error: (err) => {
@@ -190,20 +189,85 @@ export class Checkout implements OnInit {
   }
 
   // ============================================================
-  // CASHFREE: create order + open checkout
+  // CASHFREE: compute real amount → create order → open checkout
   // ============================================================
-  private startCashfreePayment(): void {
-    const amount = 100; // backend recomputes for cart mode
-
+  private async startCashfreePayment(): Promise<void> {
     this.submitting.set(true);
 
-    this.paymentService.createCashfreeOrder(amount).subscribe({
-      next: (res) => this.openCashfreeCheckout(res),
-      error: (err) => {
+    try {
+      const amount = await this.computePayableAmount();
+
+      if (!amount || amount <= 0) {
         this.submitting.set(false);
-        this.error.set(err?.error?.error || 'Failed to initiate payment.');
+        this.error.set('Could not calculate the payable amount.');
+        return;
       }
-    });
+
+      this.paymentService.createCashfreeOrder(amount).subscribe({
+        next: (res) => this.openCashfreeCheckout(res),
+        error: (err) => {
+          this.submitting.set(false);
+          this.error.set(err?.error?.error || 'Failed to initiate payment.');
+        }
+      });
+    } catch {
+      this.submitting.set(false);
+      this.error.set('Could not calculate the payable amount.');
+    }
+  }
+
+  /**
+   * Real payable amount:
+   * - buy-now → product price (or offerPrice) × qty
+   * - cart    → sum of (price × qty) for every item
+   * 👇 PLUS delivery + packing charges (fixed)
+   */
+  private computePayableAmount(): Promise<number> {
+    // ----- Buy-now -----
+    if (this.mode === 'buy-now' && this.buyNowProductId) {
+      return firstValueFrom(
+        this.productService.getById(this.buyNowProductId).pipe(
+          map((p: ProductResponse) => {
+            const unit = (p.offerPrice && p.offerPrice > 0 && p.offerPrice < p.price)
+              ? p.offerPrice
+              : p.price;
+            const itemsTotal = unit * this.buyNowQty;
+            return itemsTotal + this.deliveryCharge + this.packingCharge;
+          }),
+          catchError(() => of(0))
+        )
+      );
+    }
+
+    // ----- Cart -----
+    return firstValueFrom(
+      this.cartService.getCart().pipe(
+        switchMap((items: ApiCartItem[]) => {
+          if (!items || items.length === 0) return of(0);
+
+          const requests: Observable<number>[] = items.map(item =>
+            this.productService.getById(item.productId).pipe(
+              map((p: ProductResponse) => {
+                const unit = (p.offerPrice && p.offerPrice > 0 && p.offerPrice < p.price)
+                  ? p.offerPrice
+                  : p.price;
+                return unit * item.quantity;
+              }),
+              catchError(() => of(0))
+            )
+          );
+
+          return forkJoin(requests).pipe(
+            map(totals => {
+              const itemsTotal = totals.reduce((sum, n) => sum + n, 0);
+              if (itemsTotal <= 0) return 0;
+              return itemsTotal + this.deliveryCharge + this.packingCharge;
+            })
+          );
+        }),
+        catchError(() => of(0))
+      )
+    );
   }
 
   /** Opens the Cashfree checkout with the payment session id */
@@ -215,7 +279,7 @@ export class Checkout implements OnInit {
     }
 
     const cashfree = Cashfree({
-      mode: 'production' // 👈 LIVE — real money
+      mode: 'production'
     });
 
     cashfree.checkout({
@@ -228,7 +292,6 @@ export class Checkout implements OnInit {
         return;
       }
 
-      // Ask backend to verify the payment
       this.verifyAndPlaceOrder(res.orderId);
     });
   }
@@ -255,7 +318,6 @@ export class Checkout implements OnInit {
     this.paymentService.verify(payload).subscribe({
       next: () => {
         this.submitting.set(false);
-        // 👇 Redirect to My Orders after successful payment
         this.router.navigate(['/my-orders']);
       },
       error: (err) => {

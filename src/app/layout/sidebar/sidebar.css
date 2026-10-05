@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MACARENA — Admin Sidebar
+   MACARENA — Admin Sidebar (desktop + mobile hamburger drawer)
    ========================================================================== */
 
 :host {
@@ -8,13 +8,96 @@
   --sb-width-collapsed: 84px;
 }
 
-.admin-sidebar {
-  position: sticky;          /* stays in place while the page scrolls */
+/* ==========================================================================
+   MOBILE TOP BAR (hamburger) — hidden on desktop
+   ========================================================================== */
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+  position: sticky;
   top: 0;
-  align-self: flex-start;    /* needed for sticky inside a flex parent */
+  z-index: 100;
+}
+
+/* ---------- Hamburger (opens drawer) ---------- */
+.hamburger {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 12px;
+  transition: background 0.25s ease,
+              border-color 0.25s ease,
+              transform 0.15s ease;
+}
+
+.hamburger:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-soft);
+}
+
+.hamburger:active {
+  transform: scale(0.94);
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--color-ink);
+  border-radius: 999px;
+  transition: background 0.25s ease;
+}
+
+.hamburger:hover span {
+  background: var(--color-accent);
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+/* ---------- Scrim (dark overlay behind drawer) ---------- */
+.mobile-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 19, 15, 0.45);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.mobile-scrim.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   DESKTOP SIDEBAR (default)
+   ========================================================================== */
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
   width: var(--sb-width);
-  height: 100vh;             /* fixed height instead of min-height */
-  height: 100dvh;            /* better on mobile browsers */
+  height: 100vh;
+  height: 100dvh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -22,11 +105,10 @@
   background: var(--color-surface);
   border-right: 1px solid var(--color-line);
   color: var(--color-ink);
-  overflow: hidden;          /* fine now, the nav scrolls inside */
+  overflow: hidden;
   transition: width var(--dur) var(--ease);
 }
 
-/* Hand-drawn corner accent */
 .corner-flourish {
   position: absolute;
   right: -1px;
@@ -37,7 +119,7 @@
   pointer-events: none;
 }
 
-/* ---------- Brand ---------- */
+/* ---------- Brand row ---------- */
 .sidebar-brand {
   position: relative;
   display: flex;
@@ -47,7 +129,7 @@
   margin-bottom: 22px;
   border-bottom: 1px solid var(--color-line);
   cursor: pointer;
-  flex-shrink: 0;            /* never shrink */
+  flex-shrink: 0;
 }
 
 .brand-mark {
@@ -57,12 +139,21 @@
   color: var(--color-accent);
   display: grid;
   place-items: center;
+  border: 1px solid var(--color-accent);
+  border-radius: 12px;
+  overflow: hidden;
   transition: transform var(--dur) var(--ease);
 }
 .sidebar-brand:hover .brand-mark {
   transform: rotate(-4deg) scale(1.04);
 }
-.brand-mark svg { width: 100%; height: 100%; display: block; }
+.brand-mark svg,
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 
 .brand-copy {
   display: flex;
@@ -72,7 +163,6 @@
   overflow: hidden;
   transition: opacity 0.25s ease, width 0.3s ease;
 }
-
 .brand-name {
   font-family: var(--font-display);
   font-weight: 500;
@@ -89,7 +179,7 @@
   opacity: 0.75;
 }
 
-/* ---------- Collapse toggle ---------- */
+/* ---------- Collapse toggle (desktop only) ---------- */
 .collapse-toggle {
   margin-left: auto;
   width: 30px;
@@ -117,13 +207,40 @@
 }
 .toggle-icon.flip { transform: rotate(180deg); }
 
-/* ---------- Nav (scrollable area) ---------- */
+/* ---------- Mobile close button (hidden on desktop) ---------- */
+.mobile-close {
+  display: none;
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-radius: 10px;
+  cursor: pointer;
+  place-items: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.mobile-close svg {
+  width: 18px;
+  height: 18px;
+}
+.mobile-close:hover {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+.mobile-close:active {
+  transform: scale(0.94);
+}
+
+/* ---------- Nav ---------- */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex: 1;
-  min-height: 0;             /* IMPORTANT: lets a flex child scroll */
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
@@ -159,7 +276,7 @@
   font-weight: 500;
   letter-spacing: 0.005em;
   text-decoration: none;
-  flex-shrink: 0;            /* items keep their size, the nav scrolls instead */
+  flex-shrink: 0;
   transition: color var(--dur) var(--ease),
               background var(--dur) var(--ease);
   animation: navRise 0.5s var(--ease) backwards;
@@ -197,7 +314,6 @@
 }
 .nav-arrow svg { width: 100%; height: 100%; display: block; }
 
-/* Hover */
 .nav-item:hover {
   color: var(--color-accent);
   background: var(--color-accent-soft);
@@ -208,18 +324,16 @@
   transform: translateX(0);
 }
 
-/* Active */
 .nav-item.active {
   background: var(--color-accent);
   color: var(--color-white);
 }
 .nav-item.active .nav-arrow { opacity: 0.85; transform: translateX(0); }
 
-/* Small tick on active (moved inside so the scroll area doesn't clip it) */
 .nav-item.active::before {
   content: "";
   position: absolute;
-  left: -4px;                /* was -20px */
+  left: -4px;
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
@@ -228,9 +342,7 @@
   border-radius: 0 3px 3px 0;
 }
 
-/* ============================================================
-   Back to Store — separate from main nav
-   ============================================================ */
+/* ---------- Back to Store ---------- */
 .nav-item--home {
   width: 100%;
   background: transparent;
@@ -244,7 +356,6 @@
   border-radius: 0;
   opacity: 0.9;
 }
-
 .nav-item--home:hover {
   color: var(--color-accent);
   background: var(--color-accent-soft);
@@ -252,23 +363,12 @@
   opacity: 1;
 }
 
-/* Keep the divider visible even on hover */
-.nav-item--home:hover::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--color-line);
-}
-
 /* ---------- Footer ---------- */
 .sidebar-footer {
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid var(--color-line);
-  flex-shrink: 0;            /* always visible at the bottom */
+  flex-shrink: 0;
 }
 
 .footer-card {
@@ -305,19 +405,6 @@
   white-space: nowrap;
   flex: 1;
   transition: opacity 0.2s ease;
-}
-
-.brand-mark img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-.brand-mark {
-  border: 1px solid var(--color-accent);
-  border-radius: 12px;
-  overflow: hidden;
 }
 .footer-name {
   font-size: 0.82rem;
@@ -367,7 +454,7 @@
   background: var(--color-accent-soft);
 }
 
-/* ---------- Collapsed ---------- */
+/* ---------- Collapsed (desktop only) ---------- */
 .admin-sidebar.is-collapsed {
   width: var(--sb-width-collapsed);
   padding-inline: 16px;
@@ -391,69 +478,93 @@
 }
 .admin-sidebar.is-collapsed .nav-item { justify-content: center; }
 .admin-sidebar.is-collapsed .footer-card { justify-content: center; }
-
-/* Collapsed state for Back to Store */
 .admin-sidebar.is-collapsed .nav-item--home {
   padding-top: 14px;
   margin-top: 8px;
   border-top: 1px solid var(--color-line);
 }
 
-/* ---------- Mobile ---------- */
+/* ==========================================================================
+   MOBILE — hamburger in topbar + absolute slide-in drawer
+   ========================================================================== */
 @media (max-width: 768px) {
-  .admin-sidebar {
-    position: static;        /* reset sticky */
-    align-self: auto;
-    width: 100%;
-    height: auto;            /* reset fixed height */
-    min-height: auto;
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 16px;
-    border-right: none;
-    border-bottom: 1px solid var(--color-line);
-    overflow-x: auto;
-    gap: 8px;
-  }
-  .corner-flourish { display: none; }
-  .sidebar-brand {
-    border: none;
-    padding: 0;
-    margin: 0 12px 0 0;
-  }
-  .brand-copy,
-  .collapse-toggle,
-  .nav-eyebrow,
-  .sidebar-footer { display: none; }
-  .sidebar-nav {
-    flex-direction: row;
-    margin: 0;
-    padding: 0;
-    gap: 4px;
-    flex: 0;
-    min-height: auto;
-    overflow-y: visible;     /* reset vertical scroll */
-    overflow-x: visible;
-  }
-  .nav-item {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-  .nav-item .nav-text { display: none; }
-  .nav-item.active::before { display: none; }
 
-  /* Home button on mobile — no divider */
-  .nav-item--home {
-    margin: 0;
-    padding: 10px 12px;
-    border-top: none;
+  .mobile-topbar { display: flex; }
+  .mobile-scrim { display: block; }
+
+  /* Show mobile close button, hide desktop collapse toggle */
+  .mobile-close { display: grid; }
+  .collapse-toggle { display: none !important; }
+
+  /* Sidebar becomes a full-height absolute drawer */
+  .admin-sidebar,
+  .admin-sidebar.is-collapsed {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0;
+    width: 300px !important;
+    max-width: 85vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding: 20px 20px 24px !important;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-line);
+    border-bottom: none;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 999;
+    overflow-y: auto;
+    flex-direction: column !important;
+    align-items: stretch;
+    box-shadow: none;
   }
-  .nav-item--home:hover::after { display: none; }
+
+  .admin-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  /* When drawer is open, hide the topbar so it doesn't peek behind */
+  .admin-sidebar.mobile-open ~ .mobile-topbar,
+  body.drawer-open .mobile-topbar {
+    display: none;
+  }
+
+  /* Reset collapsed-only rules on mobile */
+  .admin-sidebar.is-collapsed .brand-copy,
+  .admin-sidebar.is-collapsed .nav-text,
+  .admin-sidebar.is-collapsed .nav-arrow,
+  .admin-sidebar.is-collapsed .nav-eyebrow,
+  .admin-sidebar.is-collapsed .footer-meta,
+  .admin-sidebar.is-collapsed .footer-action {
+    opacity: 1;
+    width: auto;
+    pointer-events: auto;
+  }
+  .admin-sidebar.is-collapsed .sidebar-brand { justify-content: flex-start; }
+  .admin-sidebar.is-collapsed .nav-item { justify-content: flex-start; }
+  .admin-sidebar.is-collapsed .footer-card { justify-content: flex-start; }
+
+  .corner-flourish { display: none; }
+
+  .nav-text { display: inline !important; }
+  .nav-arrow { display: block !important; }
+
+  .sidebar-nav {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .nav-item {
+    padding: 12px 14px;
+    gap: 14px;
+    animation: none;
+  }
 }
 
 /* ==========================================================================
    Logout confirm popup
-   (outside the media query, so it works on desktop and mobile)
    ========================================================================== */
 .logout-backdrop {
   position: fixed;
