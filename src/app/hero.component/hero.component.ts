@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject, OnInit } from '@angular/core';
+import { Component, computed, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,6 +8,10 @@ import {
   DressType
 } from '../services/product.service';
 import { LikesService } from '../services/likes.service';
+import { AuthService } from '../services/auth.service';
+
+const LOGIN_ROUTE = '/login';
+const LOGIN_REDIRECT_MS = 2000;
 
 export interface Product {
   id: number;
@@ -39,10 +43,11 @@ export interface Product {
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.css'
 })
-export class HeroComponent implements OnInit {
+export class HeroComponent implements OnInit, OnDestroy {
 
   private productService = inject(ProductService);
   private likesService = inject(LikesService);
+  private auth = inject(AuthService);
   private router = inject(Router);
 
   categories = signal<string[]>(['All']);
@@ -52,12 +57,54 @@ export class HeroComponent implements OnInit {
   loading = signal(true);
   loadError = signal('');
 
+  // ---------- Login prompt popup ----------
+  showLoginPrompt = signal(false);
+  loginPromptMessage = signal('');
+  private loginTimer: ReturnType<typeof setTimeout> | null = null;
+
   ngOnInit(): void {
-    this.likesService.loadLikes();
+    // Guests have no likes; skip the API call (it would return 401)
+    if (this.auth.isLoggedIn()) {
+      this.likesService.loadLikes();
+    }
     this.loadDressTypes();
     this.loadProducts();
   }
 
+  ngOnDestroy(): void {
+    if (this.loginTimer) clearTimeout(this.loginTimer);
+  }
+
+  // ---------- Login prompt ----------
+  /**
+   * Returns true if logged in.
+   * Otherwise shows the popup and auto-redirects to /login after 2 seconds.
+   */
+  private requireLogin(message: string): boolean {
+    if (this.auth.isLoggedIn()) return true;
+
+    this.loginPromptMessage.set(message);
+    this.showLoginPrompt.set(true);
+
+    if (this.loginTimer) clearTimeout(this.loginTimer);
+    this.loginTimer = setTimeout(() => this.goToLogin(), LOGIN_REDIRECT_MS);
+    return false;
+  }
+
+  goToLogin(): void {
+    if (this.loginTimer) { clearTimeout(this.loginTimer); this.loginTimer = null; }
+    this.showLoginPrompt.set(false);
+    this.router.navigate([LOGIN_ROUTE], {
+      queryParams: { returnUrl: this.router.url }
+    });
+  }
+
+  closeLoginPrompt(): void {
+    if (this.loginTimer) { clearTimeout(this.loginTimer); this.loginTimer = null; }
+    this.showLoginPrompt.set(false);
+  }
+
+  // ---------- Data ----------
   private loadDressTypes(): void {
     this.productService.getDressTypes().subscribe({
       next: (list: DressType[]) => {
@@ -91,7 +138,9 @@ export class HeroComponent implements OnInit {
   reload(): void {
     this.loadDressTypes();
     this.loadProducts();
-    this.likesService.loadLikes();
+    if (this.auth.isLoggedIn()) {
+      this.likesService.loadLikes();
+    }
   }
 
   private mapToUiProduct(p: ProductResponse): Product {
@@ -130,8 +179,11 @@ export class HeroComponent implements OnInit {
   }
 
   toggleFavorite(product: Product, event: Event): void {
+    // Always stop the click from opening the product page
     event.stopPropagation();
     event.preventDefault();
+
+    if (!this.requireLogin('Please login to like this product.')) return;
 
     this.likesService.toggle(product.id).subscribe({
       next: () => { /* reactive signal updates the UI */ },
@@ -154,7 +206,7 @@ export class HeroComponent implements OnInit {
     this.activeCategory.set(category);
   }
 
-  /** 👇 FIXED: shows decimals (₹13.5) instead of rounding to ₹13 */
+  /** Shows decimals (₹13.5) instead of rounding to ₹13 */
   formatPrice(price: number): string {
     return '₹' + price.toLocaleString('en-IN', {
       minimumFractionDigits: 0,

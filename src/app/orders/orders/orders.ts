@@ -2,18 +2,22 @@ import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of, Observable } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+// 👇 path ungal folder structure-ku ethavaru maathikonga
+import { ProductService } from '../../services/product.service';
 
 export type OrderStatus = 'new' | 'packed' | 'dispatched' | 'delivered' | 'cancelled' | 'returned';
 export type OrderTab = 'recent' | OrderStatus;
 type ReasonType = 'cancel' | 'rto' | 'return';
 
 export interface OrderItem {
+  productId: number;
   name: string;
   size: string;
   qty: number;
   price: number;
+  image?: string | null;
 }
 
 export interface TimelineEvent {
@@ -52,9 +56,10 @@ const HOUR = 3600000;
 export class Orders implements OnInit {
 
   private http = inject(HttpClient);
+  private productService = inject(ProductService);
   private readonly api = `${environment.apiUrl}/orders`;
 
-  // ✅ Real data (loaded from API) — now a signal so change detection fires reliably
+  // Real data (loaded from API) — signal so change detection fires reliably
   orders = signal<Order[]>([]);
   loading = signal(true);
   loadError = signal('');
@@ -110,6 +115,8 @@ export class Orders implements OnInit {
   searchTerm = '';
 
   detailOrder: Order | null = null;
+  productsOrder: Order | null = null;   // 👈 NEW: products popup
+  viewerItem: OrderItem | null = null;  // 👈 NEW: full-screen image viewer
   reasonOrder: Order | null = null;
   reasonType: ReasonType = 'cancel';
   selectedReason = '';
@@ -144,7 +151,6 @@ export class Orders implements OnInit {
       })
     ).subscribe({
       next: (orders) => {
-        // Set as new array reference → signal emits → template re-renders
         this.orders.set(orders);
         this.loading.set(false);
       },
@@ -166,10 +172,12 @@ export class Orders implements OnInit {
     const items: any[] = apiOrder.items || [];
 
     const uiItems: OrderItem[] = items.map(i => ({
+      productId: i.productId,
       name: i.productName || `Product #${i.productId}`,
       size: i.size || 'One Size',
       qty: i.quantity || 1,
-      price: i.unitPrice || 0
+      price: i.unitPrice || 0,
+      image: i.productImage || null
     }));
 
     const uiOrder: Order = {
@@ -342,7 +350,7 @@ export class Orders implements OnInit {
   private addEvent(order: Order, status: OrderStatus, note?: string): void {
     order.status = status;
     order.timeline = [...order.timeline, { status, at: new Date(), note }];
-    this.refreshOrders(); // ✅ force signal emit so template updates
+    this.refreshOrders();
   }
 
   pack(order: Order): void {
@@ -548,6 +556,49 @@ export class Orders implements OnInit {
   }
 
   // ============================================================
+  // Products popup (NEW)
+  // ============================================================
+  openProducts(order: Order): void {
+    this.productsOrder = order;
+    order.items.forEach(item => this.ensureImage(item));
+  }
+
+  /** Order response la image illana, product id vachu product API la edukkum */
+  private ensureImage(item: OrderItem): void {
+    if (item.image || !item.productId) return;
+    this.productService.getById(item.productId).subscribe({
+      next: p => {
+        item.image = p.photoUrls?.[0] ?? null;
+        this.refreshOrders();
+      },
+      error: () => {}
+    });
+  }
+
+  // ---------- Full-screen image viewer ----------
+  /** Click an image (Products popup) or a product name (Order detail) */
+  openImage(item: OrderItem): void {
+    this.ensureImage(item);
+    this.viewerItem = item;
+  }
+
+  closeImage(): void {
+    this.viewerItem = null;
+  }
+
+  closeProducts(): void {
+    this.productsOrder = null;
+  }
+
+  imgUrl(item: OrderItem): string {
+    return this.productService.imageUrl(item.image);
+  }
+
+  onImgError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/placeholder-product.jpg';
+  }
+
+  // ============================================================
   // UI helpers
   // ============================================================
   setTab(tab: OrderTab): void {
@@ -568,9 +619,15 @@ export class Orders implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    // image viewer is on top — close it first
+    if (this.viewerItem) {
+      this.closeImage();
+      return;
+    }
     this.closeReason();
     this.closeDetails();
     this.closeDispatch();
+    this.closeProducts();
   }
 
   private showToast(message: string): void {

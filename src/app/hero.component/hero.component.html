@@ -87,7 +87,7 @@
         <div class="card-image-wrapper">
           <img [src]="product.image" [alt]="product.name" loading="lazy" />
 
-          <!-- 👇 Sold-out overlay -->
+          <!-- Sold-out overlay -->
           <div class="sold-out-overlay" *ngIf="isSoldOut(product)">
             <span>Sold Out</span>
           </div>
@@ -142,3 +142,16 @@
 
   </div>
 </section>
+
+<!-- ===== Login prompt popup ===== -->
+<div class="login-modal-backdrop" *ngIf="showLoginPrompt()" (click)="closeLoginPrompt()">
+  <div class="login-modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <p class="login-modal__icon">🔒</p>
+    <p class="login-modal__msg">{{ loginPromptMessage() }}</p>
+    <p class="login-modal__sub">Redirecting to login in 2 seconds…</p>
+    <div class="login-modal__actions">
+      <button type="button" class="login-modal__btn login-modal__btn--primary" (click)="goToLogin()">Login</button>
+      <button type="button" class="login-modal__btn login-modal__btn--ghost" (click)="closeLoginPrompt()">Cancel</button>
+    </div>
+  </div>
+</div>

@@ -91,6 +91,7 @@
         <tr>
           <th>Order</th>
           <th>Customer</th>
+          <th>Products</th>
           <th>Payment</th>
           <th class="num">Amount</th>
           <th>Status</th>
@@ -112,6 +113,13 @@
           <td>
             <div class="customer-name">{{ order.customer }}</div>
             <div class="sub-text">{{ order.city }} · {{ order.phone }}</div>
+          </td>
+
+          <!-- NEW: Products column -->
+          <td>
+            <button type="button" class="link-btn" (click)="openProducts(order)">
+              View ({{ order.items.length }})
+            </button>
           </td>
 
           <td>
@@ -251,7 +259,11 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of o.items">
-          <td>{{ item.name }}</td>
+          <td>
+            <button type="button" class="link-btn item-link"
+                    title="View product image"
+                    (click)="openImage(item)">{{ item.name }}</button>
+          </td>
           <td>{{ item.size }}</td>
           <td class="num">{{ item.qty }}</td>
           <td class="num">{{ item.price * item.qty | currency: 'INR' : 'symbol' : '1.0-0' }}</td>
@@ -276,6 +288,44 @@
         </div>
       </li>
     </ol>
+  </div>
+</div>
+
+<!-- ============ ORDERED PRODUCTS (NEW) ============ -->
+<div class="modal-overlay" *ngIf="productsOrder as o" (click)="closeProducts()">
+  <div class="modal-card modal-card--wide" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow">Ordered Products</span>
+        <h3 class="modal-title">{{ o.id }}</h3>
+      </div>
+      <button type="button" class="modal-close" aria-label="Close" (click)="closeProducts()">×</button>
+    </div>
+
+    <ul class="product-list">
+      <li class="product-row" *ngFor="let item of o.items">
+        <button type="button" class="product-thumb-btn"
+                title="Click to enlarge"
+                (click)="openImage(item)">
+          <img class="product-thumb"
+               [src]="imgUrl(item)"
+               [alt]="item.name"
+               (error)="onImgError($event)" />
+        </button>
+        <div class="product-info">
+          <div class="customer-name">{{ item.name }}</div>
+          <div class="sub-text">Product ID: {{ item.productId }} · Size: {{ item.size }}</div>
+          <div class="sub-text">Qty: {{ item.qty }} × {{ item.price | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+        </div>
+        <div class="amount-cell">
+          {{ item.price * item.qty | currency: 'INR' : 'symbol' : '1.0-0' }}
+        </div>
+      </li>
+    </ul>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn--ghost" (click)="closeProducts()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -348,6 +398,19 @@
         Confirm
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ============ FULL-SCREEN IMAGE VIEWER (NEW) ============ -->
+<div class="lightbox" *ngIf="viewerItem as v" (click)="closeImage()">
+  <button type="button" class="lightbox-close" aria-label="Close image" (click)="closeImage()">×</button>
+  <img class="lightbox-img"
+       [src]="imgUrl(v)"
+       [alt]="v.name"
+       (click)="$event.stopPropagation()"
+       (error)="onImgError($event)" />
+  <div class="lightbox-caption" (click)="$event.stopPropagation()">
+    {{ v.name }}<span *ngIf="v.size"> · Size {{ v.size }}</span>
   </div>
 </div>
 

@@ -1,10 +1,18 @@
-import { Component, computed, signal, inject, OnInit } from '@angular/core';
+import { Component, computed, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { ProductService, ProductResponse } from '../services/product.service';
 import { CartService, CartItem as ApiCartItem } from '../services/cart.service';
 import { LikesService } from '../services/likes.service';
+import { ListScrollService } from '../services/list-scroll.service';
+import { AuthService } from '../services/auth.service';
+
+const PRODUCT_ROUTE = '/product-detail';
+const HOME_ROUTE = '/';
+const LOGIN_ROUTE = '/login';
+const RELATED_COUNT = 10;
+const LOGIN_REDIRECT_MS = 2000;
 
 export interface Product {
   id: number;
@@ -20,9 +28,18 @@ export interface Product {
   highlights: string[];
   sizes: string[];
   sizeStock: Record<string, number>;
-  soldOutSizes: string[];                    // 👈 NEW
+  soldOutSizes: string[];
   deliveryCharge: number;
   deliveryDays: number;
+}
+
+export interface RelatedCard {
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  mrp: number;
+  discount: number;
 }
 
 const EMPTY_PRODUCT: Product = {
@@ -39,7 +56,7 @@ const EMPTY_PRODUCT: Product = {
   highlights: [],
   sizes: [],
   sizeStock: {},
-  soldOutSizes: [],                          // 👈 NEW
+  soldOutSizes: [],
   deliveryCharge: 0,
   deliveryDays: 5
 };
@@ -51,11 +68,13 @@ const EMPTY_PRODUCT: Product = {
   templateUrl: './product-dettail.html',
   styleUrl: './product-dettail.css'
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit, OnDestroy {
 
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private likesService = inject(LikesService);
+  private listScroll = inject(ListScrollService);
+  private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -69,11 +88,20 @@ export class ProductDetailComponent implements OnInit {
   addingToCart = signal(false);
   liking = signal(false);
 
-  /** How many of this product+size are already in the cart. */
   alreadyInCart = signal<number>(0);
 
   toastMessage = signal('');
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // ---------- Login prompt popup ----------
+  showLoginPrompt = signal(false);
+  loginPromptMessage = signal('');
+  private loginTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // ---------- Related ("next 10") ----------
+  relatedProducts = signal<RelatedCard[]>([]);
+  hasMore = signal(false);
+  private seeMoreAnchorId: number | null = null;
 
   discount = computed(() => {
     const p = this.product();
@@ -95,31 +123,24 @@ export class ProductDetailComponent implements OnInit {
     return this.product().sizeStock[size] ?? 0;
   });
 
-  /** True if ALL sizes are sold out (whole product unavailable). */
   isFullySoldOut = computed<boolean>(() => {
     const p = this.product();
     if (!p.sizes.length) return false;
-    // Every size is either sold-out or has 0 stock
     return p.sizes.every(size =>
       p.soldOutSizes.includes(size) || (p.sizeStock[size] ?? 0) <= 0
     );
   });
 
-  /**
-   * Max you can ADD NOW = total stock − what's already in the cart.
-   */
   maxQuantity = computed<number>(() => {
     const p = this.product();
     if (!p.sizes.length) return 99;
 
-    // "One Size" product
     if (p.sizes.length === 1 && p.sizes[0] === 'One Size') {
       if (p.soldOutSizes.includes('One Size')) return 0;
       const totalStock = p.sizeStock['One Size'] ?? 99;
       return Math.max(0, totalStock - this.alreadyInCart());
     }
 
-    // Multi-size
     if (!this.selectedSize()) return 0;
     if (this.isSizeSoldOut(this.selectedSize()!)) return 0;
     const totalStock = this.selectedSizeStock();
@@ -127,19 +148,136 @@ export class ProductDetailComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    this.likesService.loadLikes();
-
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? Number(idParam) : null;
-
-    if (!id || Number.isNaN(id)) {
-      this.router.navigate(['/']);
-      return;
+    // Guests have no likes; skip the API call (it would return 401)
+    if (this.auth.isLoggedIn()) {
+      this.likesService.loadLikes();
     }
-    this.loadProduct(id);
+
+    this.route.paramMap.subscribe(params => {
+      const idParam = params.get('id');
+      const id = idParam ? Number(idParam) : null;
+
+      if (!id || Number.isNaN(id)) {
+        this.router.navigate([HOME_ROUTE]);
+        return;
+      }
+
+      // reset UI state for the new product
+      this.selectedSize.set(null);
+      this.quantity.set(1);
+      this.activeImageIndex.set(0);
+      this.alreadyInCart.set(0);
+      this.closeLoginPrompt();
+
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      this.loadProduct(id);
+      this.loadRelated(id);
+    });
   }
 
+  ngOnDestroy(): void {
+    if (this.loginTimer) clearTimeout(this.loginTimer);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+  }
+
+  // ---------- Login prompt ----------
+  /**
+   * Returns true if the user is logged in.
+   * Otherwise shows the popup and auto-redirects to /login after 2 seconds.
+   */
+  private requireLogin(action: 'cart' | 'like'): boolean {
+    if (this.auth.isLoggedIn()) return true;
+
+    this.loginPromptMessage.set(
+      action === 'cart'
+        ? 'Please login to add items to your cart.'
+        : 'Please login to like this product.'
+    );
+    this.showLoginPrompt.set(true);
+
+    if (this.loginTimer) clearTimeout(this.loginTimer);
+    this.loginTimer = setTimeout(() => this.goToLogin(), LOGIN_REDIRECT_MS);
+    return false;
+  }
+
+  goToLogin(): void {
+    if (this.loginTimer) { clearTimeout(this.loginTimer); this.loginTimer = null; }
+    this.showLoginPrompt.set(false);
+    this.router.navigate([LOGIN_ROUTE], {
+      queryParams: { returnUrl: this.router.url }
+    });
+  }
+
+  closeLoginPrompt(): void {
+    if (this.loginTimer) { clearTimeout(this.loginTimer); this.loginTimer = null; }
+    this.showLoginPrompt.set(false);
+  }
+
+  // ---------- Back / See more ----------
+  goBack(): void {
+    this.listScroll.setBackTarget();
+    this.router.navigate([HOME_ROUTE]);
+  }
+
+  seeMore(): void {
+    if (this.seeMoreAnchorId) {
+      this.listScroll.setSeeMoreTarget(this.seeMoreAnchorId);
+    } else {
+      this.listScroll.setBackTarget();
+    }
+    this.router.navigate([HOME_ROUTE]);
+  }
+
+  openRelated(id: number): void {
+    this.router.navigate([PRODUCT_ROUTE, id]);
+  }
+
+  /**
+   * Next 10 cards AFTER the current product (same order as the home list).
+   * The viewed product is never included.
+   */
+  private loadRelated(currentId: number): void {
+    this.productService.getAll().subscribe({
+      next: (all: ProductResponse[]) => {
+        const list = (all || []).filter(p => !p.archivedAt);
+        const idx = list.findIndex(p => p.id === currentId);
+        const others = list.filter(p => p.id !== currentId);
+
+        const following = idx >= 0 ? others.slice(idx) : others;
+
+        const shown = following.slice(0, RELATED_COUNT);
+        this.relatedProducts.set(shown.map(p => this.toCard(p)));
+
+        this.hasMore.set(following.length > RELATED_COUNT);
+        this.seeMoreAnchorId = following[RELATED_COUNT]?.id ?? null;
+      },
+      error: () => {
+        this.relatedProducts.set([]);
+        this.hasMore.set(false);
+      }
+    });
+  }
+
+  private toCard(p: ProductResponse): RelatedCard {
+    const price = (p.offerPrice && p.offerPrice > 0) ? p.offerPrice : p.price;
+    const discount = p.price > price
+      ? Math.round(((p.price - price) / p.price) * 100)
+      : 0;
+    return {
+      id: p.id,
+      name: p.dressName,
+      image: this.productService.imageUrl(p.photoUrls?.[0]),
+      price,
+      mrp: p.price,
+      discount
+    };
+  }
+
+  onImgError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/placeholder-product.svg';
+  }
+
+  // ---------- Product load ----------
   private loadProduct(id: number): void {
     this.loading.set(true);
     this.loadError.set('');
@@ -166,6 +304,12 @@ export class ProductDetailComponent implements OnInit {
   }
 
   private refreshCartCount(): void {
+    // Guests have no cart; skip the API call (it would return 401)
+    if (!this.auth.isLoggedIn()) {
+      this.alreadyInCart.set(0);
+      return;
+    }
+
     this.cartService.getCart().subscribe({
       next: (items: ApiCartItem[]) => this.updateAlreadyInCart(items || []),
       error: () => this.alreadyInCart.set(0)
@@ -217,7 +361,7 @@ export class ProductDetailComponent implements OnInit {
       highlights: [],
       sizes: sizeLabels,
       sizeStock,
-      soldOutSizes: (p as any).soldOutSizes || [],   // 👈 NEW
+      soldOutSizes: (p as any).soldOutSizes || [],
       deliveryCharge: 0,
       deliveryDays: 5
     };
@@ -226,19 +370,16 @@ export class ProductDetailComponent implements OnInit {
   setActiveImage(i: number): void { this.activeImageIndex.set(i); }
 
   // ---------- Sold-out detection ----------
-  /** True if the given size is currently flagged as sold out by the backend. */
   isSizeSoldOut(size: string): boolean {
     return this.product().soldOutSizes.includes(size);
   }
 
-  /** True if the currently selected size is sold out. */
   get selectedSizeSoldOut(): boolean {
     const size = this.selectedSize();
     return size ? this.isSizeSoldOut(size) : false;
   }
 
   selectSize(size: string): void {
-    // 👇 block sold-out sizes
     if (this.isSizeSoldOut(size)) return;
 
     const stock = this.product().sizeStock[size] ?? 0;
@@ -270,6 +411,8 @@ export class ProductDetailComponent implements OnInit {
 
   // ---------- Favorite ----------
   toggleFavorite(): void {
+    if (!this.requireLogin('like')) return;
+
     const id = this.product().id;
     if (!id) return;
 
@@ -295,7 +438,6 @@ export class ProductDetailComponent implements OnInit {
       return 'Please select a size first.';
     }
 
-    // 👇 sold-out guard
     if (this.selectedSize() && this.isSizeSoldOut(this.selectedSize()!)) {
       return 'This size is sold out. Please choose another size.';
     }
@@ -317,6 +459,8 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
+    if (!this.requireLogin('cart')) return;
+
     const error = this.validateSelection();
     if (error) { this.showToast(error); return; }
 
