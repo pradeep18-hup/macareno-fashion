@@ -11,4 +11,4 @@ export const environment = {
     token: 'macarena_token',
     user: 'macarena_user'
   }
-};
+}; 

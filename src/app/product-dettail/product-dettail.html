@@ -145,12 +145,12 @@
         <div class="pd-cta-row pd-cta-row--split">
           <button class="pd-btn pd-btn--half pd-btn--cart"
                   (click)="addToCart()"
-                  [disabled]="addingToCart() || isFullySoldOut()">
+                  [disabled]="addingToCart() || isFullySoldOut() || isMaxReached()">
             {{ addingToCart()
                ? 'Adding…'
                : (isFullySoldOut()
                   ? 'Sold Out'
-                  : ((maxQuantity() <= 0 && alreadyInCart() > 0) ? 'Max quantity reached' : 'Add to Cart')) }}
+                  : (isMaxReached() ? 'Max quantity reached' : 'Add to Cart')) }}
           </button>
 
           <button type="button" class="pd-btn pd-btn--half pd-btn--back" (click)="goBack()">

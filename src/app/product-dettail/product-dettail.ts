@@ -147,6 +147,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     return Math.max(0, totalStock - this.alreadyInCart());
   });
 
+  // True when the cart already holds all available stock for the selected size
+  isMaxReached = computed<boolean>(() =>
+    this.alreadyInCart() > 0 && this.maxQuantity() <= 0
+  );
+
   ngOnInit(): void {
     // Guests have no likes; skip the API call (it would return 401)
     if (this.auth.isLoggedIn()) {
@@ -459,6 +464,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   addToCart(): void {
+    if (this.isMaxReached()) return;
     if (!this.requireLogin('cart')) return;
 
     const error = this.validateSelection();
